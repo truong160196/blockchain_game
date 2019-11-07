@@ -1,7 +1,8 @@
 import React from 'react';
 import './App.scss';
+import Web3  from '../../utils/web3';
 
-const Web3 = window.Web3;
+import MyCanvas  from '../Canvas/myCanvas';
 
 class App extends React.Component {
   componentWillMount() {
@@ -28,10 +29,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className="container">
-        <h1>Hello, World!</h1>
-        <p>Your account: {this.state.account}</p>
-      </div>
+      <MyCanvas />
     );
   }
 }
