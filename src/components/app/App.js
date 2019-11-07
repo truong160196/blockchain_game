@@ -1,24 +1,39 @@
 import React from 'react';
 import './App.scss';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const Web3 = window.Web3;
+
+class App extends React.Component {
+  componentWillMount() {
+    this.loadBlockchainData()
+  }
+
+  async loadBlockchainData() {
+    var web3 = new Web3("ws://localhost:8545");
+
+    web3.eth.getNodeInfo(function(error, result){
+      if(error){
+         console.log( 'error' ,error);
+      }
+      else{
+         console.log( 'result',result );
+      }
+ });
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = { account: '' }
+  }
+
+  render() {
+    return (
+      <div className="container">
+        <h1>Hello, World!</h1>
+        <p>Your account: {this.state.account}</p>
+      </div>
+    );
+  }
 }
 
 export default App;
