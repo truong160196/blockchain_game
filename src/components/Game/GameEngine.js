@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
-import Circle from '../Canvas/circle';
+import Circle from '../canvas/circle';
+import Player from '../player/Player1';
 
 
 
@@ -150,7 +151,6 @@ class GameEngine extends Component {
           width: window.innerWidth,
           height: window.innerHeight,
           ratio: window.devicePixelRatio || 1
-
         }
       });
 
@@ -186,14 +186,26 @@ class GameEngine extends Component {
 
 		if (entities && entities.length > 0) {
 			entities.map((item) => {
-				const newEntities = new Circle(item.options);
-				const objectItem = {
-					name: item.name,
-					main: newEntities,
-				};
+				let newEntities = null;
 
-				dataState.player.push(objectItem);
+				if (item.type === 'circle') {
+					newEntities = new Circle(item.options);
 
+				}
+
+				if (item.type === 'image') {
+					newEntities = new Player(item.options);
+
+				}
+
+				if (newEntities) {
+					const objectItem = {
+						name: item.name,
+						main: newEntities,
+					};
+	
+					dataState.player.push(objectItem);
+				}
 				return null;
 			});
 
@@ -246,7 +258,7 @@ class GameEngine extends Component {
     }
 
 
-    getCircle2Position(){
+    getCircle2Position = () =>{
       let objX= this.state.circle1.position.x;
       let objY= this.state.circle1.position.y;
 
@@ -269,9 +281,8 @@ class GameEngine extends Component {
       circle2.position={ x: curX, y:curY};
 
       this.setState({circle2: circle2});
-    }
-
-
+	}
+	
     render() {
 		return (
 		<div>
@@ -280,7 +291,7 @@ class GameEngine extends Component {
 				this.state.screen.width * this.state.screen.ratio
 				}
 				height = {
-				this.state.screen.height * this.state.screen.ratio - 50
+				this.state.screen.height * this.state.screen.ratio - 200
 				}
 			/>
 		</div>

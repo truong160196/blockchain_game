@@ -2,11 +2,24 @@ import React from 'react';
 import './App.scss';
 import Web3  from '../../utils/web3';
 
-import MyCanvas  from '../Canvas/myCanvas';
+// import MyCanvas  from '../canvas/myCanvas';
+
+import game from '../../utils/game';
 
 class App extends React.Component {
   componentWillMount() {
-    this.loadBlockchainData()
+    // this.loadBlockchainData()
+    const define = {
+      config: {
+        urlSource: './assets/images/treasureHunter.json'
+      }
+    };
+
+    var gameDev = new game(define);
+
+    gameDev.init();
+
+    gameDev.loaderResource();
   }
 
   async loadBlockchainData() {
@@ -29,7 +42,10 @@ class App extends React.Component {
 
   render() {
     return (
-      <MyCanvas />
+      <div>
+
+      </div>
+      // <MyCanvas />
     );
   }
 }
