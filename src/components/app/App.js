@@ -48,6 +48,10 @@ class App extends React.Component {
       this.blockchain = new Blockchain(urlBase, config);
 
       await this.blockchain.init();
+
+      await this.blockchain.connectMetaMask();
+
+      this.blockchain.subscribe('log', '0x248062ceD7E34354651c930940b93e48281E2BFf')
     } catch (err) {
       console.error(err);
     }
@@ -75,14 +79,16 @@ class App extends React.Component {
       const toAddress = $('#toAddress').val();
       let fromAddress = $('#fromAddress').val();
       let value = $('#value').val();
-
       if (!fromAddress) {
         fromAddress = await this.blockchain.getCurrentAccount();
       }
 
       const data = await this.blockchain.sendTransaction(fromAddress, toAddress, value)
-      console.log(data)
-      if (data) {
+
+      if (data.transactionHash) {
+
+        await this.getTransaction(data.transactionHash);
+
         this.setState({
           message: 'Please check hash: ' + data.transactionHash
         })
@@ -129,17 +135,43 @@ class App extends React.Component {
     }
   }
 
-  getTransaction =  async() => {
+  getTransaction =  async(hash) => {
     try {
-      const txHash = $('#txHash').val();
+      let txHash = $('#txHash').val();
+
+      if(hash) {
+        txHash = hash;
+      }
 
       const result = await this.blockchain.getTransaction(txHash);
 
-      if (result) {
+      if (result && result.data) {
         this.setState({
-          txHash: result
+          txHash: result.data
         })
       } else {
+        alert(result.error || 'exception');
+        this.setState({
+          txHash: null
+        })
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  getTransactionFromBlock =  async() => {
+    try {
+      const blockNumber = $('#blockNumber').val();
+
+      const result = await this.blockchain.getTransactionFromBlock(blockNumber);
+
+      if (result && result.data) {
+        this.setState({
+          txHash: result.data
+        })
+      } else {
+        alert(result.error || 'exception')
         this.setState({
           txHash: null
         })
@@ -178,7 +210,7 @@ class App extends React.Component {
     try {
       const result  = await this.blockchain.getAllAccount();
 
-      this.setState({allAccount: result})
+      this.setState({allAccount: result.data})
     } catch(err) {
       console.error(err);
     }
@@ -348,6 +380,19 @@ class App extends React.Component {
             </div>
             <div className="form-group col-sm-3">
                 <button className="btn btn-success" onClick={this.getTransaction} >check hash</button>
+            </div>
+            <div className="form-group col-sm-3">
+            <label>Check hash from block number</label>
+              <input
+                id="blockNumber"
+                name="blockNumber"
+                className="form-control"
+                type="text"
+                placeholder="enter block number"
+              />
+            </div>
+            <div className="form-group col-sm-3">
+                <button className="btn btn-success" onClick={this.getTransactionFromBlock} >check block</button>
             </div>
             <div className="form-group col-sm-12">
               {this.renderTableHash()}
