@@ -5,7 +5,7 @@
   "author": "truong.nq",
   "license": "ISC",
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set REACT_APP_ENV=production && set PORT=3006 && react-scripts start",
     "build": "react-scripts build"
   },
   "eslintConfig": {

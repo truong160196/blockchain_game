@@ -7,8 +7,11 @@ import appReducers from './reducers/index';
 // import * as web3 from 'https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.34/dist/web3.min.js';
 
 import './index.css';
-import App from './components/app/App';
 import * as serviceWorker from './serviceWorker';
+
+import App from './components/app/App';
+import ErrorBoundary from './components/errorHandling/ErrorBoundary';
+
 
 const store = createStore(
 	appReducers,
@@ -17,7 +20,9 @@ const store = createStore(
   
   ReactDOM.render(
 	<Provider store={store}>
-	  <App />
+		<ErrorBoundary>
+			<App />
+		</ErrorBoundary>
 	</Provider>,
 	document.getElementById('root'),
   );

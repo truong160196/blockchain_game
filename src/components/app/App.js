@@ -1,51 +1,436 @@
 import React from 'react';
 import './App.scss';
-import Web3  from '../../utils/web3';
+import Blockchain from '../../utils/blockchain';
+
+import { web3 } from '../../utils/web3';
 
 // import MyCanvas  from '../canvas/myCanvas';
 
 import game from '../../utils/game';
 
+const $ = window.$;
+const mainnet = 'https://mainnet.infura.io/v3/cde205b23d7d4a998f4ee02f652355b0';
+const local =  'http://localhost:8545'
+
 class App extends React.Component {
-  componentWillMount() {
-    // this.loadBlockchainData()
-    const define = {
-      config: {
-        urlSource: './assets/images/treasureHunter.json'
-      }
-    };
+  constructor(props) {
+    super(props)
+    this.state = {
+      account: '',
+      urlBase: null,
+    }
+  }
 
-    var gameDev = new game(define);
+  componentWillMount = () => {
+    this.loadBlockchainData()
+    // const define = {
+    //   config: {
+    //     urlSource: './assets/images/treasureHunter.json'
+    //   }
+    // };
 
-    gameDev.init();
+    // var gameDev = new game(define);
 
-    gameDev.loaderResource();
+    // gameDev.init();
+
+    // gameDev.loaderResource();
   }
 
   async loadBlockchainData() {
-    var web3 = new Web3("ws://localhost:8545");
+    const { urlBase } = this.state;
 
-    web3.eth.getNodeInfo(function(error, result){
-      if(error){
-         console.log( 'error' ,error);
+    try {
+      const config = {
+        gasPrice: '1400000000',
+        gas: 21000,
       }
-      else{
-         console.log( 'result',result );
+      
+      this.blockchain = new Blockchain(urlBase, config);
+
+      await this.blockchain.init();
+    } catch (err) {
+      console.error(err);
+    }
+
+  }
+  
+  getBalance = async() => {
+    try {
+      const address = $('#address').val();
+
+      const result = await this.blockchain.getBalance(address);
+  
+      if (result) {
+        this.setState({
+          balance: 'My Balance: ' + result
+        })
       }
- });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  constructor(props) {
-    super(props)
-    this.state = { account: '' }
+  sendToken = async() => {
+    try {
+      const toAddress = $('#toAddress').val();
+      let fromAddress = $('#fromAddress').val();
+      let value = $('#value').val();
+
+      if (!fromAddress) {
+        fromAddress = await this.blockchain.getCurrentAccount();
+      }
+
+      const data = await this.blockchain.sendTransaction(fromAddress, toAddress, value)
+      console.log(data)
+      if (data) {
+        this.setState({
+          message: 'Please check hash: ' + data.transactionHash
+        })
+      }
+
+      if (data.err) {
+        this.setState({
+          message: data.err.message
+        })
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
+
+  importAccount = async() => {
+    try {
+      const account = $('#account').val();
+
+      const result = await this.blockchain.importAccountByPrivateKey(account);
+  
+      if (result) {
+        this.setState({
+          account: 'account: ' + result.address
+        })
+      }
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  createAccount =  async() => {
+    try {
+      const password = $('#password').val();
+
+      const result = await this.blockchain.createNewAccount(password);
+      if (result) {
+        this.setState({
+          newAccount: 'new account: ' + result
+        })
+      }
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  getTransaction =  async() => {
+    try {
+      const txHash = $('#txHash').val();
+
+      const result = await this.blockchain.getTransaction(txHash);
+
+      if (result) {
+        this.setState({
+          txHash: result
+        })
+      } else {
+        this.setState({
+          txHash: null
+        })
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  testFunction = () => {
+    // this.blockchain.getTotalSupply();
+  }
+
+  changeProvider = async() => {
+    try {
+      const provider = $('#provider').val();
+
+      if (provider == -1) {
+        await this.blockchain.changeProvider(null);
+        alert('connect to metaMask success');
+      } else {
+        await this.blockchain.changeProvider(provider);
+        alert(`change provider: ${provider}`);
+      }
+  
+  
+      this.setState({
+        urlBase: provider,
+      })
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  getAllAccount = async() => {
+    try {
+      const result  = await this.blockchain.getAllAccount();
+
+      this.setState({allAccount: result})
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  getCurrentAccount = async() => {
+    try {
+      const result = await this.blockchain.getCurrentAccount();
+
+      this.setState({currentAccount: result})
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  renderTableHash = () => {
+    const {txHash} = this.state;
+
+    let table = '';
+
+    if (txHash) {
+      table = (
+        <table>
+        <tbody>
+          <tr>
+            <td>blockHash</td>
+            <td>{txHash.blockHash}</td>
+          </tr>
+          <tr>
+            <td>blockNumber</td>
+            <td>{txHash.blockNumber}</td>
+          </tr>
+          <tr>
+            <td>from Address</td>
+            <td>{txHash.from}</td>
+          </tr>
+          <tr>
+            <td>to Address</td>
+            <td>{txHash.to}</td>
+          </tr>
+          <tr>
+            <td>Value</td>
+            <td>{this.blockchain.convertEtherToValue(txHash.value)}</td>
+          </tr>
+          <tr>
+            <td>gas</td>
+            <td>{txHash.gas}</td>
+          </tr>
+          <tr>
+            <td>gasPrice</td>
+            <td>{txHash.gasPrice}</td>
+          </tr>
+          <tr>
+            <td>hash</td>
+            <td>{txHash.hash}</td>
+          </tr>
+          <tr>
+            <td>nonce</td>
+            <td>{txHash.nonce}</td>
+          </tr>
+        </tbody>
+      </table>
+      );
+    }
+
+    return table;
+  }
+
+  renderTableAccount = () => {
+    const { allAccount } = this.state;
+
+    let tableAccount = '';
+
+    if (allAccount) {
+      tableAccount = allAccount.map((element, index) => {
+        return (
+          <tr key={index.toString()}>
+            <td>{index}</td>
+            <td>{element}</td>
+          </tr>
+        );
+      });
+    } else {
+      tableAccount = '';
+    }
+
+    return tableAccount;
+  }
+
 
   render() {
-    return (
-      <div>
+    const {
+      message,
+      balance,
+      account,
+      newAccount,
+      currentAccount,
+    } = this.state;
 
+    return (
+      <div className="container" style={{marginTop: 30}}>
+        <div className="row">
+          <div className="form-group col-sm-3">
+            <label>Change provider</label>
+              <select
+                id="provider"
+                name="provider"
+                className="form-control"
+                onChange={this.changeProvider}
+              >
+                <option value={-1}>MetaMask</option>
+                <option value={local}>localhost:8545</option>
+                <option value={mainnet}>mainnet</option>
+              </select>
+            </div>
+        </div>
+        <label>Send token ether:</label>
+        <div className="row">
+          <div className="form-group col-sm-3">
+            <label>From Address</label>
+              <input
+                id="fromAddress"
+                name="fromAddress"
+                className="form-control"
+                type="text"
+                placeholder="enter fromAddress"
+              />
+            </div>
+            <div className="form-group col-sm-3">
+              <label>To Address</label>
+                <input
+                  id="toAddress"
+                  name="toAddress"
+                  className="form-control"
+                  type="text"
+                  placeholder="enter toAddress"
+                />
+            </div>
+            <div className="form-group col-sm-3">
+              <label>Value</label>
+              <input
+                id="value"
+                name="value"
+                className="form-control"
+                type="text"
+                value={0.05}
+                placeholder="enter value"
+              />
+            </div>
+          <div className="form-group col-sm-3">
+              <button className="btn btn-success" onClick={this.sendToken} >Send</button>
+          </div>
+          <div className="form-group col-sm-12">
+              <h4>{message}</h4>
+          </div>
+        </div>
+        <div className="row">
+          <div className="form-group col-sm-3">
+            <label>Check tx hash</label>
+              <input
+                id="txHash"
+                name="txHash"
+                className="form-control"
+                type="text"
+                placeholder="enter tx hash"
+              />
+            </div>
+            <div className="form-group col-sm-3">
+                <button className="btn btn-success" onClick={this.getTransaction} >check hash</button>
+            </div>
+            <div className="form-group col-sm-12">
+              {this.renderTableHash()}
+            </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col-sm-3">
+            <label>Check Balance</label>
+              <input
+                id="address"
+                name="address"
+                className="form-control"
+                type="text"
+                placeholder="enter address"
+              />
+            </div>
+            <div className="form-group col-sm-3">
+                <button className="btn btn-success" onClick={this.getBalance} >check</button>
+            </div>
+            <div className="form-group col-sm-12">
+                <h4>{balance}</h4>
+            </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col-sm-3">
+            <label>Import account</label>
+              <input
+                id="account"
+                name="account"
+                className="form-control"
+                type="text"
+                placeholder="enter private key"
+              />
+            </div>
+            <div className="form-group col-sm-3">
+                <button className="btn btn-success" onClick={this.importAccount} >Import account</button>
+            </div>
+            <div className="form-group col-sm-12">
+                <h4>{account}</h4>
+            </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col-sm-3">
+            <label>Create account</label>
+              <input
+                id="password"
+                name="password"
+                className="form-control"
+                type="text"
+                placeholder="enter password"
+              />
+            </div>
+            <div className="form-group col-sm-3">
+                <button className="btn btn-success" onClick={this.createAccount} >create account</button>
+            </div>
+            <div className="form-group col-sm-12">
+                <h4>{newAccount}</h4>
+            </div>
+        </div>
+        <label>Get current account</label>
+        <div className="form-group col-sm-12">
+            <button className="btn btn-success" onClick={this.getCurrentAccount} >get</button>
+        </div>
+        <div className="form-group col-sm-12">
+            <h4>{currentAccount}</h4>
+        </div>
+        <div className="form-group col-sm-12">
+            <button className="btn btn-success" onClick={this.testFunction} >test</button>
+        </div>
+        <div className="form-group col-sm-12">
+            <button className="btn btn-success" onClick={this.getAllAccount} >get all account</button>
+        </div>
+        <div>
+          <table style={{width: '100%'}}>
+            <tbody>
+                {this.renderTableAccount()}
+            </tbody>
+          </table>
+        </div>
       </div>
-      // <MyCanvas />
     );
   }
 }
