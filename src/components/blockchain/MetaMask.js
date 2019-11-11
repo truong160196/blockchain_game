@@ -1,6 +1,9 @@
 import React from 'react';
-import './App.scss';
+import { connect } from 'react-redux';
+
 import Blockchain from '../../utils/blockchain';
+
+import postData from '../../actions/blockchain/index';
 
 const $ = window.$;
 const mainnet = 'https://mainnet.infura.io/v3/cde205b23d7d4a998f4ee02f652355b0';
@@ -28,7 +31,7 @@ class MetaMask extends React.Component {
         gas: 21000,
       }
       
-      this.blockchain = new Blockchain(urlBase, config);
+      this.blockchain = new Blockchain(urlBase, config, this.props.postData);
 
       await this.blockchain.init();
 
@@ -118,11 +121,11 @@ class MetaMask extends React.Component {
     }
   }
 
-  getTransaction =  async(hash) => {
+  getTransaction = async(hash) => {
     try {
       let txHash = $('#txHash').val();
 
-      if(hash) {
+      if(typeof hash === 'string') {
         txHash = hash;
       }
 
@@ -293,6 +296,7 @@ class MetaMask extends React.Component {
       currentAccount,
     } = this.state;
 
+    console.log(this.props)
     return (
       <div className="container" style={{marginTop: 30}}>
         <div className="row">
@@ -463,4 +467,12 @@ class MetaMask extends React.Component {
   }
 }
 
-export default MetaMask;
+const mapStateToProps = state => ({ blockchain: state.blockchain });
+
+const mapDispatchToProps = dispatch => ({
+  postData: (data) => {
+    dispatch(postData(data));
+  },
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(MetaMask);

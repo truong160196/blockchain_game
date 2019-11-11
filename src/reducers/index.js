@@ -1,7 +1,9 @@
 import { combineReducers } from 'redux';
 
-const appReducers = combineReducers({
+import blockchain from './blockchain/default';
 
+const appReducers = combineReducers({
+    blockchain
 });
 
 export default appReducers;

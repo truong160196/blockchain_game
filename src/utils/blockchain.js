@@ -2,15 +2,20 @@ import {web3Provider, web3, ethereum} from './web3';
 
 import abi from '../assets/contract/eth.json';
 
-class Blockchain {
+import worker from '../utils/workerfile.js';
+import workerSetup from '../utils/workerSetup';
 
-    constructor(url, arg) {
+
+
+class Blockchain {
+    constructor(url, arg, dispatch) {
         this.urlBase = url;
         this.config = arg;
         this.currentAccount = null;
         this.chanId = null;
         this.listAccount = [];
         this.isChange = false;
+        this.dispatch = dispatch;
     }
 
     init = () => {
@@ -29,6 +34,7 @@ class Blockchain {
                 }
 
                 this.web3Provider = new web3Provider(web3Url);
+                this.worker = new workerSetup(worker);
             }
 
             if (web3.currentProvider.selectedAddress === null) {
@@ -70,6 +76,7 @@ class Blockchain {
             }
 
             if (provider) {
+                console.log(provider)
                 this.web3Provider.setProvider(provider);
             } else {
                 this.web3Provider.setProvider(window.web3.currentProvider);
@@ -87,6 +94,10 @@ class Blockchain {
               reject('no provider');
               return;
             }
+
+            this.worker.addEventListener('message', function(e) {
+                console.log(e.data);
+            })
 
             this.subscription = this.web3Provider.eth.subscribe('logs', {
                 address: address,
@@ -107,14 +118,11 @@ class Blockchain {
                 console.log('changed: ', log)
             });
     
-            this.subscriptions = this.web3Provider.eth.subscribe('newBlockHeaders', function(error, sync){
-                if (!error)
-                    console.log('sync', sync);
+            this.subscriptions = this.web3Provider.eth.subscribe('newBlockHeaders', (error, sync) => {
+                // if (!error)
+                    // console.log('sync', sync);
             })
-            .on("data", function(sync){
-                console.log('data sync', sync)
-                // show some syncing stats
-            })
+            .on("data", this.syncData)
             .on("changed", function(isSyncing){
                 console.log('isSyncing',isSyncing)
                 if(isSyncing) {
@@ -135,6 +143,11 @@ class Blockchain {
         }).catch((err) => {
             throw new Error(err);
         })
+    }
+
+    syncData = (data) => {
+        this.dispatch(data)
+        // this.worker.postMessage(data)
     }
 
     unSubscribe = () => {
@@ -453,10 +466,9 @@ class Blockchain {
                 reject('no provider web3.js');
                 return;
             }
+            const transactionDetail = await this.web3Provider.eth.getTransaction(txHash)
 
-            const trx = await this.web3Provider.eth.getTransaction(txHash)
-
-            resolve({data: trx});
+            resolve({data: transactionDetail});
         }).catch((err) => {
             throw new Error(err);
         });
@@ -523,5 +535,10 @@ class Blockchain {
         });
     }
 }
+
+const mapStateToProps = state => ({ ...state });
+
+const mapDispatchToProps = dispatch => ({
+});
 
 export default Blockchain;
