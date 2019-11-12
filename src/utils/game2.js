@@ -1,59 +1,23 @@
 import PIXI from './pixi';
 
-class Entities {
-	constructor(arg) {
-		this.position = {
-			x: arg.position.x || 0,
-			y: arg.position.y || 0
-		}
-		this.tilePosition = {
-			x: arg.tilePosition.x || 0,
-			y: arg.tilePosition.y || 0
-		}
-	
-		this.viewportX = arg.viewportX || 0;
+import Entities from './scroller/Entities';
 
-		this.deltaX = arg.deltaX || 0;
-
-		this.image = {
-			src: arg.image.src,
-			width: arg.image.width,
-			height: arg.image.height
-		}
-	}
-
-	init = () => {
-		this.texture = PIXI.Texture.from(this.image.src);
-		
-		const result = new PIXI.TilingSprite(this.texture, this.image.width, this.image.height);
-
-		result.x = this.position.x;
-		result.y = this.position.y;
-		result.tilePosition.x = this.tilePosition.x;
-		result.tilePosition.y = this.tilePosition.x;
-
-		return result;
-	}
-
-	setResourceImage = (src, width, height) => {
-		this.image.src = src;
-		this.image.width = width;
-		this.image.height = height;
-	}
-
-	getResourceImage = () => {
-		return this.image;
-	}
-}
+import Scroller from './scroller/Scroller';
 
 
 class Game2 {
     constructor(arg) {
 		this.config = arg.config;
-		this.scrollSpeed = 5;
 		this.viewportX = 0;
 		this.canvasId = arg.config.canvasId;
 		this.ad = 1;
+		this.minScrollSpeed = 5;
+		this.maxScrollSpeed = 15;
+		this.scrollAcceleration = 0.005;
+		this.scrollSpeed = this.minScrollSpeed;
+
+		this.init();
+		this.loadSpriteSheet();
 	}
 
 	init = () => {
@@ -70,19 +34,40 @@ class Game2 {
 		this.game.stage.addChild(this.stage);
 
         document.body.appendChild(this.game.view);
-
-		this.scroller = this.initScroller();
-		
-		requestAnimationFrame(this.update.bind(this))
 	}
 	
 	update = () => {
-		this.moveViewportXBy(this.scrollSpeed);
+		this.scroller.moveViewportXBy(this.scrollSpeed);
+
+		this.scrollSpeed += this.scrollAcceleration;
+
+		if (this.scrollSpeed > this.maxScrollSpeed)
+		{
+			this.scrollSpeed = this.maxScrollSpeed;
+		}
 
 		this.game.renderer.render(this.game.stage);
 
-		requestAnimationFrame(this.update.bind(this));	
+		requestAnimationFrame(this.update.bind(this));
 	}
+
+	loadSpriteSheet = () => {
+		this.loader = new PIXI.Loader();
+		this.loader.add("wall", "./assets/resources_02//wall.json");
+		this.loader.add("bg-mid", "./assets/resources_02//bg-mid.png");
+		this.loader.add("bg-far", "./assets/resources_02//bg-far.png");
+		this.loader.once("complete", this.spriteSheetLoaded.bind(this));
+		this.loader.load();
+	};
+
+	spriteSheetLoaded = () => {
+		const options = {
+			stage: this.stage,
+		}
+		this.scroller = new Scroller(options);
+
+		requestAnimationFrame(this.update.bind(this));
+	};
 
 	initScroller() {
 		const optionsFar = {
