@@ -63,6 +63,7 @@ class Game2 {
 	spriteSheetLoaded = () => {
 		const options = {
 			stage: this.stage,
+			game: this.game,
 		}
 		this.scroller = new Scroller(options);
 

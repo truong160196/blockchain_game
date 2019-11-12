@@ -1,3 +1,4 @@
+import Explorer from './Explorer';
 import Entities from './Entities';
 import Walls from './Wall1';
 import MapBuilder from './MapBuilder';
@@ -6,6 +7,7 @@ import MapBuilder from './MapBuilder';
 class Scroller {
 	constructor(arg) {
 		this.stage = arg.stage;
+		this.game = arg.game;
 		this.viewportX = arg.viewportX || 0;
 
 		this.init();
@@ -70,6 +72,31 @@ class Scroller {
 		this.stage.addChild(this.front);
 	
 		this.mapBuilder = new MapBuilder(this.front);
+
+		const optionsExplorer = {
+			position: {
+				x: 0,
+				y: 150,
+			},
+			tilePosition: {
+				x: 0,
+				y: 0,
+			},
+			viewportX: 0,
+			deltaX: 0.0,
+			image: {
+				src: './assets/resources_02/explorer.png',
+				width: 21,
+				height: 32
+			},
+			game: this.game,
+		};
+
+		this.explorer = new Explorer(optionsExplorer);
+
+		this.stage.addChild(this.explorer.entities);
+
+		this.explorer.update();
 	}
 
 	setViewportX = (viewportX) => {
