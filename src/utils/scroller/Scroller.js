@@ -1,5 +1,5 @@
 import Entities from './Entities';
-import Walls from './Walls';
+import Walls from './Wall1';
 import MapBuilder from './MapBuilder';
 
 
@@ -62,21 +62,21 @@ class Scroller {
 			viewportX: 0,
 			viewportSliceX: 0,
 			width: 64,
-			viewportWidth: 512
+			viewportWidth: 512,
 		};
 
 		this.front = new Walls(optionsWall);
-		console.log(this.front);
-		this.stage.addChild(this.front.pool);
+
+		this.stage.addChild(this.front);
 	
-		// this.mapBuilder = new MapBuilder(this.front);
+		this.mapBuilder = new MapBuilder(this.front);
 	}
 
 	setViewportX = (viewportX) => {
 		this.viewportX = viewportX;
 		this.far.setViewportX(viewportX);
 		this.mid.setViewportX(viewportX);
-		// this.front.setViewportX(viewportX);
+		this.front.setViewportX(viewportX);
 	};
 
 	getViewportX = () => {

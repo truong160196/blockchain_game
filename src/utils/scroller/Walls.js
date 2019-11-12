@@ -1,4 +1,5 @@
 import WallSpritesPool from './WallSpritesPool';
+import PIXI from '../pixi';
 
 const Types = {
 	FRONT: 0,
@@ -9,27 +10,31 @@ const Types = {
 	GAP: 5
 }
 
-
-class Walls {
+function WallSlice(type, y){
+	this.type   = type;
+	this.y      = y;
+	this.sprite = null;
+}
+class Walls extends PIXI.Container {
 	constructor(arg) {
+		super();
+		PIXI.Container.call(this)
+
 		this.slices = [];
 		this.width = arg.width || 64;
 		this.viewportWidth = arg.viewportWidth || 512;
 		this.viewportNumSlices = Math.ceil(this.viewportWidth/this.width) + 1;
 		this.viewportX = arg.viewportX || 0;
 		this.viewportSliceX = arg.viewportSliceX || 0;
-
 		this.init();
 	}
 
 	init = () => {
 		this.pool = new WallSpritesPool();
+
 		this.createLookupTables();
 	}
 
-	WallSlice = (type, y) => {
-		return {type, y, sprite: null}
-	}
 
 	setViewportX = (viewportX) => {
 		this.viewportX = this.checkViewportXBounds(viewportX);
@@ -44,15 +49,16 @@ class Walls {
 
 	removeOldSlices = (prevViewportSliceX) => {
 		let numOldSlices = this.viewportSliceX - prevViewportSliceX;
-		if (numOldSlices > Walls.VIEWPORT_NUM_SLICES)
+		if (numOldSlices > this.viewportSliceX)
 		{
-			numOldSlices = Walls.VIEWPORT_NUM_SLICES;
+			numOldSlices = this.viewportSliceX;
 		}
 	
 		for (let i = prevViewportSliceX; i < prevViewportSliceX + numOldSlices; i++)
 		{
 			let slice = this.slices[i];
-			if (slice.sprite != null)
+
+			if (slice && slice.sprite != null)
 			{
 				this.returnWallSprite(slice.type, slice.sprite);
 				this.removeChild(slice.sprite);
@@ -62,12 +68,12 @@ class Walls {
 	};
 
 	addSlice = (sliceType, y) => {
-		const slice = this.WallSlice(sliceType, y);
+		const slice = new WallSlice(sliceType, y);
 		this.slices.push(slice);
 	};
 
 	checkViewportXBounds = (viewportX) => {
-		const maxViewportX = (this.slices.length - Walls.viewportNumSlices) * 
+		const maxViewportX = (this.slices.length - this.viewportNumSlices) * 
 							this.width;
 		if (viewportX < 0)
 		{
@@ -88,6 +94,7 @@ class Walls {
 				 i++, sliceIndex++)
 		{
 			let slice = this.slices[i];
+
 			if (slice.sprite == null && slice.type !== Types.GAP)
 			{
 				slice.sprite = this.borrowWallSprite(slice.type);

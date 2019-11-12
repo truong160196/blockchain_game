@@ -110,17 +110,17 @@ class MapBuilder {
 	};
 
 	addWallFront = (heightIndex) => {
-		var y = MapBuilder.WALL_HEIGHTS[heightIndex];
+		var y = Types.WALL_HEIGHTS[heightIndex];
 		this.walls.addSlice(Types.FRONT, y);
 	};
 
 	addWallBack = function(heightIndex) {
-		var y = MapBuilder.WALL_HEIGHTS[heightIndex];
+		var y = Types.WALL_HEIGHTS[heightIndex];
 		this.walls.addSlice(Types.BACK, y);
 	};
 
 	addWallMid = (heightIndex, spanLength) =>  {
-		var y = MapBuilder.WALL_HEIGHTS[heightIndex];
+		var y = Types.WALL_HEIGHTS[heightIndex];
 		for (var i = 0; i < spanLength; i++)
 		{
 			if (i % 2 === 0)
@@ -135,7 +135,7 @@ class MapBuilder {
 	};
 
 	addWallStep = (heightIndex) => {
-		var y = MapBuilder.WALL_HEIGHTS[heightIndex];
+		var y = Types.WALL_HEIGHTS[heightIndex];
 		this.walls.addSlice(Types.STEP, y);
 	};
 }
