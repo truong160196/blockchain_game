@@ -7,13 +7,16 @@ const Types = {
 	STEP:2,
 	DECORATION: 3,
 	WINDOW: 4,
-	GAP: 5
+	GAP: 5,
+	WIDTH: 64,
 }
 
-function WallSlice(type, y){
-	this.type   = type;
-	this.y      = y;
-	this.sprite = null;
+class WallSlice{
+	constructor(type, y) {
+		this.type   = type;
+		this.y      = y;
+		this.sprite = null;
+	}
 }
 class Walls extends PIXI.Container {
 	constructor(arg) {
@@ -21,12 +24,12 @@ class Walls extends PIXI.Container {
 		PIXI.Container.call(this)
 
 		this.slices = [];
-		this.width = arg.width || 64;
 		this.viewportWidth = arg.viewportWidth || 512;
-		this.viewportNumSlices = Math.ceil(this.viewportWidth/this.width) + 1;
+		this.viewportNumSlices = Math.ceil(arg.viewportWidth/Types.WIDTH) + 1;
 		this.viewportX = arg.viewportX || 0;
 		this.viewportSliceX = arg.viewportSliceX || 0;
 		this.init();
+
 	}
 
 	init = () => {
@@ -40,15 +43,16 @@ class Walls extends PIXI.Container {
 		this.viewportX = this.checkViewportXBounds(viewportX);
 	
 		let prevViewportSliceX = this.viewportSliceX;
-		this.viewportSliceX = Math.floor(this.viewportX/this.width);
-	
+		this.viewportSliceX = Math.floor(this.viewportX/Types.WIDTH);
+
 		this.removeOldSlices(prevViewportSliceX);
-		
 		this.addNewSlices();
 	};
 
 	removeOldSlices = (prevViewportSliceX) => {
+
 		let numOldSlices = this.viewportSliceX - prevViewportSliceX;
+
 		if (numOldSlices > this.viewportSliceX)
 		{
 			numOldSlices = this.viewportSliceX;
@@ -74,7 +78,7 @@ class Walls extends PIXI.Container {
 
 	checkViewportXBounds = (viewportX) => {
 		const maxViewportX = (this.slices.length - this.viewportNumSlices) * 
-							this.width;
+							Types.WIDTH;
 		if (viewportX < 0)
 		{
 			viewportX = 0;
@@ -88,7 +92,7 @@ class Walls extends PIXI.Container {
 	};
 
 	addNewSlices = () =>{
-		const firstX = -(this.viewportX % this.width);
+		const firstX = -(this.viewportX % Types.WIDTH);
 		for (let i = this.viewportSliceX, sliceIndex = 0;
 				 i < this.viewportSliceX + this.viewportNumSlices;
 				 i++, sliceIndex++)

@@ -70,6 +70,8 @@ class Game {
             //at which the first blob should be added
             let x = spacing * i + xOffset;
             //Give the blob a random y position
+		    console.log(this.game.stage.height)
+
             let y = this.randomInt(0, this.game.stage.height - blob.height);
             //Set the blob's position
             blob.x = x;

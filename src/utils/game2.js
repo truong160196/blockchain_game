@@ -30,7 +30,7 @@ class Game2 {
             transparent: false,
             resolution: 1
 		});
-
+		
 		this.game.stage.addChild(this.stage);
 
         document.body.appendChild(this.game.view);
@@ -54,8 +54,8 @@ class Game2 {
 	loadSpriteSheet = () => {
 		this.loader = new PIXI.Loader();
 		this.loader.add("wall", "./assets/resources_02//wall.json");
-		this.loader.add("bg-mid", "./assets/resources_02//bg-mid.png");
-		this.loader.add("bg-far", "./assets/resources_02//bg-far.png");
+		this.loader.add("bg-mid", "./assets/resources_02/bg-mid.png");
+		this.loader.add("bg-far", "./assets/resources_02/bg-far.png");
 		this.loader.once("complete", this.spriteSheetLoaded.bind(this));
 		this.loader.load();
 	};

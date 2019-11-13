@@ -4,12 +4,12 @@ class Entities {
 	constructor(arg) {
 		this.position = {
 			x: arg.position.x || 0,
-			y: arg.position.y || 0
+			y: arg.position.y || 0,
+			vx: arg.position.vx || 0,
+			vy: arg.position.vy || 0,
 		}
-		this.tilePosition = {
-			x: arg.tilePosition.x || 0,
-			y: arg.tilePosition.y || 0
-		}
+
+		this.step = arg.step;
 	
 		this.viewportX = arg.viewportX || 0;
 
@@ -33,8 +33,8 @@ class Entities {
 
 		this.entities.x = this.position.x;
 		this.entities.y = this.position.y;
-		this.entities.vx = 0;
-        this.entities.vy = 0;
+		this.entities.vx = this.position.vx;
+        this.entities.vy = this.position.vy;
 	}
 
 	update = () => {
@@ -47,7 +47,7 @@ class Entities {
 			//Left arrow key `press` method
 			left.press = () => {
 				//Change the this.entities's velocity when the key is pressed
-				this.entities.vx = -5;
+				this.entities.vx = -this.step;
 				this.entities.vy = 0;
 			};
 			//Left arrow key `release` method
@@ -61,7 +61,7 @@ class Entities {
 			};
 			//Up
 			up.press = () => {
-				this.entities.vy = -5;
+				this.entities.vy = -this.step;
 				this.entities.vx = 0;
 			};
 			up.release = () => {
@@ -71,7 +71,7 @@ class Entities {
 			};
 			//Right
 			right.press = () => {
-				this.entities.vx = 5;
+				this.entities.vx = this.step;
 				this.entities.vy = 0;
 			};
 			right.release = () => {
@@ -81,7 +81,7 @@ class Entities {
 			};
 			//Down
 			down.press = () => {
-				this.entities.vy = 5;
+				this.entities.vy = this.step;
 				this.entities.vx = 0;
 			};
 			down.release = () => {

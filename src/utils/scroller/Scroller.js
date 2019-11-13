@@ -1,7 +1,8 @@
 import Explorer from './Explorer';
 import Entities from './Entities';
-import Walls from './Wall1';
+import Walls from './Walls';
 import MapBuilder from './MapBuilder';
+import Enemies from './Enemies';
 
 
 class Scroller {
@@ -32,9 +33,9 @@ class Scroller {
 			}
 		};
 		
-		this.far = new Entities(optionsFar);
+		// this.far = new Entities(optionsFar);
 
-		this.stage.addChild(this.far.entities);
+		// this.stage.addChild(this.far.entities);
 
 		// create entities 2
 
@@ -56,22 +57,21 @@ class Scroller {
 			}
 		};
 
-		this.mid = new Entities(optionsMix);
+		// this.mid = new Entities(optionsMix);
 
-		this.stage.addChild(this.mid.entities);
+		// this.stage.addChild(this.mid.entities);
 	
 		const optionsWall = {
 			viewportX: 0,
 			viewportSliceX: 0,
-			width: 64,
 			viewportWidth: 512,
 		};
 
-		this.front = new Walls(optionsWall);
+		// this.front = new Walls(optionsWall);
 
-		this.stage.addChild(this.front);
+		// this.stage.addChild(this.front);
 	
-		this.mapBuilder = new MapBuilder(this.front);
+		// this.mapBuilder = new MapBuilder(this.front);
 
 		const optionsExplorer = {
 			position: {
@@ -82,6 +82,7 @@ class Scroller {
 				x: 0,
 				y: 0,
 			},
+			step: 2,
 			viewportX: 0,
 			deltaX: 0.0,
 			image: {
@@ -92,18 +93,35 @@ class Scroller {
 			game: this.game,
 		};
 
-		this.explorer = new Explorer(optionsExplorer);
+		// this.explorer = new Explorer(optionsExplorer);
 
-		this.stage.addChild(this.explorer.entities);
+		// this.stage.addChild(this.explorer.entities);
 
-		this.explorer.update();
+		const optionsEnemies = {
+			numberOfEnemies: 6,
+			spacing: 48,
+			xOffset: 150,
+			speed: 2,
+			direction:1 ,
+			game: this.game,
+			stage: this.stage,
+			image: {
+				src: './assets/resources_02/blob.png',
+				width: 32,
+				height: 24
+			},
+		};
+
+		this.Enemies = new Enemies(optionsEnemies);
+
+		// this.explorer.update();
 	}
 
 	setViewportX = (viewportX) => {
-		this.viewportX = viewportX;
-		this.far.setViewportX(viewportX);
-		this.mid.setViewportX(viewportX);
-		this.front.setViewportX(viewportX);
+		// this.viewportX = viewportX;
+		// this.far.setViewportX(viewportX);
+		// this.mid.setViewportX(viewportX);
+		// this.front.setViewportX(viewportX);
 	};
 
 	getViewportX = () => {

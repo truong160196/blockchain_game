@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import Game2 from '../../utils/game2';
+import Game2 from '../../utils/game';
 
 class Scroller02 extends Component {
 	componentWillMount = () => {
@@ -14,6 +14,8 @@ class Scroller02 extends Component {
 		this.gameDev = new Game2(options);
 	
 		this.gameDev.init();
+
+    	this.gameDev.loaderResource();
 	  }
 
     render() {
