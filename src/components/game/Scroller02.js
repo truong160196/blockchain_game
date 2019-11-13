@@ -7,7 +7,8 @@ class Scroller02 extends Component {
 		  config: {
 			width: 512,
 			height: 384,
-			canvasId: 'game-canvas'
+			canvasId: 'game-canvas',
+			urlSource: './assets/images/treasureHunter.json'
 		  }
 		};
 

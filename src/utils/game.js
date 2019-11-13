@@ -32,7 +32,6 @@ class Game {
         //Make the sprites and add them to the `gameScene`
         //Create an alias for the texture atlas frame ids
 		this.id = this.resources[this.config.urlSource].textures;
-
         //Dungeon
         this.dungeon = new PIXI.Sprite(this.id["dungeon.png"]);
         this.gameScene.addChild(this.dungeon);

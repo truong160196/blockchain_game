@@ -1,11 +1,10 @@
 import React from 'react';
-import './App.scss';
 
 // import game from '../../utils/game';
 
-import Scroller02 from '../game/Scroller02';
+// import Scroller02 from '../game/Scroller02';
 
-// import MetaMask from '../../components/blockchain/MetaMask'
+import MetaMask from '../../components/blockchain/MetaMask'
 
 class App extends React.Component {
   constructor(props) {
@@ -32,7 +31,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <Scroller02 />
+      <MetaMask />
     );
   }
 }

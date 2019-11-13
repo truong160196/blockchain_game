@@ -167,8 +167,9 @@ class MetaMask extends React.Component {
     }
   }
 
-  testFunction = () => {
+  testFunction = async() => {
     // this.blockchain.getTotalSupply();
+    this.blockchain.signData();
   }
 
   changeProvider = async() => {

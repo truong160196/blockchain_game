@@ -1,6 +1,8 @@
 import {web3Provider, web3, ethereum} from './web3';
 
-import abi from '../assets/contract/eth.json';
+import { Transaction } from 'ethereumjs-tx';
+
+// import abi from '../assets/contract/eth.json';
 
 import worker from '../utils/workerfile.js';
 import workerSetup from '../utils/workerSetup';
@@ -305,6 +307,107 @@ class Blockchain {
         });
     }
 
+    sendSignedTransaction = () => {
+        // var privateKey = Buffer.from('e331b6d69882b4cb4ea581d88e0b604039a3de5967688d3dcffdd2270c0fd109', 'hex');
+
+        // var rawTx = {
+        // nonce: '0x00',
+        // gasPrice: '0x09184e72a000',
+        // gasLimit: '0x2710',
+        // to: '0x0000000000000000000000000000000000000000',
+        // value: '0x00',
+        // data: '0x7f7465737432000000000000000000000000000000000000000000000000000000600057'
+        // }
+
+        // var tx = new Tx.Transaction(rawTx, {'chain':'ropsten'});
+        // tx.sign(privateKey);
+
+        // var serializedTx = tx.serialize();
+
+        // // console.log(serializedTx.toString('hex'));
+        // // 0xf889808609184e72a00082271094000000000000000000000000000000000000000080a47f74657374320000000000000000000000000000000000000000000000000000006000571ca08a8bbf888cfa37bbf0bb965423625641fc956967b81d12e23709cead01446075a01ce999b56a8a88504be365442ea61239198e23d1fce7d00fcfc5cd3b44b7215f
+
+        // web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
+        // .on('receipt', console.log);
+    }
+
+    signData = async() => {
+        let privateKey = "0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3";
+
+        const msg = 'hello';
+
+        let sigObj = await this.web3Provider.eth.accounts.sign(msg, privateKey);
+
+        let msgHash2 = sigObj.messageHash;
+        // console.log('msgHash2: ', msgHash2)
+
+        // let sig2 = sigObj.signature;
+        // console.log('sig2: ', sig2)
+
+        // let whoSigned2 = await this.web3Provider.eth.accounts.recover(sigObj)
+        // console.log('whoSigned2: ', whoSigned2)
+
+        // let dataEncoding = await this.web3Provider.eth.abi.encodeParameter('uint256', '2345675643');
+
+        // console.log('dataEncoding: ', dataEncoding)
+
+        // let dataDecoding = await this.web3Provider.eth.abi.decodeParameter('uint256', dataEncoding);
+
+        // console.log('dataDecoding: ', dataDecoding)
+
+        // this.web3Provider.eth.net.isListening()
+        //     .then(() => console.log('web3 is connected'))
+        //     .catch(e => console.log('Wow. Something went wrong'));
+
+        // const abi = [{"constant":false,"inputs":[{"name":"_greeting","type":"string"}],"name":"greet","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getGreeting","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}];
+        const account1 = '0x248062ceD7E34354651c930940b93e48281E2BFf'; // Your account address 1
+        //const account2 = '' // Your account address 2
+        web3.eth.defaultAccount = account1;
+        
+        const privateKey1 = Buffer.from('EEA14CED894BAF54A74869DA3DD189EC02E4D1455972180FB22422530C6BA4F3', 'hex');
+        
+        const abi = [{"constant":false,"inputs":[{"name":"_greeting","type":"string"}],"name":"greet","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getGreeting","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}];
+        
+        const contract_Address = "0xcbe74e21b070a979b9d6426b11e876d4cb618daf";
+        
+        const contract = new this.web3Provider.eth.Contract(abi, contract_Address);
+        
+        const myData = contract.methods.greet( "hello all devs").encodeABI();
+        
+        this.web3Provider.eth.getTransactionCount(account1, (err, txCount) => {
+        // Build the transaction
+          const txObject = {
+            nonce:    web3.toHex(txCount),
+            to:       '0xaC8832ae0C56f638bC07822f90b24A4f8d721B2D',
+            value:    web3.toHex(web3.toWei('0', 'ether')),
+            gasLimit: web3.toHex(2100000),
+            gasPrice: web3.toHex(web3.toWei('6', 'gwei')),
+            data: myData  
+          }
+            // Sign the transaction
+            const tx = new Transaction(txObject, { chain: 'ropsten', hardfork: 'petersburg' });
+            tx.sign(privateKey1);
+        
+            const serializedTx = tx.serialize();
+            const raw = '0x' + serializedTx.toString('hex');
+        
+            // Broadcast the transaction
+            this.web3Provider.eth.sendSignedTransaction(raw).on('transactionHash', function (txHash) {
+                console.log("txHash: " + txHash);
+
+            }).on('receipt', function (receipt) {
+                console.log("receipt: ");
+                console.log(receipt);
+            }).on('confirmation', function (confirmationNumber, receipt) {
+                console.log("confirmationNumber: " + confirmationNumber);
+                console.log("receipt: ");
+                console.log(receipt);
+            }).on('error', function (error) {
+                console.error(error);
+            });
+        });
+    }
+
     /**
      * Wallet
      */
@@ -468,6 +571,11 @@ class Blockchain {
             }
             const transactionDetail = await this.web3Provider.eth.getTransaction(txHash)
 
+            console.log(transactionDetail.input)
+             let dataDecoding = web3.toAscii('string', transactionDetail.input);
+
+            console.log('dataDecoding: ', dataDecoding)
+
             resolve({data: transactionDetail});
         }).catch((err) => {
             throw new Error(err);
@@ -535,10 +643,5 @@ class Blockchain {
         });
     }
 }
-
-const mapStateToProps = state => ({ ...state });
-
-const mapDispatchToProps = dispatch => ({
-});
 
 export default Blockchain;
