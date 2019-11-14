@@ -2,12 +2,10 @@ import {web3Provider, web3, ethereum} from './web3';
 
 import { Transaction } from 'ethereumjs-tx';
 
-// import abi from '../assets/contract/eth.json';
+import abi from '../assets/contract/eth.json';
 
 import worker from '../utils/workerfile.js';
 import workerSetup from '../utils/workerSetup';
-
-
 
 class Blockchain {
     constructor(url, arg, dispatch) {
@@ -18,10 +16,11 @@ class Blockchain {
         this.listAccount = [];
         this.isChange = false;
         this.dispatch = dispatch;
+        this.typeHash = 'string';
     }
 
     init = () => {
-        return new Promise((resolve, reject) => {
+        return new Promise(async(resolve, reject) => {
             if (!web3) {
               // show error: Install Metamask
                 reject('No web3? Please use google chrome and metamask plugin to enter this Dapp!', null, null)
@@ -50,6 +49,29 @@ class Blockchain {
     }
 
     connectMetaMask = async() => {
+        if (this.web3Provider) {
+            const netId = await this.web3Provider.eth.net.getId();
+            this.chanId = netId;
+            switch (netId) {
+              case 1:
+                this.chain = 'mainnet';
+                break
+              case 42:
+                this.chain = 'kovan';
+                break
+              case 3:
+                this.chain = 'ropsten';
+                break
+             case 4:
+                this.chain = 'rinkeby';
+                break
+            case 5:
+                this.chain = 'goerli';
+                break
+              default:
+                console.log('This is an unknown network.')
+            }
+        }
         ethereum.on('accountsChanged', (accounts) => {
             if (accounts.length === 0) {
                 console.error('Please connect to MetaMask.')
@@ -78,8 +100,27 @@ class Blockchain {
             }
 
             if (provider) {
-                console.log(provider)
                 this.web3Provider.setProvider(provider);
+                // this.web3ws = new web3Provider(new web3Provider.providers.WebsocketProvider('ws://ropsten.infura.io/ws/v3/cde205b23d7d4a998f4ee02f652355b0'));
+                // this.subscriptionWss = this.web3ws.eth.subscribe('newBlockHeaders', (err, res) => {
+                //     if (err) console.error(err);
+                //     console.log(res)
+                // });
+
+                this.subscription.on('data', (txHash) => {
+                    setTimeout(async () => {
+                        try {
+                            let tx = await this.getTransaction(txHash);
+                            if (tx != null) {
+                                if (this.account === tx.to.toLowerCase()) {
+                                    console.log({address: tx.from, value: this.web3.utils.fromWei(tx.value, 'ether'), timestamp: new Date()});
+                                }
+                            }
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    }, 60000)
+                });
             } else {
                 this.web3Provider.setProvider(window.web3.currentProvider);
             }
@@ -101,9 +142,11 @@ class Blockchain {
                 console.log(e.data);
             })
 
+            const account = await this.getCurrentAccount();
+
             this.subscription = this.web3Provider.eth.subscribe('logs', {
-                address: address,
-                topics: topics
+                address: account,
+                topics: null
             }, (error, result) => {
                 if (error) {
                     console.error(error);
@@ -133,13 +176,30 @@ class Blockchain {
                     // regain app operation
                 }
             });
-    
-            this.subscription1 = this.web3Provider.eth.subscribe('pendingTransactions', function(error, result){
+
+            var subscription1sd = this.web3Provider.eth.subscribe('pendingTransactions', function(error, result){
                 if (!error)
                     console.log(result);
             })
+            .on("connected", (subscriptionId) => {
+                console.log('subscriptionId', subscriptionId);
+            })
             .on("data", function(transaction){
-                console.log('pending transaction', transaction);
+                console.log(transaction);
+            }).on("changed", (log) => {
+                console.log('changed: ', log)
+            });
+
+            const balance = await this.getBalance(account);
+            this.dispatch({balance})
+
+           const a = await this.web3Provider.eth.defaultBlock;
+           console.log(a);
+            const filter = web3.eth.filter('latest');
+            filter.watch((err, res) => {
+                if (!err) {
+                    this.dispatch({balance})
+                }
             });
 
         }).catch((err) => {
@@ -147,8 +207,29 @@ class Blockchain {
         })
     }
 
-    syncData = (data) => {
-        this.dispatch(data)
+    syncData = async(data) => {
+        const account = await this.getCurrentAccount();
+
+        if (data) {
+            const thisTransaction = await this.getTransactionFromBlock(data.number);
+
+            if (thisTransaction.data && thisTransaction.data.hash) {
+                const thisTransactionReceipt = await this.getTransactionReceipt(thisTransaction.data.hash)
+
+                if (thisTransactionReceipt.data && (
+                    thisTransactionReceipt.data.to === account
+                    || thisTransactionReceipt.data.from === account
+                    )) {
+                    //
+                    console.log(thisTransactionReceipt);
+                    this.dispatch(data)
+                }
+            }
+        }
+
+        const balance = await this.getBalance(account);
+        this.dispatch({transaction: data, balance})
+
         // this.worker.postMessage(data)
     }
 
@@ -332,60 +413,39 @@ class Blockchain {
     }
 
     signData = async() => {
-        let privateKey = "0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3";
-
-        const msg = 'hello';
-
-        let sigObj = await this.web3Provider.eth.accounts.sign(msg, privateKey);
-
-        let msgHash2 = sigObj.messageHash;
-        // console.log('msgHash2: ', msgHash2)
-
-        // let sig2 = sigObj.signature;
-        // console.log('sig2: ', sig2)
-
-        // let whoSigned2 = await this.web3Provider.eth.accounts.recover(sigObj)
-        // console.log('whoSigned2: ', whoSigned2)
-
-        // let dataEncoding = await this.web3Provider.eth.abi.encodeParameter('uint256', '2345675643');
-
-        // console.log('dataEncoding: ', dataEncoding)
-
-        // let dataDecoding = await this.web3Provider.eth.abi.decodeParameter('uint256', dataEncoding);
-
-        // console.log('dataDecoding: ', dataDecoding)
-
-        // this.web3Provider.eth.net.isListening()
-        //     .then(() => console.log('web3 is connected'))
-        //     .catch(e => console.log('Wow. Something went wrong'));
-
-        // const abi = [{"constant":false,"inputs":[{"name":"_greeting","type":"string"}],"name":"greet","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getGreeting","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}];
         const account1 = '0x248062ceD7E34354651c930940b93e48281E2BFf'; // Your account address 1
         //const account2 = '' // Your account address 2
-        web3.eth.defaultAccount = account1;
         
         const privateKey1 = Buffer.from('EEA14CED894BAF54A74869DA3DD189EC02E4D1455972180FB22422530C6BA4F3', 'hex');
         
-        const abi = [{"constant":false,"inputs":[{"name":"_greeting","type":"string"}],"name":"greet","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getGreeting","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}];
+        // const abi = [{"constant":false,"inputs":[{"name":"_greeting","type":"string"}],"name":"greet","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getGreeting","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}];
         
-        const contract_Address = "0xcbe74e21b070a979b9d6426b11e876d4cb618daf";
+        const contract_Address = "0x4C84c7489126865688ADe51e8c8e1be1f5C6Afb7";
         
-        const contract = new this.web3Provider.eth.Contract(abi, contract_Address);
+        // const contract = new this.web3Provider.eth.Contract(abi, contract_Address);
         
-        const myData = contract.methods.greet( "hello all devs").encodeABI();
-        
+        // const myData = contract.methods.greet( "hello all devs").encodeABI();
+        const myData = this.web3Provider.eth.abi.encodeParameter(this.typeHash, JSON.stringify(abi));
+
+        const gasPrice = await this.getGasPrice();
+
+        this.config.gasPrice = gasPrice;
+
+        const valueSend = this.convertValueToEther(0.05);
+
         this.web3Provider.eth.getTransactionCount(account1, (err, txCount) => {
         // Build the transaction
           const txObject = {
             nonce:    web3.toHex(txCount),
-            to:       '0xaC8832ae0C56f638bC07822f90b24A4f8d721B2D',
-            value:    web3.toHex(web3.toWei('0', 'ether')),
-            gasLimit: web3.toHex(2100000),
-            gasPrice: web3.toHex(web3.toWei('6', 'gwei')),
+            to:       contract_Address,
+            gasLimit: web3.toHex(this.config.gas),
+            gasPrice: web3.toHex(this.config.gasPrice),
+            value:  web3.toHex(valueSend),
             data: myData  
           }
+
             // Sign the transaction
-            const tx = new Transaction(txObject, { chain: 'ropsten', hardfork: 'petersburg' });
+            const tx = new Transaction(txObject, { chain: this.chain, hardfork: 'petersburg' });
             tx.sign(privateKey1);
         
             const serializedTx = tx.serialize();
@@ -396,12 +456,30 @@ class Blockchain {
                 console.log("txHash: " + txHash);
 
             }).on('receipt', function (receipt) {
-                console.log("receipt: ");
-                console.log(receipt);
-            }).on('confirmation', function (confirmationNumber, receipt) {
-                console.log("confirmationNumber: " + confirmationNumber);
-                console.log("receipt: ");
-                console.log(receipt);
+                // console.log("receipt: ");
+                // console.log(receipt);
+            }).on('confirmation', async (confirmationNumber, receipt) => {
+                // if (confirmationNumber === 3) {
+                //     this.web3Provider.eth.transactionConfirmationBlocks(receipt.blockNumber);
+                // }
+                // console.log("confirmationNumber: " + confirmationNumber);
+                // console.log("receipt: ");
+
+                if (confirmationNumber > 3) {
+                    const account = await this.getCurrentAccount();
+
+                    if (receipt) {
+                            const thisTransactionReceipt = await this.getTransactionReceipt(receipt.transactionHash)
+
+                            if (thisTransactionReceipt.data && (
+                                thisTransactionReceipt.data.to === account
+                                || thisTransactionReceipt.data.from === account
+                                )) {
+                                //
+                                this.dispatch(receipt)
+                            }
+                    }
+                }
             }).on('error', function (error) {
                 console.error(error);
             });
@@ -571,12 +649,21 @@ class Blockchain {
             }
             const transactionDetail = await this.web3Provider.eth.getTransaction(txHash)
 
-            console.log(transactionDetail.input)
-             let dataDecoding = web3.toAscii('string', transactionDetail.input);
-
-            console.log('dataDecoding: ', dataDecoding)
-
             resolve({data: transactionDetail});
+        }).catch((err) => {
+            throw new Error(err);
+        });
+     }
+
+     getTransactionReceipt = async(txHash) => {
+        return new Promise(async(resolve, reject) => {
+            if (!this.web3Provider) {
+                reject('no provider web3.js');
+                return;
+            }
+            const transactionReceipt = await this.web3Provider.eth.getTransactionReceipt(txHash)
+
+            resolve({data: transactionReceipt});
         }).catch((err) => {
             throw new Error(err);
         });
@@ -602,6 +689,24 @@ class Blockchain {
         }).catch((err) => {
             throw new Error(err);
         }); 
+     }
+
+     getInputDataFromTransaction = async(txHash) => {
+        return new Promise(async(resolve, reject) => {
+            if (!this.web3Provider) {
+                reject('no provider web3.js');
+                return;
+            }
+            const dataInput = await this.getTransaction(txHash)
+
+            if (dataInput && dataInput.data && dataInput.data.input)  {
+                let dataDecoding = this.web3Provider.eth.abi.decodeParameter(this.typeHash, dataInput.data.input);
+   
+                resolve({data: JSON.parse(dataDecoding)});
+            }
+        }).catch((err) => {
+            throw new Error(err);
+        });
      }
 
      /**

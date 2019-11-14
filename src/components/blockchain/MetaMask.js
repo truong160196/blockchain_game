@@ -6,7 +6,7 @@ import Blockchain from '../../utils/blockchain';
 import postData from '../../actions/blockchain/index';
 
 const $ = window.$;
-const mainnet = 'https://mainnet.infura.io/v3/cde205b23d7d4a998f4ee02f652355b0';
+const mainnet = 'https://ropsten.infura.io/v3/cde205b23d7d4a998f4ee02f652355b0';
 const local =  'http://localhost:8545'
 
 class MetaMask extends React.Component {
@@ -28,7 +28,7 @@ class MetaMask extends React.Component {
     try {
       const config = {
         gasPrice: '1400000000',
-        gas: 21000,
+        gas: 210000,
       }
       
       this.blockchain = new Blockchain(urlBase, config, this.props.postData);
@@ -52,7 +52,7 @@ class MetaMask extends React.Component {
   
       if (result) {
         this.setState({
-          balance: 'My Balance: ' + result
+          balanceState: 'My Balance: ' + result
         })
       }
     } catch (err) {
@@ -167,6 +167,28 @@ class MetaMask extends React.Component {
     }
   }
 
+  getDataInput = async () => {
+    try {
+      const dataInput = $('#dataInput').val();
+
+      const result = await this.blockchain.getInputDataFromTransaction(dataInput);
+
+      if (result && result.data) {
+        console.log(result.data);
+        this.setState({
+          dataInput: JSON.stringify(result.data)
+        })
+      } else {
+        alert(result.error || 'exception')
+        this.setState({
+          dataInput: null
+        })
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   testFunction = async() => {
     // this.blockchain.getTotalSupply();
     this.blockchain.signData();
@@ -176,7 +198,7 @@ class MetaMask extends React.Component {
     try {
       const provider = $('#provider').val();
 
-      if (provider == -1) {
+      if (provider === -1) {
         await this.blockchain.changeProvider(null);
         alert('connect to metaMask success');
       } else {
@@ -291,15 +313,19 @@ class MetaMask extends React.Component {
   render() {
     const {
       message,
-      balance,
+      balanceState,
       account,
       newAccount,
       currentAccount,
+      dataInput,
     } = this.state;
 
-    console.log(this.props)
+    const { blockchain } = this.props;
+
+    // console.log(this.props)
     return (
       <div className="container" style={{marginTop: 30}}>
+        <label>My Balance: {blockchain.balance}</label>
         <div className="row">
           <div className="form-group col-sm-3">
             <label>Change provider</label>
@@ -311,7 +337,7 @@ class MetaMask extends React.Component {
               >
                 <option value={-1}>MetaMask</option>
                 <option value={local}>localhost:8545</option>
-                <option value={mainnet}>mainnet</option>
+                <option value={mainnet}>Ropsten Testnet</option>
               </select>
             </div>
         </div>
@@ -389,6 +415,25 @@ class MetaMask extends React.Component {
 
         <div className="row">
           <div className="form-group col-sm-3">
+            <label>Get data Input Transaction</label>
+              <input
+                id="dataInput"
+                name="dataInput"
+                className="form-control"
+                type="text"
+                placeholder="enter tx hash transaction"
+              />
+            </div>
+            <div className="form-group col-sm-3">
+                <button className="btn btn-success" onClick={this.getDataInput} >Get data</button>
+            </div>
+            <div className="form-group col-sm-12">
+                <h4>{dataInput}</h4>
+            </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col-sm-3">
             <label>Check Balance</label>
               <input
                 id="address"
@@ -402,7 +447,7 @@ class MetaMask extends React.Component {
                 <button className="btn btn-success" onClick={this.getBalance} >check</button>
             </div>
             <div className="form-group col-sm-12">
-                <h4>{balance}</h4>
+                <h4>{balanceState}</h4>
             </div>
         </div>
 
