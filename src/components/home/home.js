@@ -14,7 +14,7 @@ class Home extends React.Component {
   componentWillMount = () => {
     const define = {
       config: {
-        urlSource: './assets/template/home.json'
+        urlSource: './assets/template/main.json'
       }
     };
 

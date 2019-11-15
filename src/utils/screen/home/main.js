@@ -3,12 +3,22 @@ import * as PIXI from 'pixi.js';
 class Main {
     constructor(arg) {
         this.config = arg.config;
+
         this.padding = {
             left: 15,
             top: 15,
             right: 15,
             bottom: 15
         }
+
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.style = new PIXI.TextStyle({
+            fontFamily: "Futura",
+            fontSize: 25,
+            fill: "white"
+        });
+
     }
 
     init = () => {
@@ -17,11 +27,10 @@ class Main {
             height: window.innerHeight,
             antialiasing: true,
             transparent: false,
-            resolution: 1
+            resolution: 1,
         });
         
         this.game.autoResize = true;
-        this.game.resize(window.innerWidth, window.innerHeight);
 		
 		this.loader = new PIXI.Loader();
 
@@ -41,8 +50,11 @@ class Main {
     }
 
     resize = () => {
-        this.game.view.width = window.innerWidth;
-        this.game.view.height = window.innerHeight;
+        this.width = window.innerWidth
+        this.height =  window.innerHeight;
+
+        this.game.view.width = window.screen.width;
+        this.game.view.height = window.screen.height;
 
         this.update();
       }
@@ -57,155 +69,268 @@ class Main {
 
 		this.id = this.resources[this.config.urlSource].textures;
 
-        this.background = new PIXI.Sprite(this.id["background.jpg"]);
+        this.background = new PIXI.Sprite(this.id["background.png"]);
+        this.background.width = this.width;
+        this.background.height =  this.height;
 
         this.gameScene.addChild(this.background);
 
-        // logo
-        this.logoMain = new PIXI.Sprite(this.id["logo-game.png"]);
-        this.logoMain.x = window.screen.width / 2 - this.logoMain.width / 2;
-        this.logoMain.y = 100;
+        // // logo
+        this.logoMain = new PIXI.Sprite(this.id["logo.png"]);
+        this.logoMain.width = this.logoMain.width;
+        this.logoMain.height = this.logoMain.height;
+        this.logoMain.x = this.width / 2 - this.logoMain.width / 2;
+        this.logoMain.y = this.height / 2 - this.logoMain.height;
 
         this.gameScene.addChild(this.logoMain);
 
-        // victory
-        this.victory = new PIXI.Sprite(this.id["victory.png"]);
-        this.victory.width = this.victory.width / 1.2;
-        this.victory.height = this.victory.height / 1.2;
-        this.victory.x = window.screen.width - this.victory.width - 150;
-        this.victory.y = window.screen.height / 2 - this.victory.height / 2;
+        // button play
+        this.buttonPlay = new PIXI.Sprite(this.id["button-play.png"]);
 
-        this.gameScene.addChild(this.victory);
+        this.buttonPlay.width = this.buttonPlay.width / 2;
+        this.buttonPlay.height = this.buttonPlay.height / 2;
+        
+        this.buttonPlay.x =  this.width / 2 - this.buttonPlay.width / 2;
+        this.buttonPlay.y = this.logoMain.y + this.logoMain.height + 30;
 
-        // setting
-        this.setting = new PIXI.Sprite(this.id["setting.png"]);
-        this.setting.width = this.setting.width / 3;
-        this.setting.height = this.setting.height / 3;
-        this.setting.x = window.screen.width - this.setting.width - this.padding.right;
-        this.setting.y = 100;
-        this.gameScene.addChild(this.setting);
+        this.buttonPlay.buttonMode = true;
+        this.buttonPlay.interactive = true;
+        this.buttonPlay.isClick = false;
 
-        // championship
-        this.championship = new PIXI.Sprite(this.id["championship.png"]);
-        this.championship.width = this.championship.width / 4;
-        this.championship.height = this.championship.height / 4;
-        this.championship.x = window.screen.width - this.championship.width - this.padding.right;
-        this.championship.y = window.screen.height - this.championship.height - this.padding.right;
+        this.buttonPlay
+        .on('mousedown', (event) => {
+            //handle event
+            this.buttonPlay.anchor.set(0.1)
+            setTimeout(() => {
+                this.balanceEthText.text = '0,5'
+                this.balanceEthText.x = 120;
+                this.buttonPlay.anchor.set(0)
+            }, 360);
+         })
+        .on('tap', (event) => {
+            //handle event
+            this.buttonPlay.anchor.set(0.1, 0.1)
+            setTimeout(() => {
+                this.buttonPlay.anchor.set(0)
+            }, 360);
+         });
 
-        this.gameScene.addChild(this.championship);
-
-        // shop
-        this.shop = new PIXI.Sprite(this.id["event1.png"]);
-        this.shop.width = this.shop.width / 3.5;
-        this.shop.height = this.shop.height / 3.5;
-        this.shop.x = window.screen.width - this.shop.width - this.championship.width - 30;
-        this.shop.y = window.screen.height - this.shop.height - this.padding.right;
-
-        this.shop.buttonMode = true;
-        this.shop.interactive = true;
-        this.shop.isOpen = false;
-
-        this.shop
-        .on('mousedown', this.openScreenShop)
-        .on('touchstart', this.openScreenShop)
-        .on('click', this.openScreenShop)
-
-        this.gameScene.addChild(this.shop);
-                
-        // money
-        this.money = new PIXI.Sprite(this.id["money.png"]);
-        this.money.width = this.money.width / 1.5;
-        this.money.height = this.money.height / 1.5;
-        this.money.x = window.screen.width - this.money.width - this.padding.right;
-        this.money.y = this.padding.top;
-
-        this.gameScene.addChild(this.money);
-
-        // gold
-        this.gold = new PIXI.Sprite(this.id["gold.png"]);
-        this.gold.width = this.gold.width / 1.5;
-        this.gold.height = this.gold.height / 1.5;
-        this.gold.x = window.screen.width - this.gold.width - this.money.width - this.padding.right;
-        this.gold.y = this.padding.top;
-
-        this.gameScene.addChild(this.gold);
+        this.gameScene.addChild(this.buttonPlay);
+        
 
         
-        // level
-        this.level = new PIXI.Sprite(this.id["level.png"]);
-        this.level.width = this.level.width / 1.5;
-        this.level.height = this.level.height / 1.5;
-        this.level.x = window.screen.width - this.level.width - this.gold.width - this.money.width - this.padding.right;
-        this.level.y = this.padding.top;
+        // button play
+        this.buttonAccount = new PIXI.Sprite(this.id["button-account.png"]);
+        this.buttonAccount.width = this.buttonAccount.width / 2;
+        this.buttonAccount.height = this.buttonAccount.height / 2;
+        this.buttonAccount.x =  this.width / 2 - this.buttonAccount.width / 2;
+        this.buttonAccount.y = this.buttonPlay.y + this.buttonPlay.height + 20;
 
-        this.gameScene.addChild(this.level);
+        this.buttonAccount.buttonMode = true;
+        this.buttonAccount.interactive = true;
+        this.buttonAccount.isClick = false;
 
+        this.buttonAccount
+        .on('mousedown', (event) => {
+            //handle event
+            this.buttonAccount.anchor.set(0.1)
+            setTimeout(() => {
+                this.buttonAccount.anchor.set(0)
+            }, 360);
+         })
+        .on('tap', (event) => {
+            //handle event
+            this.buttonAccount.anchor.set(0.1, 0.1)
+            setTimeout(() => {
+                this.buttonAccount.anchor.set(0)
+            }, 360);
+         });
+
+        this.gameScene.addChild(this.buttonAccount);
+
+        // setting
+        this.setting = new PIXI.Sprite(this.id["button.png"]);
+        
+        this.setting.width = this.setting.width / 2;
+        this.setting.height = this.setting.height / 2;
+        this.setting.x = this.padding.left;
+        this.setting.y = this.height - this.setting.height - this.padding.bottom;
+
+        var settingIcon = new PIXI.Sprite(this.id["setting.png"]);
+        settingIcon.x =  this.setting.width / 2;
+        settingIcon.y =  this.setting.height / 2;
+
+        this.setting.addChild(settingIcon);
+
+        this.gameScene.addChild(this.setting);
+
+        // balanceDisplay
+        this.balanceEth = new PIXI.Sprite(this.id["balance-eth.png"]);
+        this.balanceEth.width = this.balanceEth.width / 1.5;
+        this.balanceEth.height = this.balanceEth.height / 1.5;
+        this.balanceEth.x = this.width - this.balanceEth.width - this.padding.right;
+        this.balanceEth.y = this.padding.top;
+
+        // balance eth
+        this.balanceEthText = new PIXI.Text('9,999,999', this.style);
+        this.balanceEthText.x = 120;
+        this.balanceEthText.y = this.balanceEth.y + 20;
+        
+        this.balanceEth.addChild(this.balanceEthText);
+
+        this.gameScene.addChild(this.balanceEth);
+
+        // balance god
+        this.balanceGod = new PIXI.Sprite(this.id["balance-god.png"]);
+        this.balanceGod.width = this.balanceGod.width / 1.5;
+        this.balanceGod.height = this.balanceGod.height / 1.5;
+        this.balanceGod.x = this.balanceEth.x - this.balanceEth.width - 10;
+        this.balanceGod.y = this.padding.top;
+
+        this.balanceGodText = new PIXI.Text('9,999.999.9999', this.style);
+        this.balanceGodText.x = 110;
+        this.balanceGodText.y = this.balanceGod.y + 20;
+        
+        this.balanceGod.addChild(this.balanceGodText);
+
+        this.gameScene.addChild(this.balanceGod);
+
+        // responsive
+        if (window.screen.width < 578) {
+            this.balanceEth.x = this.width / 2 - this.balanceEth.width / 2;
+            this.balanceEth.y = this.padding.top + this.balanceGod.height;
+
+            this.balanceEthText.x = 120;
+            this.balanceEthText.y = this.balanceEth.y - 50;
+
+            this.balanceGod.x = this.width / 2 - this.balanceGod.width / 2;
+            this.balanceGod.y = this.padding.top;
+        }
+
+        // volume
+        this.volume = new PIXI.Sprite(this.id["button.png"]);
+        this.volume.width = this.volume.width / 2;
+        this.volume.height = this.volume.height / 2;
+        this.volume.x = this.setting.x + this.setting.width + this.padding.left;
+        this.volume.y = this.height - this.volume.height - this.padding.bottom;
+
+        var volumeIcon = new PIXI.Sprite(this.id["volume.png"]);
+        volumeIcon.x =  this.volume.width / 2 - 5;
+        volumeIcon.y =  this.volume.height / 2 - 5;
+
+        this.volume.addChild(volumeIcon);
+
+        this.gameScene.addChild(this.volume);
+
+         // box
+         this.box = new PIXI.Sprite(this.id["button.png"]);
+         this.box.width = this.box.width / 2;
+         this.box.height = this.box.height / 2;
+         this.box.x = this.volume.x + this.volume.width + this.padding.left;
+         this.box.y = this.height - this.box.height - this.padding.bottom;
+ 
+         
+         var boxIcon = new PIXI.Sprite(this.id["box.png"]);
+         boxIcon.x =  this.box.width / 2;
+         boxIcon.y =  this.box.height / 2;
+ 
+         this.box.addChild(boxIcon);
+ 
+         this.box.buttonMode = true;
+         this.box.interactive = true;
+         this.box.isOpen = false;
+ 
+         this.box
+         .on('mousedown', this.openScreenbox)
+         .on('touchstart', this.openScreenbox)
+         .on('click', this.openScreenbox)
+         this.gameScene.addChild(this.box); 
 
         this.customMouseIcon();
     }
 
     update = () => {
-        this.logoMain.x = window.screen.width / 2 - this.logoMain.width / 2;
-        this.logoMain.y = 100;
+        this.background.width = this.width;
+        this.background.height = this.height;
 
-        this.setting.x = window.screen.width - this.setting.width - this.padding.right;
-        this.setting.y = 100;
+        this.logoMain.x = this.width / 2 - this.logoMain.width / 2;
+        this.logoMain.y = this.height / 2 - this.logoMain.height;
 
-        this.championship.x = window.screen.width - this.championship.width - this.padding.right;
-        this.championship.y = window.screen.height - this.championship.height - this.padding.right;
+        this.setting.x = this.padding.left;
+        this.setting.y = this.height - this.setting.height - this.padding.bottom;
 
-        this.shop.x = window.screen.width - this.shop.width - this.championship.width - 30;
-        this.shop.y = window.screen.height - this.shop.height - this.padding.right;
+        this.box.x = this.volume.x + this.volume.width + this.padding.left;
+        this.box.y = this.height - this.box.height - this.padding.bottom;
 
-        this.money.x = window.screen.width - this.money.width - this.padding.right;
-        this.money.y = this.padding.top;
+        this.volume.x = this.setting.width + this.setting.x + this.padding.left;
+        this.volume.y = this.height - this.volume.height - this.padding.bottom;
 
-        this.gold.x = window.screen.width - this.gold.width - this.money.width - this.padding.right;
-        this.gold.y = this.padding.top;
+        this.balanceEth.x = this.width - this.balanceEth.width - this.padding.right;
+        this.balanceEth.y = this.padding.top;
 
-        this.level.x = window.screen.width - this.level.width - this.gold.width - this.money.width - this.padding.right;
-        this.level.y = this.padding.top;
+        this.balanceEthText.x = 120;
+        this.balanceEthText.y = this.balanceEth.y + 20;
+        
+        this.balanceGod.x = this.balanceEth.x - this.balanceEth.width - 10;
+        this.balanceGod.y = this.padding.top;
 
-        this.victory.x = window.screen.width - this.victory.width - 150;
-        this.victory.y = window.screen.height / 2 - this.victory.height / 2;
+        this.balanceGodText.x = 110;
+        this.balanceGodText.y = this.balanceGod.y + 20;
+
+        this.buttonPlay.x =  this.width / 2 - this.buttonPlay.width / 2;
+        this.buttonPlay.y = this.logoMain.y + this.logoMain.height + 30;
+
+        this.buttonAccount.x =  this.width / 2 - this.buttonAccount.width / 2;
+        this.buttonAccount.y = this.buttonPlay.y + this.buttonPlay.height + 20;
+
+        if (window.screen.width < 578) {
+            this.balanceEth.x = this.width / 2 - this.balanceEth.width / 2;
+            this.balanceEth.y = this.padding.top + this.balanceGod.height;
+
+            this.balanceEthText.x = 120;
+            this.balanceEthText.y = this.balanceEth.y - 50;
+
+            this.balanceGod.x = this.width / 2 - this.balanceGod.width / 2;
+            this.balanceGod.y = this.padding.top;
+        }
     }
 
-    openScreenShop = () => {
-        if (this.shop.isOpen === false) {
-            this.shop.isOpen = true;
+    openScreenbox = () => {
+        if (this.box.isOpen === 'number') {
+            this.box.isOpen = true;
            
-            this.shopScene = new PIXI.Container();
-            this.shopScene.visible = true;
-            this.shopScene.interactive = true;
-            this.shopScene.cursor = "pointer";
+            this.boxScene = new PIXI.Container();
+            this.boxScene.visible = true;
+            this.boxScene.interactive = true;
+            this.boxScene.cursor = "pointer";
     
-            this.game.stage.addChild(this.shopScene);
+            this.game.stage.addChild(this.boxScene);
             
-            this.shopModal = new PIXI.Sprite(this.id["victory.png"]);
-            this.shopModal.width = this.victory.width;
-            this.shopModal.height = this.victory.height;
-            this.shopModal.x = 150;
-            this.shopModal.y = window.screen.height / 2 - this.victory.height / 2;
+            this.boxModal = new PIXI.Sprite(this.id["buttonPlay.png"]);
+            this.boxModal.width = this.buttonPlay.width;
+            this.boxModal.height = this.buttonPlay.height;
+            this.boxModal.x = 150;
+            this.boxModal.y = this.height / 2 - this.buttonPlay.height / 2;
     
             // level
             this.closeButton = new PIXI.Sprite(this.id["level.png"]);
             this.closeButton.width = this.level.width;
             this.closeButton.height = this.level.height;
-            this.closeButton.x = this.shopModal.width;
+            this.closeButton.x = this.boxModal.width;
             this.closeButton.y = 0;
     
             this.closeButton.buttonMode = true;
             this.closeButton.interactive = true;
     
             this.closeButton
-            .on('mousedown', this.closeScreenShop)
-            .on('touchstart', this.closeScreenShop)
-            .on('click', this.closeScreenShop)
+            .on('mousedown', this.closeScreenbox)
+            .on('touchstart', this.closeScreenbox)
+            .on('click', this.closeScreenbox)
 
-            const itemShops = [];
+            const itemboxs = [];
 
-            const itemShop = new PIXI.Sprite(this.id["event1.png"]);
-            const itemLimit = Math.ceil(this.shopModal.width / (itemShop.width / 4));
+            const itembox = new PIXI.Sprite(this.id["event1.png"]);
+            const itemLimit = Math.ceil(this.boxModal.width / (itembox.width / 4));
             let rows = 50;
             let itemOfRows = 0;
 
@@ -219,38 +344,38 @@ class Main {
                 itemOfRows++;
 
                 if (itemOfRows === itemLimit) {
-                    rows += (itemShops[i - 1].y + item.height);
+                    rows += (itemboxs[i - 1].y + item.height);
                     itemOfRows = 0;
                 }
 
-                itemShops.push(item);
+                itemboxs.push(item);
 
                 item.buttonMode = true;
                 item.interactive = true;
         
                 item
-                .on('mousedown', (e) => this.selectItemShop(e, i))
-                .on('touchstart', (e) => this.selectItemShop(e, i))
-                .on('click', (e) => this.selectItemShop(e, i))
+                .on('mousedown', (e) => this.selectItembox(e, i))
+                .on('touchstart', (e) => this.selectItembox(e, i))
+                .on('click', (e) => this.selectItembox(e, i))
 
-                this.shopModal.addChild(item);
+                this.boxModal.addChild(item);
             }
     
-            this.shopModal.addChild(this.closeButton);
+            this.boxModal.addChild(this.closeButton);
     
-            this.shopScene.addChild(this.shopModal);
+            this.boxScene.addChild(this.boxModal);
         }
     }
 
-    selectItemShop = (event, index) => {
+    selectItembox = (event, index) => {
         console.log(event);
         console.log(index);
     }
 
-    closeScreenShop = () => {
-        this.shopScene.visible = false;
-        this.shop.isOpen = false;
-        this.game.stage.removeChild(this.shopScene);
+    closeScreenbox = () => {
+        this.boxScene.visible = false;
+        this.box.isOpen = false;
+        this.game.stage.removeChild(this.boxScene);
     }
 
     customMouseIcon = () => {
