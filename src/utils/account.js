@@ -1,9 +1,10 @@
 class Account {
 	constructor(arg) {
-		this.name = arg.name;
-		this.score = arg.score;
-		this.level = arg.level;
-		this.equipment = arg.equipment;
+		this.name = arg.name || `Player_${new Date().getTime()}`;
+		this.score = arg.score || 0;
+		this.gold = arg.gold || 0;
+		this.level = arg.level || 1;
+		this.equipment = arg.equipment || [];
 		this.isGameRunning = true;
 		this.blockchain = arg.blockchain;
 		this.history = arg.history;
@@ -66,9 +67,21 @@ class Account {
 		 return this.equipment[id] || {};
 	 }
 
-	 /**
-	  * Action
-	  */
+	 getBalanceEth = async() => {
+		const balance = await this.blockchain.getBalance();
+		return balance;
+	 }
+
+	 setGold = (value) => {
+		this.getGold = value;
+	 }
+	 getGold = () => {
+		 return this.getGold;
+	 }
+
+	/**
+	 * Action
+	 */
 	register = (name, address) => {
 		const newNameLocal = `${name}_${address}`
 
@@ -99,6 +112,7 @@ class Account {
 		const dataStore = {
 			name:  this.name,
 			score: this.score,
+			gold: this.gold,
 			level: this.level,
 			equipment: this.equipment,
 			isGameRunning: this.isGameRunning,

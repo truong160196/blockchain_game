@@ -4,14 +4,16 @@ import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import appReducers from './reducers/index';
-// import * as web3 from 'https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.34/dist/web3.min.js';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './index.css';
 import * as serviceWorker from './serviceWorker';
+import * as PIXI from 'pixi.js';
 
 import App from './components/app/App';
 import ErrorBoundary from './components/errorHandling/ErrorBoundary';
 
+window.PIXI = PIXI;
 
 const store = createStore(
 	appReducers,

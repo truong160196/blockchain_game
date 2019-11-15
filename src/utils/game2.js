@@ -1,4 +1,4 @@
-import PIXI from './pixi';
+import * as PIXI from 'pixi.js';
 
 import Entities from './scroller/Entities';
 

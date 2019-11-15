@@ -1,5 +1,5 @@
 import WallSpritesPool from './WallSpritesPool';
-import PIXI from '../pixi';
+import * as PIXI from 'pixi.js';
 
 const Types = {
 	FRONT: 0,
