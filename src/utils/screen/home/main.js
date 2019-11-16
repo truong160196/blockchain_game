@@ -255,6 +255,7 @@ class Main {
 
         this.logoMain.x = this.width / 2 - this.logoMain.width / 2;
         this.logoMain.y = this.height / 2 - this.logoMain.height;
+        this.logoMain.visible = true;
 
         this.setting.x = this.padding.left;
         this.setting.y = this.height - this.setting.height - this.padding.bottom;
@@ -283,6 +284,15 @@ class Main {
         this.buttonAccount.x =  this.width / 2 - this.buttonAccount.width / 2;
         this.buttonAccount.y = this.buttonPlay.y + this.buttonPlay.height + 20;
 
+        // modal shop
+        if (this.box.isOpen === true) {
+            this.boxModal.width = window.innerWidth / 2;
+            this.boxModal.height = window.innerHeight / 1.2;
+            this.boxModal.x = this.width / 2 - this.boxModal.width / 2;
+            this.boxModal.y = this.padding.top + 50;
+        }
+
+
         if (window.screen.width < 578) {
             this.balanceEth.x = this.width / 2 - this.balanceEth.width / 2;
             this.balanceEth.y = this.padding.top + this.balanceGod.height;
@@ -292,11 +302,22 @@ class Main {
 
             this.balanceGod.x = this.width / 2 - this.balanceGod.width / 2;
             this.balanceGod.y = this.padding.top;
+
+            this.buttonPlay.y = this.balanceEth.y + this.balanceEth.height + 30;
+            this.buttonAccount.y = this.buttonPlay.y + this.buttonPlay.height + 20;
+            this.logoMain.visible = false;
+
+            if (this.box.isOpen === true) {
+                this.boxModal.width = window.innerWidth;
+                this.boxModal.height = window.innerHeight;
+                this.boxModal.x = this.width / 2 - this.boxModal.width / 2;
+                this.boxModal.y = 0;
+            }
         }
     }
 
     openScreenbox = () => {
-        if (this.box.isOpen === 'number') {
+        if (this.box.isOpen === false) {
             this.box.isOpen = true;
            
             this.boxScene = new PIXI.Container();
@@ -306,18 +327,22 @@ class Main {
     
             this.game.stage.addChild(this.boxScene);
             
-            this.boxModal = new PIXI.Sprite(this.id["buttonPlay.png"]);
-            this.boxModal.width = this.buttonPlay.width;
-            this.boxModal.height = this.buttonPlay.height;
-            this.boxModal.x = 150;
-            this.boxModal.y = this.height / 2 - this.buttonPlay.height / 2;
+            this.boxModal = new PIXI.Sprite(this.id["shop-modal.png"]);
+            this.boxModal.width = window.innerWidth / 2;
+            this.boxModal.height = window.innerHeight / 1.2;
+            this.boxModal.x = this.width / 2 - this.boxModal.width / 2;
+            this.boxModal.y = this.padding.top + 50;
     
             // level
-            this.closeButton = new PIXI.Sprite(this.id["level.png"]);
-            this.closeButton.width = this.level.width;
-            this.closeButton.height = this.level.height;
-            this.closeButton.x = this.boxModal.width;
-            this.closeButton.y = 0;
+            this.closeButton = new PIXI.Sprite(this.id["button.png"]);
+            this.closeButton.width = this.closeButton.width / 2;
+            this.closeButton.height = this.closeButton.height / 2;
+            this.closeButton.x = this.boxModal.width / 2 - this.closeButton.width / 2;
+            this.closeButton.y = this.boxModal.height + 15;
+
+            const closeButtonIcon = new PIXI.Sprite(this.id["back.png"]);
+            closeButtonIcon.x = this.closeButton.width / 2 - closeButtonIcon.width / 2
+            closeButtonIcon.y = this.closeButton.height / 2 - closeButtonIcon.height / 2
     
             this.closeButton.buttonMode = true;
             this.closeButton.interactive = true;
@@ -327,40 +352,48 @@ class Main {
             .on('touchstart', this.closeScreenbox)
             .on('click', this.closeScreenbox)
 
-            const itemboxs = [];
+            // const itemboxs = [];
 
-            const itembox = new PIXI.Sprite(this.id["event1.png"]);
-            const itemLimit = Math.ceil(this.boxModal.width / (itembox.width / 4));
-            let rows = 50;
-            let itemOfRows = 0;
+            // const itembox = new PIXI.Sprite(this.id["event1.png"]);
+            // const itemLimit = Math.ceil(this.boxModal.width / (itembox.width / 4));
+            // let rows = 50;
+            // let itemOfRows = 0;
 
-            for (let i = 0; i < 10; i++) {
-                const item = new PIXI.Sprite(this.id["event1.png"]);
-                item.width = item.width / 4;
-                item.height = item.height / 4;
+            // for (let i = 0; i < 10; i++) {
+            //     const item = new PIXI.Sprite(this.id["event1.png"]);
+            //     item.width = item.width / 4;
+            //     item.height = item.height / 4;
 
-                item.x = item.width * itemOfRows + 40;
-                item.y = rows;
-                itemOfRows++;
+            //     item.x = item.width * itemOfRows + 40;
+            //     item.y = rows;
+            //     itemOfRows++;
 
-                if (itemOfRows === itemLimit) {
-                    rows += (itemboxs[i - 1].y + item.height);
-                    itemOfRows = 0;
-                }
+            //     if (itemOfRows === itemLimit) {
+            //         rows += (itemboxs[i - 1].y + item.height);
+            //         itemOfRows = 0;
+            //     }
 
-                itemboxs.push(item);
+            //     itemboxs.push(item);
 
-                item.buttonMode = true;
-                item.interactive = true;
+            //     item.buttonMode = true;
+            //     item.interactive = true;
         
-                item
-                .on('mousedown', (e) => this.selectItembox(e, i))
-                .on('touchstart', (e) => this.selectItembox(e, i))
-                .on('click', (e) => this.selectItembox(e, i))
+            //     item
+            //     .on('mousedown', (e) => this.selectItembox(e, i))
+            //     .on('touchstart', (e) => this.selectItembox(e, i))
+            //     .on('click', (e) => this.selectItembox(e, i))
 
-                this.boxModal.addChild(item);
-            }
+            //     this.boxModal.addChild(item);
+            // }
     
+            if (window.screen.width < 578) {
+                if (this.box.isOpen === true) {
+                    this.boxModal.width = window.innerWidth;
+                    this.boxModal.height = window.innerHeight;
+                    this.boxModal.x = this.width / 2 - this.boxModal.width / 2;
+                    this.boxModal.y = 0;
+                }
+            }
             this.boxModal.addChild(this.closeButton);
     
             this.boxScene.addChild(this.boxModal);
