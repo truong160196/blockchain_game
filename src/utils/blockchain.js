@@ -72,20 +72,21 @@ class Blockchain {
                 console.log('This is an unknown network.')
             }
         }
-        ethereum.on('accountsChanged', (accounts) => {
+        ethereum.on('accountsChanged', async(accounts) => {
             if (accounts.length === 0) {
                 console.error('Please connect to MetaMask.')
             } else {
                 this.addToListAccount(accounts[0])
 
                 if (this.currentAccount !== accounts[0]) {
-                    this.currentAccount = accounts[0];              
+                    this.currentAccount = accounts[0]; 
+
+                    await this.getBalance(accounts[0]);
                 }
             }
-            // console.log(accounts)
         })
         
-        ethereum.on('networkChanged',  (netId) => {
+        ethereum.on('networkChanged',  async(netId) => {
             if (this.chanId !== netId) {
                 this.chanId = netId;
             }
@@ -145,19 +146,21 @@ class Blockchain {
             const account = await this.getCurrentAccount();
 
             this.subscription = this.web3Provider.eth.subscribe('logs', {
-                address: account,
+                address: null,
                 topics: null
             }, (error, result) => {
                 if (error) {
                     console.error(error);
                 }
-                console.log(result);
+                // console.log(result);
             })
             .on("connected", (subscriptionId) => {
-                console.log('subscriptionId', subscriptionId);
+                // console.log('subscriptionId', subscriptionId);
             })
             .on("data", (log) => {
-                console.log('data: ', log);
+                if (log.address === account) {
+                    console.log('data: ', log);
+                }
             })
             .on("changed", (log) => {
                 console.log('changed: ', log)
@@ -177,31 +180,16 @@ class Blockchain {
                 }
             });
 
-            var subscription1sd = this.web3Provider.eth.subscribe('pendingTransactions', function(error, result){
-                if (!error)
-                    console.log(result);
-            })
-            .on("connected", (subscriptionId) => {
-                console.log('subscriptionId', subscriptionId);
-            })
-            .on("data", function(transaction){
-                console.log(transaction);
-            }).on("changed", (log) => {
-                console.log('changed: ', log)
-            });
-
-            const balance = await this.getBalance(account);
-            this.dispatch({balance})
-
-           const a = await this.web3Provider.eth.defaultBlock;
-           console.log(a);
             const filter = web3.eth.filter('latest');
-            filter.watch((err, res) => {
+            filter.watch(async(err, res) => {
                 if (!err) {
-                    this.dispatch({balance})
+                    const account = await this.getCurrentAccount();
+
+                    const balance = await this.getBalance(account);
                 }
             });
 
+            resolve();
         }).catch((err) => {
             throw new Error(err);
         })
@@ -209,6 +197,7 @@ class Blockchain {
 
     syncData = async(data) => {
         const account = await this.getCurrentAccount();
+        await this.getBalance(account);
 
         if (data) {
             const thisTransaction = await this.getTransactionFromBlock(data.number);
@@ -222,13 +211,10 @@ class Blockchain {
                     )) {
                     //
                     console.log(thisTransactionReceipt);
-                    this.dispatch(data)
+                    // this.dispatch({transaction: data})
                 }
             }
         }
-
-        const balance = await this.getBalance(account);
-        this.dispatch({transaction: data, balance})
 
         // this.worker.postMessage(data)
     }
@@ -476,7 +462,7 @@ class Blockchain {
                                 || thisTransactionReceipt.data.from === account
                                 )) {
                                 //
-                                this.dispatch(receipt)
+                                // this.dispatch({transaction: receipt})
                             }
                     }
                 }
@@ -603,7 +589,11 @@ class Blockchain {
 
             let balance = await this.web3Provider.eth.getBalance(address);
 
-            resolve(web3.fromWei(balance, 'ether'));
+            const result = await web3.fromWei(balance, 'ether');
+
+            this.dispatch({balance: result});
+
+            resolve(result);
         }).catch((err) => {
             throw new Error(err);
         })
@@ -615,6 +605,12 @@ class Blockchain {
                 reject('no provider web3.js');
                 return;
             }
+
+            let address = fromAddress;
+
+            if (fromAddress === null) {
+                address = await this.getCurrentAccount();
+            }
             
             const gasPrice = await this.getGasPrice();
 
@@ -623,7 +619,7 @@ class Blockchain {
             const valueSend = this.convertValueToEther(value);
 
             this.web3Provider.eth.sendTransaction({
-                from: fromAddress,
+                from: address,
                 gasPrice: gasPrice,
                 gas: this.config.gas,
                 to: toAddress,

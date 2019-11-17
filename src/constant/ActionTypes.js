@@ -1,0 +1,7 @@
+export const TABS = {
+    ACCOUNT: 'ACCOUNT',
+    WALLET: 'WALLET',
+    DEPOSIT: 'DEPOSIT',
+    WITHDRAW: 'WITHDRAW',
+    HISTORY: 'HISTORY',
+}

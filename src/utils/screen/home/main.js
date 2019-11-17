@@ -1,5 +1,7 @@
 import * as PIXI from 'pixi.js';
 
+import {formatCurrency} from '../../formatNumber';
+
 class Main {
     constructor(arg) {
         this.config = arg.config;
@@ -57,7 +59,14 @@ class Main {
         this.game.view.height = window.screen.height;
 
         this.update();
-      }
+    }
+
+    setBalanceEth = (value) => {
+        if (this.balanceEthText && value && value > 0) {
+            this.balanceEthText.text = `${formatCurrency(value, 4)}`
+            this.balanceEthText.x = 120;
+        }
+    }
       
     
     setup = (resources) => {
@@ -102,8 +111,6 @@ class Main {
             //handle event
             this.buttonPlay.anchor.set(0.1)
             setTimeout(() => {
-                this.balanceEthText.text = '0,5'
-                this.balanceEthText.x = 120;
                 this.buttonPlay.anchor.set(0)
             }, 360);
          })
@@ -172,7 +179,7 @@ class Main {
         this.balanceEth.y = this.padding.top;
 
         // balance eth
-        this.balanceEthText = new PIXI.Text('9,999,999', this.style);
+        this.balanceEthText = new PIXI.Text(0, this.style);
         this.balanceEthText.x = 120;
         this.balanceEthText.y = this.balanceEth.y + 20;
         
@@ -187,7 +194,7 @@ class Main {
         this.balanceGod.x = this.balanceEth.x - this.balanceEth.width - 10;
         this.balanceGod.y = this.padding.top;
 
-        this.balanceGodText = new PIXI.Text('9,999.999.9999', this.style);
+        this.balanceGodText = new PIXI.Text(0, this.style);
         this.balanceGodText.x = 110;
         this.balanceGodText.y = this.balanceGod.y + 20;
         
@@ -290,6 +297,14 @@ class Main {
             this.boxModal.height = window.innerHeight / 1.2;
             this.boxModal.x = this.width / 2 - this.boxModal.width / 2;
             this.boxModal.y = this.padding.top + 50;
+            this.closeButton.x = this.boxModal.x - this.boxModal.width / 2 + 25;
+            this.closeButton.y = this.padding.top + 100;
+
+            const addressInput = document.getElementById('form-input');
+            addressInput.style.display = 'block'
+            addressInput.style.width = this.boxModal.width - 100 + 'px';
+            addressInput.style.left = this.boxModal.x + 50 + 'px';
+            addressInput.style.top = this.boxModal.y + this.boxModal.height / 4 + 'px';
         }
 
 
@@ -312,6 +327,15 @@ class Main {
                 this.boxModal.height = window.innerHeight;
                 this.boxModal.x = this.width / 2 - this.boxModal.width / 2;
                 this.boxModal.y = 0;
+
+                this.closeButton.x = this.boxModal.x + 25;
+                this.closeButton.y = this.padding.top + 100;
+
+                const addressInput = document.getElementById('form-input');
+                addressInput.style.display = 'block'
+                addressInput.style.width = this.boxModal.width - 100 + 'px';
+                addressInput.style.left = this.boxModal.x + 50 + 'px';
+                addressInput.style.top = this.boxModal.y + this.boxModal.height / 4 + 'px';
             }
         }
     }
@@ -337,8 +361,8 @@ class Main {
             this.closeButton = new PIXI.Sprite(this.id["button.png"]);
             this.closeButton.width = this.closeButton.width / 2;
             this.closeButton.height = this.closeButton.height / 2;
-            this.closeButton.x = this.boxModal.width / 2 - this.closeButton.width / 2;
-            this.closeButton.y = this.boxModal.height + 15;
+            this.closeButton.x = this.boxModal.x - this.boxModal.width / 2 + 25;
+            this.closeButton.y = this.padding.top + 100;
 
             const closeButtonIcon = new PIXI.Sprite(this.id["back.png"]);
             closeButtonIcon.x = this.closeButton.width / 2 - closeButtonIcon.width / 2
@@ -352,6 +376,11 @@ class Main {
             .on('touchstart', this.closeScreenbox)
             .on('click', this.closeScreenbox)
 
+            const addressInput = document.getElementById('form-input');
+            addressInput.style.display = 'block'
+            addressInput.style.width = this.boxModal.width - 100 + 'px';
+            addressInput.style.left = this.boxModal.x + 50 + 'px';
+            addressInput.style.top = this.boxModal.y + this.boxModal.height / 4 + 'px';
             // const itemboxs = [];
 
             // const itembox = new PIXI.Sprite(this.id["event1.png"]);
@@ -392,6 +421,16 @@ class Main {
                     this.boxModal.height = window.innerHeight;
                     this.boxModal.x = this.width / 2 - this.boxModal.width / 2;
                     this.boxModal.y = 0;
+
+                    this.closeButton.x = this.boxModal.x + 25;
+                    this.closeButton.y = this.padding.top + 100;
+
+                        
+                    const addressInput = document.getElementById('form-input');
+                    addressInput.style.display = 'block'
+                    addressInput.style.width = this.boxModal.width - 100 + 'px';
+                    addressInput.style.left = this.boxModal.x + 50 + 'px';
+                    addressInput.style.top = this.boxModal.y + this.boxModal.height / 4 + 'px';
                 }
             }
             this.boxModal.addChild(this.closeButton);
@@ -408,6 +447,8 @@ class Main {
     closeScreenbox = () => {
         this.boxScene.visible = false;
         this.box.isOpen = false;
+        const addressInput = document.getElementById('form-input');
+        addressInput.style.display = 'none'
         this.game.stage.removeChild(this.boxScene);
     }
 
