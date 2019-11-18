@@ -14,6 +14,9 @@ import Blockchain from '../../utils/blockchain';
 
 import postData from '../../actions/blockchain/index';
 
+// import component
+import Account from '../account/account';
+
 const $ = window.$;
 
 const mainnet = 'https://ropsten.infura.io/v3/cde205b23d7d4a998f4ee02f652355b0';
@@ -264,80 +267,19 @@ class Home extends React.Component {
   }
 
   render() {
+    const { blockchain } = this.props;
     const {
-      transaction,
-      tabCurrent,
+      currentAccount,
     } = this.state;
 
-    let layoutHtml = '';
-
-    switch (tabCurrent) {
-      case Types.TABS.WITHDRAW:
-        layoutHtml = this.renderTabWithdraw();
-        break;
-      case Types.TABS.WALLET:
-        layoutHtml = this.renderTabWallet();
-        break;
-      case Types.TABS.DEPOSIT:
-        layoutHtml = this.renderTabDeposit();
-        break;
-      default:
-        break;
-    }
-
     return (
-    <div id="form-input" className="container-form">
-        <div
-          class={`alert alert-${transaction.type} alert-dismissible fade show notification-success`}
-          role="alert"
-          style={{display: transaction.display}}
-        >
-             {transaction.message}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div id="tabs-button">
-          <button
-              type="button"
-              className={`btn btn-info tabs-child ${tabCurrent === Types.TABS.ACCOUNT ? 'active' : ''}`}
-              onClick={() => this.changeTabs(Types.TABS.ACCOUNT)}
-            >
-              Account
-          </button>
-          <button
-              type="button"
-              className={`btn btn-info tabs-child ${tabCurrent === Types.TABS.WALLET ? 'active' : ''}`}
-              onClick={() => this.changeTabs(Types.TABS.WALLET)}
-            >
-              Wallet
-          </button>
-          <button
-              type="button"
-              className={`btn btn-info tabs-child ${tabCurrent === Types.TABS.DEPOSIT ? 'active' : ''}`}
-              onClick={() => this.changeTabs(Types.TABS.DEPOSIT)}
-            >
-              Deposit
-          </button>
-          <button
-              type="button"
-              className={`btn btn-info tabs-child ${tabCurrent === Types.TABS.WITHDRAW ? 'active' : ''}`}
-              onClick={() => this.changeTabs(Types.TABS.WITHDRAW)}
-            >
-              Withdraw
-          </button>
-          <button
-              type="button"
-              className={`btn btn-info tabs-child ${tabCurrent === Types.TABS.HISTORY ? 'active' : ''}`}
-              onClick={() => this.changeTabs(Types.TABS.HISTORY)}
-            >
-              History
-          </button>
-        </div>
-        <div id="content-layout">
-          {layoutHtml}
-        </div>
-    </div>
+      <div className="home">
+          <Account
+            currentAccount={currentAccount}
+            blockchain={this.blockchain}
+            account={{...blockchain}}
+          />
+      </div>
     );
   }
 }
