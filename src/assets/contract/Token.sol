@@ -130,9 +130,9 @@ contract ERC20Token is StandardToken {
         ) {
         balances[msg.sender] = 100000;               // Give the creator all initial tokens (100000 for example)
         totalSupply = 100000;                        // Update total supply (100000 for example)
-        name = "TruongToken";                                   // Set the name for display purposes
+        name = "Nguyen Quoc Truong";                                   // Set the name for display purposes
         decimals = 0;                            // Amount of decimals for display purposes
-        symbol = "NQT";                               // Set the symbol for display purposes
+        symbol = "QTN";                               // Set the symbol for display purposes
     }
 
     /* Approves and then calls the receiving contract */

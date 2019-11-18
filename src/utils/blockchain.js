@@ -635,38 +635,47 @@ class Blockchain {
             //     });
             // const myData = this.web3Provider.eth.abi.encodeParameter(this.typeHash, JSON.stringify(value));
 
-            // const account1 = '0x4C84c7489126865688ADe51e8c8e1be1f5C6Afb7'
+            const account1 = '0x4C84c7489126865688ADe51e8c8e1be1f5C6Afb7'
 
-            this.contract.methods.getData().call(console.log)
-            // this.web3Provider.eth.getTransactionCount(account1, (err, txCount) => {
-            // const txObject = {
-            //     nonce:    web3.toHex(txCount),
-            //     gasLimit: web3.toHex(800000), // Raise the gas limit to a much higher amount
-            //     gasPrice: web3.toHex(web3.toWei('10', 'gwei')),
-            //     to: this.contractAddress,
-            //     data: this.contract.methods.getData().encodeABI(),
-            //   }
-
-            //   const privateKey = '7AD02C134A2F77AE812E0A5F45F533330EE47A93BF56CEB2BB9A18E14ACFE615';
-
-            //   const privateKey1 = Buffer.from(privateKey, 'hex')
-
-            //   const tx = new Transaction(txObject, { chain: this.chain, hardfork: 'petersburg' });
-            //   tx.sign(privateKey1)
+            // this.contract.methods.getData().call(console.log)
             
-            //   const serializedTx = tx.serialize()
-            //   const raw = '0x' + serializedTx.toString('hex')
+            this.web3Provider.eth.getTransactionCount(account1, (err, txCount) => {
+                this.contract.methods.setData(JSON.stringify(abi)).estimateGas(account1)
+                .then((gasAmount) => {
+                    // const dataInput = this.contract.methods.setData(JSON.stringify(abi)).encodeABI();
+                    const dataInput = this.contract.methods.transfer(account1, value).encodeABI();
+                    const txObject = {
+                        nonce:    web3.toHex(txCount),
+                        gasLimit: web3.toHex(gasAmount), // Raise the gas limit to a much higher amount
+                        gasPrice: web3.toHex(web3.toWei('10', 'wei')),
+                        to: this.contractAddress,
+                        data: dataInput,
+                      }
 
-            //   this.web3Provider.eth.sendSignedTransaction(raw, (err, txHash) => {
-            //     if (err) console.error(err);
-            //     console.log('transactionHash: ', txHash)
-            //   }).on('receipt', function (receipt) {
-            //     // console.log("receipt: ");
-            //     console.log('receipt', receipt);
-            // }).on('confirmation', async (confirmationNumber, receipt) => {
-            //     console.log('confirmationNumber', confirmationNumber);
-            // })
-            // });
+                      const privateKey = '7AD02C134A2F77AE812E0A5F45F533330EE47A93BF56CEB2BB9A18E14ACFE615';
+
+                      const privateKey1 = Buffer.from(privateKey, 'hex')
+        
+                      const tx = new Transaction(txObject, { chain: this.chain, hardfork: 'petersburg' });
+                      tx.sign(privateKey1)
+                    
+                      const serializedTx = tx.serialize()
+                      const raw = '0x' + serializedTx.toString('hex')
+        
+                      this.web3Provider.eth.sendSignedTransaction(raw, (err, txHash) => {
+                        if (err) console.error(err);
+                        console.log('transactionHash: ', txHash)
+                      }).on('receipt', function (receipt) {
+                        // console.log("receipt: ");
+                        console.log('receipt', receipt);
+                    }).on('confirmation', async (confirmationNumber, receipt) => {
+                        console.log('confirmationNumber', confirmationNumber);
+                    })
+                })
+                .catch(function(error){
+                   console.error(error);
+                });
+            });
 
             // contract.methods.transferFrom(address, toAddress, web3.toHex(web3.toWei(value, 'ether'))).call({
             //         from: address,
