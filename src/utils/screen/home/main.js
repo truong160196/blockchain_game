@@ -2,6 +2,8 @@ import * as PIXI from 'pixi.js';
 
 import {formatCurrency} from '../../formatNumber';
 
+import GameMain from '../game/main';
+
 class Main {
     constructor(arg) {
         this.config = arg.config;
@@ -109,6 +111,7 @@ class Main {
         this.buttonPlay
         .on('mousedown', (event) => {
             //handle event
+            this.openScreenGame();
             this.buttonPlay.anchor.set(0.1)
             setTimeout(() => {
                 this.buttonPlay.anchor.set(0)
@@ -254,6 +257,20 @@ class Main {
          this.gameScene.addChild(this.box); 
 
         this.customMouseIcon();
+    }
+
+    openScreenGame = () => {
+        this.gameScene.visible = false;
+
+        const define = {
+            config: {
+              urlSource: './assets/template/game.json'
+            }
+        };
+
+        this.gameMain = new GameMain(define);
+
+        this.gameMain.init();
     }
 
     update = () => {
