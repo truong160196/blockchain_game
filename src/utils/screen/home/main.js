@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js';
+import * as PIXI from "pixi.js"
 
 import {formatCurrency} from '../../formatNumber';
 
@@ -44,9 +44,9 @@ class Main {
 
         this.loaderResource();
 
-        window.onresize = (event) => {
-            this.resize();
-        };
+        // window.onresize = (event) => {
+        //     this.resize();
+        // };
     }
 
     loaderResource = () => {
@@ -262,13 +262,15 @@ class Main {
     openScreenGame = () => {
         this.gameScene.visible = false;
 
+        this.game.destroy(true);
+
         const define = {
             config: {
               urlSource: './assets/template/game.json'
             }
         };
 
-        this.gameMain = new GameMain(define);
+        this.gameMain = new GameMain(define, PIXI);
 
         this.gameMain.init();
     }
@@ -470,7 +472,7 @@ class Main {
     }
 
     customMouseIcon = () => {
-        const defaultIcon = "url('assets/cursor/blob.png'),auto";
+        const defaultIcon = "url('assets/template/mouse.png'),auto";
 
         this.game.renderer.plugins.interaction.cursorStyles.pointer = defaultIcon;
     }

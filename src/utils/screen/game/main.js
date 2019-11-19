@@ -1,4 +1,8 @@
-import * as PIXI from 'pixi.js';
+
+import * as PIXI from "pixi.js"
+
+import Entities from '../../source/Entities';
+import Explorer from '../../source/Explorer';
 
 class Main {
     constructor(arg) {
@@ -18,15 +22,6 @@ class Main {
             fontSize: 25,
             fill: "white"
         });
-
-        
-        this.W = 800;
-        this.H = 600;
-        this.PAD = 80;
-        this.resolution = 1;
-        this.WIDTH = this.W / this.resolution;
-        this.HEIGHT = this.H / this.resolution;
-
     }
 
     init = () => {
@@ -38,8 +33,6 @@ class Main {
             resolution: 1,
         });
 
-        this.game.stage = new PIXI.display.Stage();
-        
         this.game.autoResize = true;
 		
 		this.loader = new PIXI.Loader();
@@ -50,9 +43,11 @@ class Main {
 
         this.loaderResource();
 
-        window.onresize = (event) => {
-            this.resize();
-        };
+        this.customMouseIcon();
+
+        // window.onresize = (event) => {
+        //     this.resize();
+        // };
     }
     
     resize = () => {
@@ -64,111 +59,194 @@ class Main {
     }
 
     setup = (resources) => {
-        // this.gameScene = new PIXI.Container();
-        // this.gameScene.interactive = true;
-        // this.gameScene.cursor = "pointer";
+        this.gameScene = new PIXI.Container();
+        this.gameScene.interactive = true;
+        this.gameScene.cursor = "pointer";
 
-        // this.game.stage.addChild(this.gameScene);
+        this.gameScene.on("mouseup", () => {
+            //mouse is now on stage
+            this.gameScene.cursor = "pointer";
+        });
+
+        this.gameScene.on("mousedown", () => {
+            //mouse left cursor
+            this.gameScene.cursor = "attack";
+        });
+
+        this.gameScene.on("clock", () => {
+            //mouse left cursor
+            this.gameScene.cursor = "attack";
+
+            setTimeout(() => {
+                this.gameScene.cursor = "pointer";
+            }, 360);
+        });
+
+        this.game.stage.addChild(this.gameScene);
 
 		this.id = this.resources[this.config.urlSource].textures;
 
         this.background = new PIXI.Sprite(this.id["background-game.jpg"]);
-        this.background.width = this.width;
+        this.background.width = this.width / 2;
         this.background.height =  this.height;
+        this.background.x =  this.width / 2 - this.background.width / 2;
 
         this.gameScene.addChild(this.background);
-
-        // make container for bunnies
-        this.bunnyWorld = new PIXI.Container();
-
-        this.gameScene.addChild(this.bunnyWorld);
-
-        this.lighting = new PIXI.DisplayObject();
-
-        this.lighting.on('display', (element) => {
-            element.blendMode = PIXI.BLEND_MODES.ADD;
-        });
-
-        this.lighting.useRenderTexture = true;
-        this.lighting.clearColor = [0.5, 0.5, 0.5, 1]; // ambient gray
-
-        this.gameScene.addChild(this.lighting);
-
-        this.lightingSprite = new PIXI.Sprite(this.lighting.render());
-
-        this.lightingSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
-
-        this.gameScene.addChild(this.lightingSprite);
-
-        this.bunnyTexture = PIXI.Texture.from(this.id["blob.png"]);
-
-        for (let i = 0; i < 40; i++) {
-            this.bunnyWorld.addChild(this.createBunny());
+      
+        const optionsPlayer1 = {
+            gameScreen: {
+                width: this.background.width,
+                height: this.background.width,
+                x: this.background.x,
+                y: this.background.y,
+            },
+            player: {
+                texture: this.id["player1.png"],
+                width: 78,
+                height: 78,
+                x: 0,
+                y: 0,
+                vx: 0,
+                vy: 0,
+            },
+            rotation: 0.001,
+		    padding: 1,
+            speed: 200.0,
+            resolution: 1,
+            numberEntities: 5,
+            game: this.gameScene,
         }
-        
+
+        this.player1 = new Entities(optionsPlayer1);
+
+        this.gameScene.addChild(this.player1.entities);
+
+        const optionsPlayer2 = {
+            gameScreen: {
+                width: this.background.width,
+                height: this.background.width,
+                x: this.background.x,
+                y: this.background.y,
+            },
+            player: {
+                texture: this.id["player2.png"],
+                width: 68,
+                height: 68,
+                x: 0,
+                y: 0,
+                vx: 0,
+                vy: 0,
+            },
+            rotation: 0.0064,
+		    padding: 1,
+            speed: 350.0,
+            resolution: 1,
+            numberEntities: 5,
+            game: this.gameScene,
+        }
+
+        this.player2 = new Entities(optionsPlayer2);
+
+        this.gameScene.addChild(this.player2.entities);
+
+
+        const optionBomb = {
+            gameScreen: {
+                width: this.background.width,
+                height: this.background.width,
+                x: this.background.x,
+                y: this.background.y,
+            },
+            player: {
+                texture: this.id["bomb.png"],
+                width: 100,
+                height: 100,
+                x: 0,
+                y: 0,
+                vx: 0,
+                vy: 0,
+            },
+            rotation: 0.034,
+		    padding: 1,
+            speed: 150.0,
+            resolution: 1,
+            numberEntities: 5,
+            game: this.gameScene,
+        }
+
+        this.bomb = new Entities(optionBomb);
+
+        this.gameScene.addChild(this.bomb.entities);
+
         this.game.ticker.add(() => {
-            this.bunnyWorld.children.forEach(this.updateBunny);
+            this.player1.entities.children.forEach(this.player1.updateEntities);
+            this.player2.entities.children.forEach(this.player2.updateEntities);
+            this.bomb.entities.children.forEach(this.bomb.updateEntities);
         });
 
-        this.customMouseIcon();
+
+          
+        this.player3 = new PIXI.Sprite(this.id["player3.png"]);
+        this.player3.width = 78;
+        this.player3.height =  78;
+        this.player3.x =  this.width / 2 - this.player3.width / 2;
+        this.player3.y =  this.height - this.player3.height - 10;
+
+        const optionsExplorer = {
+            gameScreen: {
+                width: this.background.width,
+                height: this.background.width,
+                x: this.background.x,
+                y: this.background.y,
+            },
+            player: {
+                texture: this.id["player3.png"],
+                width: 78,
+                height: 78,
+                x: this.width / 2 - 39,
+                y: this.height - 90,
+                vx: 0,
+                vy: 0,
+            },
+            rotation: 0.001,
+            speed: 300.0,
+            numberEntities: 3,
+            game: this.gameScene,
+        }
+
+        this.player3 = new Explorer(optionsExplorer);
+
+        this.gameScene.on("mousedown", (event) => {
+            //mouse left cursor
+            // if (this.player3.isActive === false) {
+            //     this.player3.setRotation(event.data.global);
+            //     this.updatePosition();
+            // }
+            this.player3.reset(event.data.global);
+
+            // this.game.ticker.add((detal) => this.player3.play())
+        });
+
+        // this.gameScene.on("mouseup", (event) => {
+        //     this.player3.createExplorer();
+        // });
+
     }
 
-    updateBunny = (bunny) => {
-        bunny.x += bunny.vx;
-        bunny.y += bunny.vy;
-        if (bunny.x > this.WIDTH + this.PAD) {
-            bunny.x -= this.WIDTH + 2 * this.PAD;
-        }
-        if (bunny.x < -this.PAD) {
-            bunny.x += this.WIDTH + 2 * this.PAD;
-        }
-        if (bunny.y > this.HEIGHT + this.PAD) {
-            bunny.y -= this.HEIGHT + 2 * this.PAD;
-        }
-        if (bunny.y < -this.PAD) {
-            bunny.y += this.HEIGHT + 2 * this.PAD;
+    updatePosition = () => {
+        if (this.player3.isActive === true) {
+            requestAnimationFrame(this.updatePosition)
+            this.player3.play();
         }
     }
 
-    createBunny = () => {
-        const bunny = new PIXI.Sprite(this.bunnyTexture);
-        bunny.update = this.updateBunny;
-    
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 200.0; // px per second
-
-        bunny.vx = Math.cos(angle) * speed / 60.0;
-        bunny.vy = Math.sin(angle) * speed / 60.0;
-
-        bunny.position.set(Math.random() * this.WIDTH, Math.random() * this.HEIGHT);
-
-        bunny.anchor.set(0.5, 0.5);
-    
-        const lightbulb = new PIXI.Graphics();
-
-        const rr = Math.random() * 0x80 | 0;
-        const rg = Math.random() * 0x80 | 0;
-        const rb = Math.random() * 0x80 | 0;
-        const rad = 50 + Math.random() * 20;
-
-        lightbulb.beginFill((rr << 16) + (rg << 8) + rb, 1.0);
-
-        lightbulb.drawCircle(0, 0, rad);
-
-        lightbulb.endFill();
-
-        lightbulb.parentLayer = this.lighting;// <-- try comment it
-    
-        bunny.addChild(lightbulb);
-    
-        return bunny;
-    }
-    
 
     customMouseIcon = () => {
-        const defaultIcon = "url('assets/cursor/blob.png'),auto";
+        const defaultIcon = "url('assets/template/mouse.png'),auto";
+        const defaultIcon2 = "url('assets/template/mouse2.png'),auto";
 
         this.game.renderer.plugins.interaction.cursorStyles.pointer = defaultIcon;
+        this.game.renderer.plugins.interaction.cursorStyles.attack = defaultIcon2;
     }
 }
 

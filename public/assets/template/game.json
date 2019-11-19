@@ -1,28 +1,88 @@
 {"frames": {
 
-"background-game.png":
+"background-game.jpg":
 {
-	"frame": {"x":1,"y":1,"w":1920,"h":1080},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":1920,"h":1080},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"blob.png":
-{
-	"frame": {"x":1923,"y":1,"w":32,"h":24},
+	"frame": {"x":1,"y":1,"w":1000,"h":619},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":24},
-	"sourceSize": {"w":32,"h":24}
+	"spriteSourceSize": {"x":0,"y":0,"w":1000,"h":619},
+	"sourceSize": {"w":1000,"h":619}
+},
+"bomb.png":
+{
+	"frame": {"x":1,"y":1381,"w":293,"h":299},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":22,"y":30,"w":293,"h":299},
+	"sourceSize": {"w":322,"h":336}
+},
+"clock1.png":
+{
+	"frame": {"x":296,"y":1381,"w":202,"h":250},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":24,"y":0,"w":202,"h":250},
+	"sourceSize": {"w":250,"h":250}
+},
+"clock2.png":
+{
+	"frame": {"x":622,"y":715,"w":322,"h":300},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":9,"w":322,"h":300},
+	"sourceSize": {"w":334,"h":318}
+},
+"player1.png":
+{
+	"frame": {"x":1,"y":1003,"w":482,"h":376},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":482,"h":376},
+	"sourceSize": {"w":486,"h":386}
+},
+"player2.png":
+{
+	"frame": {"x":500,"y":1327,"w":385,"h":304},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":1,"w":385,"h":304},
+	"sourceSize": {"w":400,"h":324}
+},
+"player3.png":
+{
+	"frame": {"x":485,"y":1017,"w":391,"h":308},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":1,"w":391,"h":308},
+	"sourceSize": {"w":400,"h":328}
+},
+"player4.png":
+{
+	"frame": {"x":622,"y":303,"w":296,"h":410},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":46,"y":7,"w":296,"h":410},
+	"sourceSize": {"w":348,"h":432}
+},
+"snow.png":
+{
+	"frame": {"x":622,"y":1,"w":341,"h":300},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":3,"w":341,"h":300},
+	"sourceSize": {"w":356,"h":324}
 }},
+"animations": {
+	"clock": ["clock1.png","clock2.png"],
+	"player": ["player1.png","player2.png","player3.png","player4.png"]
+},
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "game.png",
 	"format": "RGBA8888",
-	"size": {"w":1948,"h":1082},
+	"size": {"w":964,"h":1681},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:d078647890489cca9739fd37f0267dca:95d859d1d31b4aa6a29cef738b245393:fc2835210f98bae8e8c1b7f0a84c9321$"
+	"smartupdate": "$TexturePacker:SmartUpdate:de3e4fa0f9d5fc89b217dd8e24713b07:88c26d24cfa40f6f6968b854f27283eb:fc2835210f98bae8e8c1b7f0a84c9321$"
 }
 }

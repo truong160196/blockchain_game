@@ -21,11 +21,13 @@ class Entities {
 			height: arg.image.height
 		}
 
+		this.texture = arg.texture;
+
 		this.init();
 	}
 
 	init = () => {
-		this.texture = PIXI.Texture.from(this.image.src);
+		this.texture = this.texture || PIXI.Texture.from(this.image.src);
 		
 		this.entities = new PIXI.TilingSprite(this.texture, this.image.width, this.image.height);
 

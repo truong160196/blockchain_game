@@ -8,12 +8,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './index.css';
 import * as serviceWorker from './serviceWorker';
-import * as PIXI from 'pixi.js';
 
 import App from './components/app/App';
 import ErrorBoundary from './components/errorHandling/ErrorBoundary';
-
-window.PIXI = PIXI;
 
 const store = createStore(
 	appReducers,
