@@ -17,6 +17,8 @@ import postData from '../../actions/blockchain/index';
 import Account from '../account/account';
 import Login from '../account/login';
 
+import Store from '../store/store';
+
 class Home extends React.Component {
   constructor(props) {
     super(props)
@@ -147,6 +149,16 @@ class Home extends React.Component {
       )
   }
 
+  renderScreenStore = () => {
+    return (
+      <Store
+        blockchain={this.blockchain}
+        account={this.account}
+      />
+    )
+
+  }
+
   render() {
     const {
       isRegister,
@@ -157,7 +169,8 @@ class Home extends React.Component {
     if (isRegister === true) {
       htmlView = this.renderScreenLogin();
     } else {
-      htmlView = this.renderScreenAccount();
+      // htmlView = this.renderScreenAccount();
+      htmlView = this.renderScreenStore();
     }
 
     return (

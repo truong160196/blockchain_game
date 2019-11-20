@@ -1,0 +1,51 @@
+.store-list {
+    position: absolute;
+    z-index: 999;
+    left: 50%;
+    transform: translate(-50%);
+    min-width: 300px;
+    max-height: 550px;
+    padding: 15px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.store-list .store-grid {
+    position: relative;
+}
+
+.store-list .store-grid .store-item {
+    position: relative;
+    display: inline;
+    margin: 10px;
+    padding: 10px;
+    text-align: center;
+    align-items: center;
+    justify-items: center;
+}
+
+.store-list .store-grid .store-item h4 {
+    font-weight: 600;
+}
+
+.store-list .store-grid .store-item .image-item {
+    width: 100%;
+    height: 200px;
+}
+
+.store-list .store-grid .store-item .button-group {
+    position: relative;
+    margin-top: 15px;
+}
+
+.btn-buy-eth {
+    width: 100%;
+    margin-bottom: 5px;
+    border-radius: 10px 0 0 10px;
+}
+
+.btn-buy-gold {
+    width: 100%;
+    margin-bottom: 5px;
+    border-radius: 0 10px 10px 0;
+}

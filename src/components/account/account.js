@@ -40,7 +40,7 @@ class Account extends React.Component {
 		const toAddress = $('#toAddress').val();
 		let value = $('#value').val();
 
-		const data = await blockchain.sendTransaction(null, toAddress, value)
+		const data = await blockchain.sendTransaction(toAddress, value)
 
 		if (data.transactionHash) {
 			$('#toAddress').val('');

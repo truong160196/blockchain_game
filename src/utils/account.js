@@ -70,11 +70,6 @@ class Account {
 		 return this.equipment[id] || {};
 	 }
 
-	 getBalanceEth = async() => {
-		const balance = await this.blockchain.getBalance();
-		return balance;
-	 }
-
 	 setGold = (value) => {
 		this.getGold = value;
 	 }
@@ -160,9 +155,7 @@ class Account {
 
 	save = async() => {
 		return new Promise(async(resolve, reject) => {
-				console.log(this.name);
-
-				if (!this.name) {
+				if (!this.blockchain) {
 					resolve(false);
 					return;
 				}

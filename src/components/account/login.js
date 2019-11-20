@@ -145,13 +145,7 @@ class Login extends React.Component {
 			}
 
 			setTimeout(() => {
-				this.setState({
-					notification: {
-					  display: 'none',
-					  type: 'info',
-					  message: '',
-					}
-				})
+				this.closeNotification();
 			}, 3600);
 		}
 	} catch (err) {
@@ -195,13 +189,7 @@ class Login extends React.Component {
 		}
 
 		setTimeout(() => {
-			this.setState({
-				notification: {
-				display: 'none',
-				type: 'info',
-				message: '',
-				}
-			})
+			this.closeNotification();
 		}, 3600);
 	  } catch (err) {
 		  console.error(err);

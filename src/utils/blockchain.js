@@ -388,30 +388,6 @@ class Blockchain {
         });
     }
 
-    sendSignedTransaction = () => {
-        // var privateKey = Buffer.from('e331b6d69882b4cb4ea581d88e0b604039a3de5967688d3dcffdd2270c0fd109', 'hex');
-
-        // var rawTx = {
-        // nonce: '0x00',
-        // gasPrice: '0x09184e72a000',
-        // gasLimit: '0x2710',
-        // to: '0x0000000000000000000000000000000000000000',
-        // value: '0x00',
-        // data: '0x7f7465737432000000000000000000000000000000000000000000000000000000600057'
-        // }
-
-        // var tx = new Tx.Transaction(rawTx, {'chain':'ropsten'});
-        // tx.sign(privateKey);
-
-        // var serializedTx = tx.serialize();
-
-        // // console.log(serializedTx.toString('hex'));
-        // // 0xf889808609184e72a00082271094000000000000000000000000000000000000000080a47f74657374320000000000000000000000000000000000000000000000000000006000571ca08a8bbf888cfa37bbf0bb965423625641fc956967b81d12e23709cead01446075a01ce999b56a8a88504be365442ea61239198e23d1fce7d00fcfc5cd3b44b7215f
-
-        // web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
-        // .on('receipt', console.log);
-    }
-
     convertDataBlockchain = (input) => {
         return new Promise(async(resolve, reject) => {
             if (!this.web3Provider) {
@@ -419,11 +395,24 @@ class Blockchain {
                 return;
             }
 
-            const dataFromBlockChain = await this.getDataInputSmartContract();
+            if (!input) {
+                resolve(false)
+                return;
+            }
 
+            const dataFromBlockChain = await this.getDataInputSmartContract();
+            console.log(dataFromBlockChain);
             if (input && input.type === Types.DATA_TYPE.ACCOUNT) {
                 dataFromBlockChain.account.push(input.data)
             };
+
+            if (input && input.type === Types.DATA_TYPE.STORE_BUY) {
+                const objIndex= dataFromBlockChain.account.findIndex(obj => obj.username === input.username);
+
+                if (objIndex > -1) {
+                    dataFromBlockChain.account[objIndex] = input.data;   
+                }
+            }
 
             resolve(dataFromBlockChain);
         }).catch((err) => {
@@ -439,43 +428,73 @@ class Blockchain {
             }
 
             const dataConvert = await this.convertDataBlockchain(data);
-            
+            console.log(dataConvert)
             const gasPrice = await this.getGasPrice();
+            // if (dataConvert) {
+            //     this.web3Provider.eth.getTransactionCount(this.accountHolder, (err, txCount) => {
+            //         this.contract.methods.setData(JSON.stringify(dataConvert)).estimateGas(this.accountHolder)
+            //         .then((gasAmount) => {
+            //             const dataInput = this.contract.methods.setData(JSON.stringify(dataConvert)).encodeABI();
+            //             const txObject = {
+            //                 nonce:    web3.toHex(txCount),
+            //                 gasLimit: web3.toHex(gasAmount), // Raise the gas limit to a much higher amount
+            //                 gasPrice: web3.toHex(gasPrice),
+            //                 to: this.contractAddress,
+            //                 data: dataInput,
+            //               }
+    
+    
+            //               const privateKey1 = Buffer.from(this.privateKeyHolder, 'hex')
+            
+            //               const tx = new Transaction(txObject, { chain: this.chain, hardfork: 'petersburg' });
+    
+            //               tx.sign(privateKey1)
+                        
+            //               const serializedTx = tx.serialize()
+            //               const raw = '0x' + serializedTx.toString('hex')
+            
+            //               this.web3Provider.eth.sendSignedTransaction(raw, (err, txHash) => {
+            //                 if (err) reject(err);
+            //                 console.log('transaction hash: ', txHash)
+            //                 resolve({transaction: {
+            //                     txHash: txHash,
+            //                 }});
+            //               });
+            //         })
+            //         .catch(function(error){
+            //            console.error(error);
+            //         });
+            //     });
+            // };
 
-            this.web3Provider.eth.getTransactionCount(this.accountHolder, (err, txCount) => {
-                this.contract.methods.setData(JSON.stringify(dataConvert)).estimateGas(this.accountHolder)
-                .then((gasAmount) => {
-                    const dataInput = this.contract.methods.setData(JSON.stringify(dataConvert)).encodeABI();
-                    const txObject = {
-                        nonce:    web3.toHex(txCount),
-                        gasLimit: web3.toHex(gasAmount), // Raise the gas limit to a much higher amount
-                        gasPrice: web3.toHex(gasPrice),
-                        to: this.contractAddress,
-                        data: dataInput,
-                      }
+            resolve(false)
 
+        }).catch((err) => {
+            throw new Error(err);
+        });
+    }
 
-                      const privateKey1 = Buffer.from(this.privateKeyHolder, 'hex')
-        
-                      const tx = new Transaction(txObject, { chain: this.chain, hardfork: 'petersburg' });
+    buyItem =  async(data) => {
+        return new Promise(async(resolve, reject) => {
+            if (!this.web3Provider) {
+                reject('no provider web3.js');
+                return;
+            }
 
-                      tx.sign(privateKey1)
-                    
-                      const serializedTx = tx.serialize()
-                      const raw = '0x' + serializedTx.toString('hex')
-        
-                      this.web3Provider.eth.sendSignedTransaction(raw, (err, txHash) => {
-                        if (err) console.error(err);
-                        console.log('transaction hash: ', txHash)
-                        resolve({transaction: {
-                            txHash: txHash,
-                        }});
-                      });
-                })
-                .catch(function(error){
-                   console.error(error);
-                });
-            });
+            const dataSign = await this.signData(data);
+
+            if (dataSign.transaction && dataSign.transaction.txHash) {
+                const sendToken = await this.sendTransaction(this.accountHolder, data.value);
+                
+                if (sendToken && sendToken.transactionHash) {
+                    resolve({
+                        txHash: sendToken.transactionHash,
+                        message: 'Send token success',
+                    })
+                }
+            } else {
+                resolve(false);
+            }
         }).catch((err) => {
             throw new Error(err);
         });
@@ -630,6 +649,28 @@ class Blockchain {
         });
      }
 
+     getAccountFromAddress= async(address) => {
+        return new Promise(async(resolve, reject) => {
+            if (!this.web3Provider) {
+                reject('no provider web3.js');
+                return;
+            }
+
+            const dataFromBlockchain = await this.getDataInputSmartContract();
+
+            if (dataFromBlockchain && dataFromBlockchain.account) {
+                const findObjAddress = dataFromBlockchain.account.findIndex(obj => obj.blockchain.address === address);
+
+                if (findObjAddress > -1 ) resolve(dataFromBlockchain.account[findObjAddress]);
+            }
+
+            resolve(false);
+        }).catch((err) => {
+            throw new Error(err);
+        });
+     }
+
+
      loginWithMetaMask = async() => {
         return new Promise(async(resolve, reject) => {
             if (!this.web3Provider) {
@@ -696,18 +737,14 @@ class Blockchain {
         })
      }
 
-     sendTransaction = (fromAddress, toAddress, value, data) => {
+     sendTransaction = (toAddress, value, data) => {
         return new Promise(async(resolve, reject) => {
             if (!this.web3Provider) {
                 reject('no provider web3.js');
                 return;
             }
 
-            let address = fromAddress;
-
-            if (fromAddress === null) {
-                address = await this.getCurrentAccount();
-            }
+            const address = await this.getCurrentAccount();
             
             const gasPrice = await this.getGasPrice();
 
@@ -715,102 +752,20 @@ class Blockchain {
 
             const valueSend = this.convertValueToEther(value);
 
-            // this.web3Provider.eth.sendTransaction({
-            //     from: address,
-            //     gasPrice: gasPrice,
-            //     gas: this.config.gas,
-            //     to: toAddress,
-            //     value: valueSend,
-            //     data: data
-            //     }, (err, transactionHash) => {
-            //         if (err) {
-            //             resolve({ err });
-            //         }
+            this.web3Provider.eth.sendTransaction({
+                from: address,
+                gasPrice: gasPrice,
+                gas: this.config.gas,
+                to: toAddress,
+                value: valueSend,
+                data: data
+                }, (err, transactionHash) => {
+                    if (err) {
+                        resolve({ err });
+                    }
 
-            //         resolve({ transactionHash })
-            //     });
-            // const myData = this.web3Provider.eth.abi.encodeParameter(this.typeHash, JSON.stringify(value));
-
-            const account1 = '0x4C84c7489126865688ADe51e8c8e1be1f5C6Afb7'
-
-            // this.contract.methods.getData().call(console.log)
-            
-            this.web3Provider.eth.getTransactionCount(account1, (err, txCount) => {
-                this.contract.methods.setData(JSON.stringify(abi)).estimateGas(account1)
-                .then((gasAmount) => {
-                    // const dataInput = this.contract.methods.setData(JSON.stringify(abi)).encodeABI();
-                    const dataInput = this.contract.methods.transfer(account1, value).encodeABI();
-                    const txObject = {
-                        nonce:    web3.toHex(txCount),
-                        gasLimit: web3.toHex(gasAmount), // Raise the gas limit to a much higher amount
-                        gasPrice: web3.toHex(web3.toWei('10', 'wei')),
-                        to: this.contractAddress,
-                        data: dataInput,
-                      }
-
-                      const privateKey = '7AD02C134A2F77AE812E0A5F45F533330EE47A93BF56CEB2BB9A18E14ACFE615';
-
-                      const privateKey1 = Buffer.from(privateKey, 'hex')
-        
-                      const tx = new Transaction(txObject, { chain: this.chain, hardfork: 'petersburg' });
-                      tx.sign(privateKey1)
-                    
-                      const serializedTx = tx.serialize()
-                      const raw = '0x' + serializedTx.toString('hex')
-        
-                      this.web3Provider.eth.sendSignedTransaction(raw, (err, txHash) => {
-                        if (err) console.error(err);
-                        console.log('transactionHash: ', txHash)
-                      }).on('receipt', function (receipt) {
-                        // console.log("receipt: ");
-                        console.log('receipt', receipt);
-                    }).on('confirmation', async (confirmationNumber, receipt) => {
-                        console.log('confirmationNumber', confirmationNumber);
-                    })
-                })
-                .catch(function(error){
-                   console.error(error);
+                    resolve({ transactionHash })
                 });
-            });
-
-            // contract.methods.transferFrom(address, toAddress, web3.toHex(web3.toWei(value, 'ether'))).call({
-            //         from: address,
-            //         gasPrice: web3.toHex(gasPrice),
-            //         gas: web3.toHex(this.config.gas),
-            //         to: toAddress,
-            //         value: web3.toHex(web3.toWei(value, 'ether')),
-            //     }, function(error, transactionHash){
-            //         if (error) console.error(error);
-            //         console.log('transactionHash', transactionHash)
-            //     })            
-
-            // contract.methods.transferFrom(address, toAddress, web3.toHex(web3.toWei(value, 'ether')))
-            // .send({
-            //     from: address,
-            //     gasLimit: web3.toHex(21000),
-            //     gasPrice: web3.toHex(web3.toWei('10', 'wei')),
-            //     to: toAddress,
-            //     value: web3.toHex(web3.toWei(value, 'ether')),
-            // }, function(error, transactionHash){
-            //     console.log('transactionHash', transactionHash)
-            // })
-            // .on('error', function(error){
-            //     console.log('error', error)
-            // })
-            // .on('transactionHash', function(transactionHash){
-            //     console.log('transactionHash', transactionHash)
-            //  })
-            // .on('receipt', function(receipt){
-            //    console.log('receipt', receipt.contractAddress)
-            // })
-            // .on('confirmation', function(confirmationNumber, receipt){
-            //    console.log('confirmationNumber', confirmationNumber)
-            //    console.log('receipt', receipt)
-            // })
-            // .then(function(newContractInstance){
-            //     console.log(newContractInstance) // instance with the new contract address
-            // });
-
             }).catch((err) => {
                 throw new Error(err);
             });

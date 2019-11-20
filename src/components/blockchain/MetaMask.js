@@ -69,7 +69,7 @@ class MetaMask extends React.Component {
         fromAddress = await this.blockchain.getCurrentAccount();
       }
 
-      const data = await this.blockchain.sendTransaction(fromAddress, toAddress, value)
+      const data = await this.blockchain.sendTransaction(toAddress, value)
 
       if (data.transactionHash) {
 
