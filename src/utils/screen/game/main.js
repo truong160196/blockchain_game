@@ -87,16 +87,17 @@ class Main {
 		this.id = this.resources[this.config.urlSource].textures;
 
         this.background = new PIXI.Sprite(this.id["background-game.jpg"]);
-        this.background.width = this.width / 2;
+        this.background.x = 0;
+        this.background.y = 0;
+        this.background.width = this.width;
         this.background.height =  this.height;
-        this.background.x =  this.width / 2 - this.background.width / 2;
 
         this.gameScene.addChild(this.background);
       
         const optionsPlayer1 = {
             gameScreen: {
                 width: this.background.width,
-                height: this.background.width,
+                height: this.background.height - 150,
                 x: this.background.x,
                 y: this.background.y,
             },
@@ -124,7 +125,7 @@ class Main {
         const optionsPlayer2 = {
             gameScreen: {
                 width: this.background.width,
-                height: this.background.width,
+                height: this.background.height - 150,
                 x: this.background.x,
                 y: this.background.y,
             },
@@ -149,11 +150,10 @@ class Main {
 
         this.gameScene.addChild(this.player2.entities);
 
-
         const optionBomb = {
             gameScreen: {
                 width: this.background.width,
-                height: this.background.width,
+                height: this.background.height - 150,
                 x: this.background.x,
                 y: this.background.y,
             },
@@ -178,14 +178,34 @@ class Main {
 
         this.gameScene.addChild(this.bomb.entities);
 
-        this.game.ticker.add(() => {
-            this.player1.entities.children.forEach(this.player1.updateEntities);
-            this.player2.entities.children.forEach(this.player2.updateEntities);
-            this.bomb.entities.children.forEach(this.bomb.updateEntities);
-        });
+        const optionSnow = {
+            gameScreen: {
+                width: this.background.width,
+                height: this.background.height - 150,
+                x: this.background.x,
+                y: this.background.y,
+            },
+            player: {
+                texture: this.id["snow.png"],
+                width: 100,
+                height: 100,
+                x: 0,
+                y: 0,
+                vx: 0,
+                vy: 0,
+            },
+            rotation: 0.034,
+		    padding: 1,
+            speed: 200.0,
+            resolution: 1,
+            numberEntities: 1,
+            game: this.gameScene,
+        }
 
+        this.snow = new Entities(optionSnow);
 
-          
+        this.gameScene.addChild(this.snow.entities);
+
         this.player3 = new PIXI.Sprite(this.id["player3.png"]);
         this.player3.width = 78;
         this.player3.height =  78;
@@ -195,7 +215,7 @@ class Main {
         const optionsExplorer = {
             gameScreen: {
                 width: this.background.width,
-                height: this.background.width,
+                height: this.background.height,
                 x: this.background.x,
                 y: this.background.y,
             },
@@ -208,23 +228,67 @@ class Main {
                 vx: 0,
                 vy: 0,
             },
-            rotation: 0.001,
+            rotation: 1,
             speed: 300.0,
-            numberEntities: 3,
+            numberEntities: 6,
             game: this.gameScene,
         }
 
         this.player3 = new Explorer(optionsExplorer);
 
         this.gameScene.on("mousedown", (event) => {
-            //mouse left cursor
-            // if (this.player3.isActive === false) {
-            //     this.player3.setRotation(event.data.global);
-            //     this.updatePosition();
-            // }
-            this.player3.reset(event.data.global);
+            if (this.player3.isActive === false) {
+                this.player3.setRotation(event.data.global);
+                this.updatePosition();
+            }
+        });
 
-            // this.game.ticker.add((detal) => this.player3.play())
+        // add score
+        this.scorePlay1 = new PIXI.Text(0, this.style);
+        this.scorePlay1.x = 120;
+        this.scorePlay1.y= 10;
+        this.scorePlay1.text = 0;
+
+        this.gameScene.addChild(this.scorePlay1)
+
+        // add score
+        this.scorePlay2 = new PIXI.Text(0, this.style);
+        this.scorePlay2.x = 220;
+        this.scorePlay2.y= 10;
+        this.scorePlay2.text = 0;
+
+        this.gameScene.addChild(this.scorePlay2)
+    
+        // add score
+        this.scoreBomb = new PIXI.Text(0, this.style);
+        this.scoreBomb.x = 320;
+        this.scoreBomb.y= 10;
+        this.scoreBomb.text = 0;
+
+        this.gameScene.addChild(this.scoreBomb)
+
+        // add score
+        this.buttonPlayAgain = new PIXI.Sprite(this.id["player4.png"]);
+        this.buttonPlayAgain.width = this.buttonPlayAgain.width / 2;
+        this.buttonPlayAgain.height = this.buttonPlayAgain.height / 2;
+        this.buttonPlayAgain.x = 120;
+        this.buttonPlayAgain.y= this.background.y + this.background.height - this.buttonPlayAgain.height;
+
+		this.buttonPlayAgain.buttonMode = true;
+        this.buttonPlayAgain.interactive = true;
+        this.buttonPlayAgain.isClick = false;
+
+        this.buttonPlayAgain
+        .on('mousedown', this.handleClickPlayAgain)
+		.on('tap', this.handleClickPlayAgain);
+
+        this.gameScene.addChild(this.buttonPlayAgain)
+
+        this.game.ticker.add(() => {
+            this.player1.entities.children.forEach(this.player1.updateEntities);
+            this.player2.entities.children.forEach(this.player2.updateEntities);
+            this.bomb.entities.children.forEach(this.bomb.updateEntities);
+            this.snow.entities.children.forEach(this.snow.updateEntities);
         });
 
         // this.gameScene.on("mouseup", (event) => {
@@ -237,7 +301,18 @@ class Main {
         if (this.player3.isActive === true) {
             requestAnimationFrame(this.updatePosition)
             this.player3.play();
+            this.bomb.entities.children.forEach((detail) => this.bomb.killEntities(detail, this.player3, this.scoreBomb));
+            this.player1.entities.children.forEach((detail) => this.player1.killEntities(detail, this.player3, this.scorePlay1));
+            this.player2.entities.children.forEach((detail) => this.player2.killEntities(detail, this.player3, this.scorePlay2));
+            this.snow.entities.children.forEach((detail) => this.snow.killEntities(detail, this.player3));
         }
+    }
+
+    handleClickPlayAgain = () => {
+        this.player3.removeAllChild();
+        setTimeout(() => {
+            this.player3.reset();
+        }, 360);
     }
 
 

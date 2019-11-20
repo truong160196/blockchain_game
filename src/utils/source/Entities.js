@@ -59,25 +59,36 @@ class Entities {
 	}
 	
     updateEntities = (bunny) => {
-        bunny.x += bunny.vx + this.speedUp / 60.0;
+		//Move the blob
+		bunny.x += bunny.vx + this.speedUp / 60.0;
 		bunny.y += bunny.vy + this.speedUp / 60.0;
 
-		const limitRight = this.gameScreen.x + this.gameScreen.width;
-		const limitLeft = this.gameScreen.x;
-		const limitTop = this.gameScreen.y
-		const limitBottom = this.gameScreen.y + this.gameScreen.height;
-		
-        if (bunny.x > (limitRight + this.padding)) {
-            bunny.x -= this.gameScreen.width + 2 * this.padding;
-        }
-        if (bunny.x < - (limitLeft + this.padding)) {
-            bunny.x += this.gameScreen.width + 2 * this.padding;
-        }
-        if (bunny.y > (limitBottom + this.padding)) {
-            bunny.y -= this.gameScreen.height + 2 * this.padding;
-        }
-        if (bunny.y < -(limitTop + this.padding)) {
-            bunny.y += this.gameScreen.height + 2 * this.padding;
+		//Check the blob's screen boundaries
+		let blobHitsWall = this.contain(bunny, {
+			x: this.gameScreen.x,
+			y: this.gameScreen.y,
+			width: this.gameScreen.width,
+			height: this.gameScreen.height
+		});
+		//If the blob hits the top or bottom of the stage, reverse
+		//its direction
+		const positionX = this.gameScreen.width;
+		const positionY = this.gameScreen.height;
+
+		if (blobHitsWall === "right") {
+			bunny.vx -= positionX + 2 * this.padding;
+		}
+
+		if (blobHitsWall === "left") {
+			bunny.vx += positionX + 2 * this.padding;
+		}
+
+		if (blobHitsWall === "bottom") {
+			bunny.vy -= positionY + 2 * this.padding;
+		}
+
+		if (blobHitsWall === "top") {
+			bunny.vy += positionY + 2 * this.padding;
 		}
 		
 		bunny.rotation += this.rotation;
@@ -95,12 +106,13 @@ class Entities {
         bunny.vx = Math.cos(angle) * this.speed / 60.0;
         bunny.vy = Math.sin(angle) * this.speed / 60.0;
 
-		const positionX = Math.floor((Math.random() * (this.gameScreen.x + this.gameScreen.width)) + Math.random() * this.gameScreen.x);
-		const positionY = Math.floor((Math.random() * (this.gameScreen.y + this.gameScreen.height)) + Math.random() * this.gameScreen.y);
+		const positionX = Math.random() * (this.gameScreen.x + this.gameScreen.width) +  this.gameScreen.x;
+		const positionY = Math.random() * (this.gameScreen.y + this.gameScreen.height) +  this.gameScreen.y;
+
 		bunny.position.set(positionX, positionY);
 		
         bunny.anchor.set(0.5, 0.5);
-	
+
 		bunny.buttonMode = true;
         bunny.interactive = true;
         bunny.isClick = false;
@@ -114,8 +126,6 @@ class Entities {
 
 	handleClick = (event, bunny) => {
 		this.score ++;
-		
-		this.entities.removeChild(bunny)
 	}
 
 	setSpeedUp = (value) => {
@@ -124,6 +134,87 @@ class Entities {
 
 	getScore = () => {
 		return this.score;
+	}
+
+	//The `hitTestRectangle` function
+	hitTestRectangle = (r1, r2) => {
+		//Define the variables we'll need to calculate
+		let hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
+		//hit will determine whether there's a collision
+		hit = false;
+		//Find the center points of each sprite
+		r1.centerX = r1.x + r1.width / 2;
+		r1.centerY = r1.y + r1.height / 2;
+		r2.centerX = r2.x + r2.width / 2;
+		r2.centerY = r2.y + r2.height / 2;
+		//Find the half-widths and half-heights of each sprite
+		r1.halfWidth = r1.width / 2;
+		r1.halfHeight = r1.height / 2;
+		r2.halfWidth = r2.width / 2;
+		r2.halfHeight = r2.height / 2;
+		//Calculate the distance vector between the sprites
+		vx = r1.centerX - r2.centerX;
+		vy = r1.centerY - r2.centerY;
+		//Figure out the combined half-widths and half-heights
+		combinedHalfWidths = r1.halfWidth + r2.halfWidth;
+		combinedHalfHeights = r1.halfHeight + r2.halfHeight;
+		//Check for a collision on the x axis
+		if (Math.abs(vx) < combinedHalfWidths) {
+			//A collision might be occurring. Check for a collision on the y axis
+			if (Math.abs(vy) < combinedHalfHeights) {
+				//There's definitely a collision happening
+				hit = true;
+			} else {
+				//There's no collision on the y axis
+				hit = false;
+			}
+		} else {
+			//There's no collision on the x axis
+			hit = false;
+		}
+		//`hit` will be either `true` or `false`
+		return hit;
+	};
+
+	/* Helper functions */
+	contain = (sprite, container) => {
+		let collision = undefined;
+		//Left
+		if (sprite.x < container.x) {
+			sprite.x = container.x;
+			collision = "left";
+		}
+		//Top
+		if (sprite.y < container.y) {
+			sprite.y = container.y;
+			collision = "top";
+		}
+		//Right
+		if (sprite.x + sprite.width > container.width) {
+			sprite.x = container.width - sprite.width;
+			collision = "right";
+		}
+		//Bottom
+		if (sprite.y + sprite.height > container.height) {
+			sprite.y = container.height - sprite.height;
+			collision = "bottom";
+		}
+		//Return the `collision` value
+		return collision;
+	}
+
+
+	killEntities = (bunny, explorer, scoreElement) => {
+		let isKill = this.hitTestRectangle(bunny, explorer.currentPlayer);
+
+		if (isKill === true) {
+			this.score ++;
+			this.entities.removeChild(bunny);
+
+			if (scoreElement) {
+				scoreElement.text = this.score;
+			}
+		}
 	}
 }
 
