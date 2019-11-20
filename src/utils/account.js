@@ -1,3 +1,5 @@
+import * as Types from '../constant/ActionTypes';
+
 class Account {
 	constructor(arg) {
 		this.name = arg.name || `Player_${new Date().getTime()}`;
@@ -8,6 +10,7 @@ class Account {
 		this.isGameRunning = true;
 		this.blockchain = arg.blockchain;
 		this.history = arg.history;
+		this.nameStorage = Types.KEY_LOCALSTORAGE;
 	}
 
 	setBlockchain = (arg) => {
@@ -82,57 +85,185 @@ class Account {
 	/**
 	 * Action
 	 */
-	register = (name, address) => {
-		const newNameLocal = `${name}_${address}`
+	register = (userName, address) => {
+		return new Promise(async(resolve, reject) => {
+            if (!userName) {
+				resolve({status: false, message: 'username can not empty'});
+              return;
+			}
+			
+			var isAccount = await this.getAccountDetail(userName);
+			if (!isAccount) {
+				this.name = userName;
+				this.score = 0;
+				this.level = 0;
+				this.equipment = [];
+				this.isGameRunning = true;
+				this.blockchain = {
+					address: address,
+					friend: [],
+					transaction: []
+				};
+				this.history = {};
+				const status = await this.save();
 
-		var isAccount = localStorage.getItem(newNameLocal);
+				if (status) {
+					resolve({status: true, message: 'Register account success!'});
+				} else {
+					resolve({status: false, message: 'Register account fail!'});
+				}
+			} else {
+				resolve({status: false, message: `Account ${userName} exits!`});
+			}
+	
+			resolve({status: false, message: 'Register account fail!'});
+        }).catch((err) => {
+            throw new Error(err);
+        })
+	}
 
-		if (!isAccount === false) {
-			this.save();
+	login = async(account) => {
+		let currentAccount = {};
+
+		if (account) {
+			currentAccount = this.getAccountDetail(account);
+		} else {
+			const allAccount = await this.getAllAccount();
+
+			if (this.checkExitsObject(allAccount) === true) {
+				allAccount.map((item) => {
+					if (item.isGameRunning === true) {
+						currentAccount = item;
+					}
+					return null;
+				})
+			}
 		}
 
-		return false;
+		if (currentAccount) {
+			this.name = currentAccount.name;
+			this.score = currentAccount.score;
+			this.level = currentAccount.level;
+			this.equipment = currentAccount.equipment;
+			this.isGameRunning = currentAccount.isGameRunning;
+			this.blockchain = currentAccount.blockchain;
+			this.history = currentAccount.history;
+		}
+
+		return currentAccount;
 	}
 
-	loadAccount = (name, address) => {
-		const newNameLocal = `${name}_${address}`
-
-		var dataAccount = localStorage.getItem(newNameLocal);
-
-		return dataAccount;
+	logout = () => {
+		this.isGameRunning = false;
+		this.save();
 	}
 
-	save = () => {
+	save = async() => {
+		return new Promise(async(resolve, reject) => {
+				console.log(this.name);
+
+				if (!this.name) {
+					resolve(false);
+					return;
+				}
+
+				let nameLocal = this.name;
+
+				const dataStore = await this.getAllAccount();
+				dataStore[nameLocal] = {
+					name:  this.name,
+					score: this.score,
+					gold: this.gold,
+					level: this.level,
+					equipment: this.equipment,
+					isGameRunning: this.isGameRunning,
+					blockchain: this.blockchain,
+					history: this.history,
+					timeUpdate: new Date().getTime(),
+				}
+			
+				localStorage.setItem(this.nameStorage, JSON.stringify(dataStore))
+				resolve(true);
+        }).catch((err) => {
+            throw new Error(err);
+        })
+	}
+
+	setDataUser(account) {
+		return new Promise(async(resolve, reject) => {
+			if (!account) {
+				resolve(false);
+				return;
+			}
+
+			const getAllAccount = await this.getAllAccount();
+
+			if (getAllAccount) {
+				getAllAccount[account.name] = account;
+
+				localStorage.setItem(this.nameStorage, JSON.stringify(getAllAccount));
+
+				resolve(getAllAccount[account.name]);
+			} 
+
+		}).catch((err) => {
+			throw new Error(err);
+		})
+	}
+
+	getAllAccount = () => {
+		return new Promise(async(resolve, reject) => {
+			if (!this.nameStorage) {
+				resolve(false);
+				return;
+			}
+			const dataStore = localStorage.getItem(this.nameStorage);
+
+			if (!dataStore) {
+				resolve({});
+			}
+
+			resolve(JSON.parse(dataStore));
+		}).catch((err) => {
+			throw new Error(err);
+		})
+	}
+
+	getAccountDetail = async(account) => {
+		return new Promise(async(resolve, reject) => {
+			if (!account) {
+				reject('account not empty');
+
+				return;
+			}
+
+			const allAccount = await this.getAllAccount();
+
+			if (this.checkExitsObject(allAccount) === true) {
+				resolve(allAccount[account]);
+			}
+
+			resolve(false);
+		}).catch((err) => {
+			throw new Error(err);
+		})
+	}
+
+	destroy = async() => {
 		let nameLocal = this.name;
-		
-		if (this.blockchain.address) {
-			nameLocal += `_${this.blockchain.address}`
-		}
 
-		const dataStore = {
-			name:  this.name,
-			score: this.score,
-			gold: this.gold,
-			level: this.level,
-			equipment: this.equipment,
-			isGameRunning: this.isGameRunning,
-			blockchain: this.blockchain,
-			history: this.history,
-			timeUpdate: new Date().getTime(),
+		const allAccount = await this.getAllAccount(0)
+
+		if (allAccount && allAccount[nameLocal]) {
+			delete allAccount[nameLocal]
 		}
 		
-		localStorage.setItem(nameLocal, dataStore)
+		localStorage.setItem(this.nameStorage, allAccount);
 	}
 
-	destroy = () => {
-		let nameLocal = this.name;
-		
-		if (this.blockchain.address) {
-			nameLocal += `_${this.blockchain.address}`
-		}
-
-		localStorage.removeItem(nameLocal);
+	checkExitsObject = (obj) => {
+		return Object.keys(obj).length > 0;
 	}
-}
+ }
 
 export default Account;
