@@ -45,7 +45,7 @@ class Home extends React.Component {
 
     this.gameDev = new Main(define);
 
-    // await this.gameDev.init();
+    await this.gameDev.init();
     const options = {
 
     };
@@ -175,8 +175,8 @@ class Home extends React.Component {
     if (isRegister === true) {
       htmlView = this.renderScreenLogin();
     } else {
-      // htmlView = this.renderScreenAccount();
-      htmlView = this.renderScreenStore();
+      htmlView = this.renderScreenAccount();
+      // htmlView = this.renderScreenStore();
     }
 
     return (

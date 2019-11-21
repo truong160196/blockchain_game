@@ -1,88 +1,133 @@
 {"frames": {
 
-"background-game.jpg":
+"background.png":
 {
-	"frame": {"x":1,"y":1,"w":1000,"h":619},
+	"frame": {"x":1,"y":1,"w":1920,"h":1080},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1920,"h":1080},
+	"sourceSize": {"w":1920,"h":1080},
+	"anchor": {"x":0,"y":0}
+},
+"ball.png":
+{
+	"frame": {"x":791,"y":1309,"w":106,"h":105},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":1000,"h":619},
-	"sourceSize": {"w":1000,"h":619}
+	"spriteSourceSize": {"x":0,"y":0,"w":106,"h":105},
+	"sourceSize": {"w":106,"h":105},
+	"anchor": {"x":0,"y":0}
 },
-"bomb.png":
+"button-circle.png":
 {
-	"frame": {"x":1,"y":1381,"w":293,"h":299},
+	"frame": {"x":1208,"y":1256,"w":214,"h":204},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":22,"y":30,"w":293,"h":299},
-	"sourceSize": {"w":322,"h":336}
+	"spriteSourceSize": {"x":2,"y":0,"w":214,"h":204},
+	"sourceSize": {"w":218,"h":204},
+	"anchor": {"x":0,"y":0}
 },
-"clock1.png":
+"button-water.png":
 {
-	"frame": {"x":296,"y":1381,"w":202,"h":250},
+	"frame": {"x":409,"y":1309,"w":143,"h":145},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":24,"y":0,"w":202,"h":250},
-	"sourceSize": {"w":250,"h":250}
+	"spriteSourceSize": {"x":2,"y":0,"w":143,"h":145},
+	"sourceSize": {"w":145,"h":145},
+	"anchor": {"x":0,"y":0}
 },
-"clock2.png":
+"entities_01.png":
 {
-	"frame": {"x":622,"y":715,"w":322,"h":300},
+	"frame": {"x":1424,"y":1256,"w":235,"h":164},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":1,"y":9,"w":322,"h":300},
-	"sourceSize": {"w":334,"h":318}
+	"spriteSourceSize": {"x":0,"y":10,"w":235,"h":164},
+	"sourceSize": {"w":235,"h":183},
+	"anchor": {"x":0,"y":0}
 },
-"player1.png":
+"entities_02.png":
 {
-	"frame": {"x":1,"y":1003,"w":482,"h":376},
+	"frame": {"x":1192,"y":1083,"w":262,"h":171},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":0,"y":0,"w":482,"h":376},
-	"sourceSize": {"w":486,"h":386}
+	"spriteSourceSize": {"x":1,"y":5,"w":262,"h":171},
+	"sourceSize": {"w":270,"h":176},
+	"anchor": {"x":0,"y":0}
 },
-"player2.png":
+"entities_06.png":
 {
-	"frame": {"x":500,"y":1327,"w":385,"h":304},
+	"frame": {"x":898,"y":1267,"w":308,"h":164},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":0,"y":1,"w":385,"h":304},
-	"sourceSize": {"w":400,"h":324}
+	"spriteSourceSize": {"x":9,"y":4,"w":308,"h":164},
+	"sourceSize": {"w":328,"h":177},
+	"anchor": {"x":0,"y":0}
 },
-"player3.png":
+"entities_07.png":
 {
-	"frame": {"x":485,"y":1017,"w":391,"h":308},
+	"frame": {"x":1,"y":1083,"w":301,"h":406},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":301,"h":406},
+	"sourceSize": {"w":301,"h":406},
+	"anchor": {"x":0,"y":0}
+},
+"entities_08.png":
+{
+	"frame": {"x":409,"y":1083,"w":417,"h":224},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":0,"y":1,"w":391,"h":308},
-	"sourceSize": {"w":400,"h":328}
+	"spriteSourceSize": {"x":0,"y":3,"w":417,"h":224},
+	"sourceSize": {"w":422,"h":248},
+	"anchor": {"x":0,"y":0}
 },
-"player4.png":
+"gun_01.png":
 {
-	"frame": {"x":622,"y":303,"w":296,"h":410},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":46,"y":7,"w":296,"h":410},
-	"sourceSize": {"w":348,"h":432}
+	"frame": {"x":1,"y":1386,"w":74,"h":245},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":74,"h":245},
+	"sourceSize": {"w":74,"h":245},
+	"anchor": {"x":0.5,"y":0.5}
 },
-"snow.png":
+"gun_02.png":
 {
-	"frame": {"x":622,"y":1,"w":341,"h":300},
-	"rotated": false,
+	"frame": {"x":554,"y":1309,"w":79,"h":235},
+	"rotated": true,
 	"trimmed": true,
-	"spriteSourceSize": {"x":2,"y":3,"w":341,"h":300},
-	"sourceSize": {"w":356,"h":324}
+	"spriteSourceSize": {"x":0,"y":2,"w":79,"h":235},
+	"sourceSize": {"w":81,"h":237},
+	"anchor": {"x":0,"y":0}
+},
+"score.png":
+{
+	"frame": {"x":828,"y":1083,"w":362,"h":182},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":362,"h":182},
+	"sourceSize": {"w":362,"h":182},
+	"anchor": {"x":0,"y":0}
+},
+"treasury.png":
+{
+	"frame": {"x":1661,"y":1083,"w":234,"h":251},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":1,"w":234,"h":251},
+	"sourceSize": {"w":238,"h":256},
+	"anchor": {"x":0,"y":0}
 }},
 "animations": {
-	"clock": ["clock1.png","clock2.png"],
-	"player": ["player1.png","player2.png","player3.png","player4.png"]
+	"entities": ["entities_01.png","entities_02.png","entities_06.png","entities_07.png","entities_08.png"],
+	"gun": ["gun_01.png","gun_02.png"]
 },
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "game.png",
 	"format": "RGBA8888",
-	"size": {"w":964,"h":1681},
+	"size": {"w":1922,"h":1461},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:de3e4fa0f9d5fc89b217dd8e24713b07:88c26d24cfa40f6f6968b854f27283eb:fc2835210f98bae8e8c1b7f0a84c9321$"
+	"smartupdate": "$TexturePacker:SmartUpdate:7e96db10dc7f48676903df4f93988385:ef8da28146b89e7c250cce8813c69d96:fc2835210f98bae8e8c1b7f0a84c9321$"
 }
 }

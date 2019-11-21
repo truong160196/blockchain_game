@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { formatCurrency } from '../formatNumber';
 
 class Entities {
 	constructor(arg) {
@@ -40,6 +41,8 @@ class Entities {
 
 		this.speedUp = 0;
 
+		this.timeAppend = arg.timeAppend || 1;
+
 		this.resolution = arg.resolution;
 
 		this.game = arg.game;
@@ -56,6 +59,17 @@ class Entities {
         for (let i = 0; i < this.numberEntities; i++) {
             this.entities.addChild(this.createEntities());
 		}
+
+		setInterval(() => {
+			this.entities.addChild(this.createEntities());
+		}, this.timeAppend * 3600);
+
+		setInterval(() => {
+			const lastEntities = this.entities.children.length - 1;
+			if (lastEntities > 3) {
+				this.entities.removeChildAt(lastEntities)
+			}
+		}, this.timeAppend * 3600 * 2);
 	}
 	
     updateEntities = (bunny) => {
@@ -203,17 +217,24 @@ class Entities {
 		return collision;
 	}
 
-
 	killEntities = (bunny, explorer, scoreElement) => {
-		let isKill = this.hitTestRectangle(bunny, explorer.currentPlayer);
+		const balls = explorer.balls;
 
-		if (isKill === true) {
-			this.score ++;
-			this.entities.removeChild(bunny);
+		if (balls && balls.length > 0) {
+			for(let index = balls.length - 1; index >= 0; index-- ){
+				let isKill = this.hitTestRectangle(bunny, balls[index]);
 
-			if (scoreElement) {
-				scoreElement.text = this.score;
-			}
+				if (isKill === true) {
+					this.score ++;
+					this.entities.removeChild(bunny);
+					explorer.destroyBall(balls[index], index)
+		
+					if (scoreElement) {
+						scoreElement.score += 1;
+						scoreElement.text = formatCurrency(scoreElement.score);
+					}
+				}
+			  }
 		}
 	}
 }
