@@ -88,7 +88,8 @@ class Account {
 			}
 			
 			var isAccount = await this.getAccountDetail(userName);
-			if (!isAccount) {
+
+			if (isAccount === false || typeof isAccount === 'undefined') {
 				this.name = userName;
 				this.score = 0;
 				this.level = 0;
@@ -233,7 +234,9 @@ class Account {
 			const allAccount = await this.getAllAccount();
 
 			if (this.checkExitsObject(allAccount) === true) {
-				resolve(allAccount[account]);
+				if (this.checkExitsObject(allAccount[account])) {
+					resolve(allAccount[account]);
+				}
 			}
 
 			resolve(false);
@@ -255,6 +258,7 @@ class Account {
 	}
 
 	checkExitsObject = (obj) => {
+		if (!obj) return false;
 		return Object.keys(obj).length > 0;
 	}
  }

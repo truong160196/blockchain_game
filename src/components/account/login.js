@@ -106,7 +106,6 @@ class Login extends React.Component {
 
 		if (userName) {
 			const isCheckExitAccount = await blockchain.checkExitsAccount(userName, address);
-
 			if (isCheckExitAccount === true) {
 				const data = await account.register(userName, address);
 

@@ -111,13 +111,15 @@ class Home extends React.Component {
       const result = await this.blockchain.getCurrentAccount();
 
       if (result) {
+        const myData = await this.blockchain.getAccountFromAddress(result);
         const balance = await this.blockchain.getBalance(result);
 
         this.gameDev.setBalanceEth(balance);
 
         this.setState({
           currentAccount: result,
-          balanceEth: balance
+          balanceEth: balance,
+          myAccount: myData,
         })
       }
     } catch(err) {
@@ -150,10 +152,14 @@ class Home extends React.Component {
   }
 
   renderScreenStore = () => {
+    const { myAccount, currentAccount } = this.state;
+
     return (
       <Store
         blockchain={this.blockchain}
         account={this.account}
+        accountData={myAccount}
+        currentAccount={currentAccount}
       />
     )
 

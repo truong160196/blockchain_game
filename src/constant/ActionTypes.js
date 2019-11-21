@@ -11,6 +11,7 @@ export const TABS = {
     HISTORY: 'HISTORY',
     LOGIN: 'LOGIN',
     REGISTER: 'REGISTER',
+    ITEM_ACCOUNT: 'ITEM_ACCOUNT',
     STORE_LIST: 'STORE_LIST',
     STORE_GIFT: 'STORE_GIFT',
     STORE_ONLINE: 'STORE_ONLINE',
@@ -22,6 +23,11 @@ export const NETWORK = {
     METAMASK:  -1,
 }
 
+export const SORT = {
+    ASC: 'ASC',
+    DESC: 'DESC'
+}
+
 export const ERROR_EXCEPTION = 'A failure occurred during initialization of services'
 
 
@@ -29,6 +35,7 @@ export const DATA_TYPE = {
     ACCOUNT: 'ACCOUNT',
     STORE_BUY: 'STORE_BUY',
     STORE_SELL: 'STORE_SELL',
+    STORE_ORDER: 'STORE_ORDER',
     STORE_GIFT: 'STORE_GIFT',
     TRANSACTION: 'TRANSACTION',
 }
@@ -41,7 +48,7 @@ export const STORE = {
             id: 1,
             name: 'Rare',
             power: 2,
-            priceEth: 0.5,
+            priceEth: 0.05,
             priceGold: 150,
             image: image1,
             detail: '+20 Damage'
@@ -50,7 +57,7 @@ export const STORE = {
             id: 2,
             name: 'Epic',
             power: 3,
-            priceEth: 1.25,
+            priceEth: 0.1,
             priceGold: 300,
             image: image2,
             detail: '+60 Damage'
@@ -59,7 +66,7 @@ export const STORE = {
             id: 3,
             name: 'Club',
             power: 6,
-            priceEth: 1.75,
+            priceEth: 0.25,
             priceGold: 500,
             image: image3,
             detail: '+120 Damage'
@@ -68,11 +75,10 @@ export const STORE = {
             id: 4,
             name: 'Wand',
             power: 12,
-            priceEth: 2.35,
+            priceEth: 0.35,
             image: image4,
             detail: '+320 Damage'
         },
     ],
-    gift: [],
-    promotion: []
+    online: [],
 }

@@ -1,6 +1,12 @@
+.tab-button {
+    position: absolute;
+    z-index: 999;
+    left: 50%;
+}
 .store-list {
     position: absolute;
     z-index: 999;
+    top : 150px;
     left: 50%;
     transform: translate(-50%);
     min-width: 300px;
@@ -41,11 +47,5 @@
 .btn-buy-eth {
     width: 100%;
     margin-bottom: 5px;
-    border-radius: 10px 0 0 10px;
-}
-
-.btn-buy-gold {
-    width: 100%;
-    margin-bottom: 5px;
-    border-radius: 0 10px 10px 0;
+    border-radius: 10px;
 }
