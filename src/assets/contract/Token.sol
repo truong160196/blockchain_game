@@ -56,11 +56,13 @@ contract StandardToken is Token {
      }
      
     struct Item {
+          uint256 id;
           uint256 qtyItem;
           uint256 price;
      }
      
     struct Store {
+          uint256 id;
           uint256 product;
           uint256 qtyItem;
           uint256 price;
@@ -122,9 +124,26 @@ contract StandardToken is Token {
         return accounts[_address];
     }
     
+    function getIdItem (address _address, uint256 _product) view returns (uint idex, bool status){
+      for (uint i; i < items[_address].length; i++){
+          if (items[_address][i].id == _product)
+          return (i, true);
+      }
+      return (0, false);
+    }
+  
     function updateItem(address _address, uint256 _product, uint256 _qtyItem, uint256 _price) returns (bool success) {
-        items[_address][_product].qtyItem += _qtyItem;
-        items[_address][_product].price = _price;
+         Item memory item = Item(_product, _qtyItem, _price);
+         if (items[_address].length == 0) {
+            items[_address].push(item);
+         } else {
+            (uint idCheck, bool status) = getIdItem(_address, _product);
+            if (status == true && idCheck >= 0) {
+                 items[_address][idCheck].qtyItem += _qtyItem; 
+            } else {
+                items[_address].push(item); 
+            }
+         }
         
         UpdateItem(_address, _product, _qtyItem, _price);
         
@@ -145,7 +164,8 @@ contract StandardToken is Token {
         address _from,
         uint256 _value,
         uint256 _qtyItem,
-        uint256 _product
+        uint256 _product,
+        uint _id_order
         ) returns (bool success) {
         
         if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0 && items[_to][_product].qtyItem >= _qtyItem ) {
@@ -153,14 +173,20 @@ contract StandardToken is Token {
             items[_from][_product].qtyItem += _qtyItem;
             items[_from][_product].price += _value;
             
+            stores[_id_order].qtyItem -= _qtyItem;
+            
+            if (stores[_id_order].qtyItem == 0) {
+                delete stores[_id_order];
+            }
+            
             balances[_to] += _value;
             balances[_from] -= _value;
             allowed[_from][msg.sender] -= _value;
+            
             TransferItem(_from, _to, _product, _value, _qtyItem);
             return true;
         } else { return false; }
 
-        return true;
     }
     
     function updateStore(
@@ -169,7 +195,21 @@ contract StandardToken is Token {
         uint256 _price,
         address _address_to
         ) returns (bool success) {
+        (uint idItem, bool status) = getIdItem(_address_to, _product);
+        
+        uint256 subQtyItem = items[_address_to][idItem].qtyItem - _qtyItem;
+        
+        if (status == true && idItem >= 0) {
+            if (subQtyItem == 0) {
+                delete items[_address_to][idItem];
+            } else if (subQtyItem > 0) {
+                items[_address_to][idItem].qtyItem -= _qtyItem;
+            } else {
+                return false;
+            }
+        
         Store memory store = Store(
+            now,
             _product,
             _qtyItem,
             _price,
@@ -180,16 +220,15 @@ contract StandardToken is Token {
         uint id = stores.push(store) - 1;
         
         UpdateStore(_address_to, id, _product, _qtyItem, _price);
+        
         return true;
+        } else {
+            return false;
+        }
     }
 
     function getStore() public view returns (Store[]){
         return stores;
-    }
-    
-    function removeItemOfStore(uint _id) returns (bool success) {
-        delete stores[_id];
-        return true;
     }
     
     mapping (address => uint256) balances;
