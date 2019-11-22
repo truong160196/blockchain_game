@@ -1,6 +1,33 @@
 [
 	{
 		"constant": true,
+		"inputs": [
+			{
+				"name": "_address",
+				"type": "address"
+			},
+			{
+				"name": "_product",
+				"type": "uint256"
+			}
+		],
+		"name": "getIdItem",
+		"outputs": [
+			{
+				"name": "idex",
+				"type": "uint256"
+			},
+			{
+				"name": "status",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
 		"inputs": [],
 		"name": "name",
 		"outputs": [
@@ -34,6 +61,39 @@
 		],
 		"payable": false,
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "getItem",
+		"outputs": [
+			{
+				"components": [
+					{
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"name": "qtyItem",
+						"type": "uint256"
+					},
+					{
+						"name": "price",
+						"type": "uint256"
+					}
+				],
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -92,29 +152,32 @@
 		"type": "function"
 	},
 	{
-		"constant": true,
-		"inputs": [],
-		"name": "getData",
-		"outputs": [
-			{
-				"name": "",
-				"type": "string"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"constant": false,
 		"inputs": [
 			{
-				"name": "_data",
-				"type": "string"
+				"name": "_product",
+				"type": "uint256"
+			},
+			{
+				"name": "_qtyItem",
+				"type": "uint256"
+			},
+			{
+				"name": "_price",
+				"type": "uint256"
+			},
+			{
+				"name": "_address_to",
+				"type": "address"
 			}
 		],
-		"name": "setData",
-		"outputs": [],
+		"name": "updateStore",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
 		"payable": false,
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -174,6 +237,45 @@
 				"type": "address"
 			},
 			{
+				"name": "_from",
+				"type": "address"
+			},
+			{
+				"name": "_value",
+				"type": "uint256"
+			},
+			{
+				"name": "_qtyItem",
+				"type": "uint256"
+			},
+			{
+				"name": "_product",
+				"type": "uint256"
+			},
+			{
+				"name": "_id_order",
+				"type": "uint256"
+			}
+		],
+		"name": "transferItem",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_to",
+				"type": "address"
+			},
+			{
 				"name": "_value",
 				"type": "uint256"
 			}
@@ -193,15 +295,117 @@
 		"constant": false,
 		"inputs": [
 			{
-				"name": "",
-				"type": "string"
+				"name": "_address",
+				"type": "address"
+			},
+			{
+				"name": "_product",
+				"type": "uint256"
 			}
 		],
-		"name": "getData",
+		"name": "removeItem",
 		"outputs": [
 			{
-				"name": "",
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_address",
+				"type": "address"
+			},
+			{
+				"name": "_user_name",
 				"type": "string"
+			},
+			{
+				"name": "_score",
+				"type": "uint256"
+			}
+		],
+		"name": "updateAccount",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getStore",
+		"outputs": [
+			{
+				"components": [
+					{
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"name": "product",
+						"type": "uint256"
+					},
+					{
+						"name": "qtyItem",
+						"type": "uint256"
+					},
+					{
+						"name": "price",
+						"type": "uint256"
+					},
+					{
+						"name": "address_to",
+						"type": "address"
+					},
+					{
+						"name": "time_update",
+						"type": "uint256"
+					}
+				],
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_address",
+				"type": "address"
+			},
+			{
+				"name": "_product",
+				"type": "uint256"
+			},
+			{
+				"name": "_qtyItem",
+				"type": "uint256"
+			},
+			{
+				"name": "_price",
+				"type": "uint256"
+			}
+		],
+		"name": "updateItem",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
 			}
 		],
 		"payable": false,
@@ -252,6 +456,35 @@
 			{
 				"name": "remaining",
 				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "getAccount",
+		"outputs": [
+			{
+				"components": [
+					{
+						"name": "user_name",
+						"type": "string"
+					},
+					{
+						"name": "score",
+						"type": "uint256"
+					}
+				],
+				"name": "",
+				"type": "tuple"
 			}
 		],
 		"payable": false,
@@ -311,6 +544,119 @@
 			}
 		],
 		"name": "Approval",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "_address",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "user_name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"name": "score",
+				"type": "uint256"
+			}
+		],
+		"name": "UpdateAccount",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "_address",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "_product",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "_qtyItem",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "_price",
+				"type": "uint256"
+			}
+		],
+		"name": "UpdateItem",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "_to",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "_from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "_product",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "_value",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "_qtyItem",
+				"type": "uint256"
+			}
+		],
+		"name": "TransferItem",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "_address_to",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "_product",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "_qtyItem",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "_price",
+				"type": "uint256"
+			}
+		],
+		"name": "UpdateStore",
 		"type": "event"
 	}
 ]

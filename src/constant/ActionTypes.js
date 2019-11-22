@@ -48,7 +48,7 @@ export const STORE = {
             id: 1,
             name: 'Rare',
             power: 2,
-            priceEth: 0.05,
+            priceEth: 10,
             priceGold: 150,
             image: image1,
             detail: '+20 Damage'
@@ -57,7 +57,7 @@ export const STORE = {
             id: 2,
             name: 'Epic',
             power: 3,
-            priceEth: 0.1,
+            priceEth: 15,
             priceGold: 300,
             image: image2,
             detail: '+60 Damage'
@@ -66,7 +66,7 @@ export const STORE = {
             id: 3,
             name: 'Club',
             power: 6,
-            priceEth: 0.25,
+            priceEth: 20,
             priceGold: 500,
             image: image3,
             detail: '+120 Damage'
@@ -75,7 +75,7 @@ export const STORE = {
             id: 4,
             name: 'Wand',
             power: 12,
-            priceEth: 0.35,
+            priceEth: 25,
             image: image4,
             detail: '+320 Damage'
         },

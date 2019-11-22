@@ -1,4 +1,5 @@
 pragma solidity ^0.4.16;
+pragma experimental ABIEncoderV2;
 
 contract Token {
 
@@ -21,10 +22,6 @@ contract Token {
     /// @param _value The amount of token to be transferred
     /// @return Whether the transfer was successful or not
     function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {}
-    
-    function setData(string x) {}
-    
-    function getData(string) returns (string) {}
 
     /// @notice `msg.sender` approves `_addr` to spend `_value` tokens
     /// @param _spender The address of the account able to transfer the tokens
@@ -39,12 +36,39 @@ contract Token {
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-    
+    event UpdateAccount(address indexed _address, string user_name, uint256 score);
+    event UpdateItem(address indexed _address, uint indexed _product, uint256 _qtyItem, uint256 _price);
+    event TransferItem(
+        address indexed _to,
+        address indexed _from,
+        uint256 indexed _product,
+        uint256 _value,
+        uint256 _qtyItem
+        );
+    event UpdateStore(address indexed _address_to, uint indexed id,  uint256 _product, uint256 _qtyItem, uint256 _price);
 }
 
 
 contract StandardToken is Token {
-    string storeddata = "{data: {}}";
+     struct Account {
+          string user_name;
+          uint256 score;
+     }
+     
+    struct Item {
+          uint256 qtyItem;
+          uint256 price;
+     }
+     
+    struct Store {
+          uint256 product;
+          uint256 qtyItem;
+          uint256 price;
+          address address_to;
+          uint256 time_update;
+     }
+     
+    Store[] stores;
     
     function transfer(address _to, uint256 _value) returns (bool success) {
         //Default assumes totalSupply can't be over max (2^256 - 1).
@@ -71,13 +95,6 @@ contract StandardToken is Token {
         } else { return false; }
     }
     
-    function setData(string _data) public {
-        storeddata = _data;
-    }
-    
-    function getData() public view returns(string){
-        return storeddata;
-    }
 
     function balanceOf(address _owner) constant returns (uint256 balance) {
         return balances[_owner];
@@ -92,9 +109,93 @@ contract StandardToken is Token {
     function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
       return allowed[_owner][_spender];
     }
+    
+    function updateAccount(address _address, string _user_name, uint256 _score) returns (bool success) {
+        Account memory account = Account(_user_name, _score);
+        accounts[_address] = account;
+      
+        UpdateAccount(_address, _user_name, _score);
+        return true;
+    }
+    
+    function getAccount(address _address) public view returns (Account){
+        return accounts[_address];
+    }
+    
+    function updateItem(address _address, uint256 _product, uint256 _qtyItem, uint256 _price) returns (bool success) {
+        items[_address][_product].qtyItem += _qtyItem;
+        items[_address][_product].price = _price;
+        
+        UpdateItem(_address, _product, _qtyItem, _price);
+        
+        return true;
+    }
+    
+    function getItem(address _address) public view returns (Item[]){
+        return items[_address];
+    }
 
+    function removeItem( address _address, uint256 _product) returns (bool success) {
+        delete items[_address][_product];
+        return true;
+    }
+    
+    function transferItem(
+        address _to,
+        address _from,
+        uint256 _value,
+        uint256 _qtyItem,
+        uint256 _product
+        ) returns (bool success) {
+        
+        if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0 && items[_to][_product].qtyItem >= _qtyItem ) {
+            items[_to][_product].qtyItem -= _qtyItem;
+            items[_from][_product].qtyItem += _qtyItem;
+            items[_from][_product].price += _value;
+            
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            TransferItem(_from, _to, _product, _value, _qtyItem);
+            return true;
+        } else { return false; }
+
+        return true;
+    }
+    
+    function updateStore(
+        uint256 _product,
+        uint256 _qtyItem,
+        uint256 _price,
+        address _address_to
+        ) returns (bool success) {
+        Store memory store = Store(
+            _product,
+            _qtyItem,
+            _price,
+            _address_to,
+            now
+            );
+
+        uint id = stores.push(store) - 1;
+        
+        UpdateStore(_address_to, id, _product, _qtyItem, _price);
+        return true;
+    }
+
+    function getStore() public view returns (Store[]){
+        return stores;
+    }
+    
+    function removeItemOfStore(uint _id) returns (bool success) {
+        delete stores[_id];
+        return true;
+    }
+    
     mapping (address => uint256) balances;
     mapping (address => mapping (address => uint256)) allowed;
+    mapping (address => Account) accounts;
+    mapping (address => Item[]) items;
     uint256 public totalSupply;
 }
 
@@ -128,11 +229,11 @@ contract ERC20Token is StandardToken {
 
     function ERC20Token(
         ) {
-        balances[msg.sender] = 100000;               // Give the creator all initial tokens (100000 for example)
-        totalSupply = 100000;                        // Update total supply (100000 for example)
-        name = "Nguyen Quoc Truong";                                   // Set the name for display purposes
+        balances[msg.sender] = 1000000;               // Give the creator all initial tokens (100000 for example)
+        totalSupply = 1000000;                        // Update total supply (100000 for example)
+        name = "QuocTruong";                                   // Set the name for display purposes
         decimals = 0;                            // Amount of decimals for display purposes
-        symbol = "QTN";                               // Set the symbol for display purposes
+        symbol = "TPI";                               // Set the symbol for display purposes
     }
 
     /* Approves and then calls the receiving contract */

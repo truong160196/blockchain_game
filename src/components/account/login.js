@@ -97,56 +97,41 @@ class Login extends React.Component {
   }
 
   registerAccount = async() => {
-	const { account, blockchain } = this.props;
+	const { blockchain } = this.props;
 
 	try {
 		const userName = $('#username-register').val();
 
-		const address = await blockchain.getCurrentAccount();
+		const result  = await blockchain.updateAccount({
+			userName: userName,
+			score: 120,
+		});
 
-		if (userName) {
-			const isCheckExitAccount = await blockchain.checkExitsAccount(userName, address);
-			if (isCheckExitAccount === true) {
-				const data = await account.register(userName, address);
+		console.log(result);
 
-				if (data && data.status === true) {
-					this.setState({
-						notification: {
-						  display: 'block',
-						  type: 'success',
-						  message: data.message,
-						}
-					})
-	
-					const accountDetail = await account.getAccountDetail(userName);
-	
-					blockchain.signData({
-						type: Types.DATA_TYPE.ACCOUNT,
-						data: accountDetail,
-					});
-				} else {
-					this.setState({
-						notification: {
-						  display: 'block',
-						  type: 'danger',
-						  message: data.message,
-						}
-					})
+		if (result.status === true) {
+			this.setState({
+				notification: {
+				display: 'block',
+				type: 'success',
+				loginMetaMask: true,
+				message: `${result.message} : ${result.transactionHash}`,
 				}
-			} else {
-				this.setState({
-					notification: {
-					  display: 'block',
-					  type: 'danger',
-					  message: isCheckExitAccount.message || 'Register account fail',
-					}
-				})
-			}
-
-			setTimeout(() => {
-				this.closeNotification();
-			}, 3600);
+			});
+		} else {
+			this.setState({
+				notification: {
+				display: 'block',
+				type: 'danger',
+				loginMetaMask: true,
+				message: result.message,
+				}
+			});
 		}
+
+		setTimeout(() => {
+			this.closeNotification();
+		}, 3600);
 	} catch (err) {
 		console.error(err);
 	}

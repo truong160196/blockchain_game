@@ -27,6 +27,7 @@ class Home extends React.Component {
       account: '',
       balanceEth: 0,
       currentAccount: '',
+      myAccount: [],
       tabCurrent: Types.TABS.WALLET,
       transaction: {
         message: '',
@@ -45,7 +46,7 @@ class Home extends React.Component {
 
     this.gameDev = new Main(define);
 
-    await this.gameDev.init();
+    // await this.gameDev.init();
     const options = {
 
     };
@@ -86,7 +87,7 @@ class Home extends React.Component {
       if (loginAccount && loginAccount.status === true) {
         this.setState({
           login:  true,
-          myAccount: loginAccount.data,
+          myAccount: [],
         });
 
         const dataStorage = {};
@@ -111,9 +112,8 @@ class Home extends React.Component {
       const result = await this.blockchain.getCurrentAccount();
 
       if (result) {
-        const myData = await this.blockchain.getAccountFromAddress(result);
-        const balance = await this.blockchain.getBalance(result);
-
+        const myData = await this.blockchain.getAccountItemFromAddress();
+        const balance = await this.blockchain.getBalanceToken();
         this.gameDev.setBalanceEth(balance);
 
         this.setState({
@@ -158,7 +158,7 @@ class Home extends React.Component {
       <Store
         blockchain={this.blockchain}
         account={this.account}
-        accountData={myAccount}
+        itemData={myAccount}
         currentAccount={currentAccount}
       />
     )
@@ -175,8 +175,8 @@ class Home extends React.Component {
     if (isRegister === true) {
       htmlView = this.renderScreenLogin();
     } else {
-      htmlView = this.renderScreenAccount();
-      // htmlView = this.renderScreenStore();
+      // htmlView = this.renderScreenAccount();
+      htmlView = this.renderScreenStore();
     }
 
     return (

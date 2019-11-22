@@ -19,7 +19,9 @@ class Blockchain {
         this.isChange = false;
         this.dispatch = dispatch;
         this.typeHash = 'string';
-        this.contractAddress = '0x8da69Da19fF8BbEbB7cd222B326D91381DaD1879';
+        // this.contractAddress = '0xBc112511caD2108B83e7828244D283C8cCb4699c' || '0x8da69Da19fF8BbEbB7cd222B326D91381DaD1879';
+        // this.contractAddress = '0xB79ade18aFA7F2Cae6C181500e9B47A774f82a78';
+        this.contractAddress = '0xb1d76cb3f39561F2CA5D5db329B7D50b0DFeD348';
         this.accountHolder = '0x4C84c7489126865688ADe51e8c8e1be1f5C6Afb7';
         this.privateKeyHolder = '7AD02C134A2F77AE812E0A5F45F533330EE47A93BF56CEB2BB9A18E14ACFE615';
         this.connected = false;
@@ -504,57 +506,97 @@ class Blockchain {
         });
     }
 
+    updateAccount = async(data) => {
+        return new Promise(async(resolve, reject) => {
+            if (!this.web3Provider) {
+                reject('no provider web3.js');
+                return;
+            }
+
+            const gasPrice = await this.getGasPrice();
+            const address = await this.getCurrentAccount();
+            this.web3Provider.eth.getTransactionCount(address, (err, txCount) => {
+                this.contract.methods.updateAccount(address, data.userName, web3.toHex(data.score)).estimateGas(address)
+                .then((gasAmount) => {
+
+                    const txObject = {
+                        nonce:    web3.toHex(txCount),
+                        gasLimit: web3.toHex(gasAmount), // Raise the gas limit to a much higher amount
+                        gasPrice: web3.toHex(gasPrice),
+                        from: address,
+                        to: this.contractAddress,
+                      }
+
+                      this.contract.methods.updateAccount(address, data.userName, web3.toHex(data.score))
+                      .send(txObject)
+                      .on('transactionHash', function(hash){
+                            resolve({
+                                status: true,
+                                message: 'Update account success',
+                                transactionHash: hash,
+                            });
+                        })
+                        .on('error', function(error, receipt) {  
+                            resolve({
+                                status: false,
+                                message: 'Update account fail',
+                            });
+                        });
+
+                })
+                .catch(function(error){
+                    resolve({
+                        status: false,
+                        message: 'Update account fail',
+                    });
+                   console.error(error);
+                });
+            });
+        }).catch((err) => {
+            throw new Error(err);
+        });
+    }
+
     buyItem =  async(inputRequest) => {
         return new Promise(async(resolve, reject) => {
             if (!this.web3Provider) {
                 reject('no provider web3.js');
                 return;
             }
-            const dataConvert = await this.convertDataBlockchain(inputRequest);
-
             const gasPrice = await this.getGasPrice();
 
-            const dataInput = this.contract.methods.setData(JSON.stringify(dataConvert)).encodeABI();
-            
-            this.web3Provider.eth.getTransactionCount(this.accountHolder, (err, txCount) => {
-            this.contract.methods.setData(JSON.stringify(dataConvert)).estimateGas(this.accountHolder)
-            .then(async(gasAmount) => {
+            const address = await this.getCurrentAccount();
+            this.contract.methods.updateItem(
+                address,
+                inputRequest.id,
+                inputRequest.qtyItem,
+                inputRequest.price
+            ).estimateGas(address)
+            .then((gasAmount) => {
+                this.web3Provider.eth.getTransactionCount(address, (err, txCount) => {
                     const txObject = {
                         nonce:    web3.toHex(txCount),
-                        gasLimit: web3.toHex(gasAmount), // Raise the gas limit to a much higher amount
+                        gasLimit: web3.toHex(gasAmount),
                         gasPrice: web3.toHex(gasPrice),
-                        from: this.accountHolder,
+                        from: address,
                         to: this.contractAddress,
-                        data: dataInput,
                     }
 
-                    const privateKey1 = Buffer.from(this.privateKeyHolder, 'hex')
-        
-                    const tx = new Transaction(txObject, { chain: this.chain, hardfork: 'petersburg' });
-
-                    tx.sign(privateKey1)
-                    
-                    const serializedTx = tx.serialize()
-                    const raw = '0x' + serializedTx.toString('hex')
-        
-                    this.web3Provider.eth.sendSignedTransaction(raw, async(err, txHash) => {
-                        if (err) reject(err);
-                        
-                        if (txHash) {
-                            const dataSend = await this.sendTransaction(this.accountHolder, inputRequest.value, dataInput);
-                            console.log(dataSend);
-
-                            if (dataSend.transactionHash) {
-                                resolve({txHash: dataSend.transactionHash, transaction: txHash});
-                            }
-                        }
+                    this.contract.methods.updateItem(
+                        address,
+                        inputRequest.id,
+                        inputRequest.qtyItem,
+                        inputRequest.price
+                    ).send(txObject, (err, result) => {
+                        if (err) console.error(err);
+                        console.log(result);
                     });
                 })
-            })
-
-
+            }).catch((err) => {
+                throw new Error(err);
+            });
         }).catch((err) => {
-            throw new Error(err);
+                throw new Error(err);
         });
     }
 
@@ -800,22 +842,17 @@ class Blockchain {
         });
      }
 
-     getAccountFromAddress= async(address) => {
+     getAccountItemFromAddress = async() => {
         return new Promise(async(resolve, reject) => {
             if (!this.web3Provider) {
                 reject('no provider web3.js');
                 return;
             }
 
-            const dataFromBlockchain = await this.getDataInputSmartContract();
+            const address = await this.getCurrentAccount();
+            const result = await this.contract.methods.getItem(address).call();
+            resolve(result)
 
-            if (dataFromBlockchain && dataFromBlockchain.account) {
-                const findObjAddress = dataFromBlockchain.account.findIndex(obj => obj.blockchain.address === address);
-
-                if (findObjAddress > -1 ) resolve(dataFromBlockchain.account[findObjAddress]);
-            }
-
-            resolve(false);
         }).catch((err) => {
             throw new Error(err);
         });
@@ -828,24 +865,26 @@ class Blockchain {
                 reject('no provider web3.js');
                 return;
             }
+
+            if (!web3) {
+                reject('GET CHROME EXTENSION: https://metamask.io/');
+                return;
+            }
             const currentAccount = await this.getCurrentAccount();
 
-            const dataFromBlockchain = await this.getDataInputSmartContract();
-
-            if (dataFromBlockchain && dataFromBlockchain.account) {
-                const findObjAddress = dataFromBlockchain.account.findIndex(obj => obj.blockchain.address === currentAccount);
-
-                if (findObjAddress > -1 ) resolve({
+            if (currentAccount) {
+                const dataFromBlockchain = await this.getDataInputSmartContract();
+                resolve({
                     message: 'Login MetaMask success',
                     status: true,
-                    data: dataFromBlockchain.account[findObjAddress]
+                    data: dataFromBlockchain
+                });
+            } else {
+                resolve({
+                    message: 'Please register new account',
+                    status: true,
                 });
             }
-
-            resolve({
-                message: 'Please register new account',
-                status: false,
-            });
         }).catch((err) => {
             throw new Error(err);
         });
@@ -870,19 +909,59 @@ class Blockchain {
         })
      }
 
-     getDataInputSmartContract = () => {
+     getBalanceToken = async() => {
         return new Promise(async(resolve, reject) => {
             if (!this.web3Provider) {
                 reject('no provider web3.js');
                 return;
             }
 
-            this.contract.methods.getData().call((err, data) => {
-                if (err) resolve('can not get data from smart contract');
-                const dataBlockchain = JSON.parse(data);
+            const address = await this.getCurrentAccount();
 
-                resolve(dataBlockchain);
-            })
+            let balance = await this.contract.methods.balanceOf(address).call();
+
+            const result = await web3.fromWei(balance, 'wei');
+
+            this.dispatch({balance: result});
+
+            resolve(result);
+        }).catch((err) => {
+            throw new Error(err);
+        })
+     }
+
+     getDataInputSmartContract = () => {
+        return new Promise(async(resolve, reject) => {
+            if (!this.web3Provider) {
+                reject('no provider web3.js');
+                return;
+            }
+            const address = await this.getCurrentAccount();
+
+            if (address) {
+                const result = await this.contract.methods.getAccount(address).call();
+                resolve({
+                    user_name: result.user_name,
+                    score: result.score,
+                })
+            }
+
+
+        }).catch((err) => {
+            throw new Error(err);
+        })
+     }
+
+     getDataInputStoreContract = () => {
+        return new Promise(async(resolve, reject) => {
+            if (!this.web3Provider) {
+                reject('no provider web3.js');
+                return;
+            }
+
+            const result = await this.contract.methods.getStore().call();
+            resolve(result)
+
         }).catch((err) => {
             throw new Error(err);
         })

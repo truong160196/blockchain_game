@@ -29,10 +29,10 @@
         const {storeDataOnline} = this.state;
         const {blockchain} = this.props;
 
-        const listDataStore = await blockchain.getDataInputSmartContract();
+        const listDataStore = await blockchain.getDataInputStoreContract();
 
-        if (listDataStore && listDataStore.store && listDataStore.store.length !== storeDataOnline.length) {
-            this.setState({storeDataOnline: listDataStore.store})
+        if (listDataStore && listDataStore.length !== storeDataOnline.length) {
+            this.setState({storeDataOnline: listDataStore})
         }
 
     }
@@ -43,29 +43,13 @@
 
             const address = await blockchain.getCurrentAccount();
     
-            const myBalance = await blockchain.getBalance(address);
-    
-            const myAccountBlockChain = await blockchain.getAccountFromAddress(address);
+            const myBalance = await blockchain.getBalanceToken(address);
     
             if (item.priceEth < myBalance) {
-                const objItem = myAccountBlockChain.equipment.findIndex(obj => obj.id === item.id);
-                
-                if (objItem > -1) {
-                    myAccountBlockChain.equipment[objItem].count += 1;
-                } else {
-                    const itemInfo = {
-                        id: item.id,
-                        count: 1,
-                    };
-    
-                    myAccountBlockChain.equipment.push(itemInfo); 
-                }
-    
                 const dataRequest = {
-                    type: Types.DATA_TYPE.STORE_BUY,
-                    data: myAccountBlockChain,
-                    item: item,
-                    value: item.priceEth,
+                    id: item.id,
+                    qtyItem: 1,
+                    price: item.priceEth,
                 }
                 
                 const result = await blockchain.buyItem(dataRequest);
@@ -315,10 +299,11 @@
         let {storeDataOnline} = this.state;
         const { currentAccount } = this.props;
 
-        storeDataOnline = storeDataOnline.sort(dynamicSort('timeOrder', Types.SORT.DESC))
+        storeDataOnline = storeDataOnline.sort(dynamicSort('time_update', Types.SORT.DESC))
 
         const listItem = storeDataOnline.map((element, index) => {
-            const dataItem = Types.STORE.item.find(obj => obj.id === element.product)
+
+            const dataItem = Types.STORE.item.find(obj => obj.id === Number(element.product))
 
             if (dataItem) {
                 return (
@@ -364,10 +349,10 @@
     }
 
     renderTabsItemStore = () => {
-        const {accountData} = this.props;
-
-        const listItem = accountData.equipment.map((element, index) => {
-            const dataItem = Types.STORE.item.find(obj => obj.id === element.id)
+        const {itemData} = this.props;
+        const listItem = itemData.map((element, index) => {
+            console.log(itemData)
+            const dataItem = Types.STORE.item.find(obj => obj.id === Number(element.id))
             if (dataItem) {
                 return (
                     <div className="store-item col-sm-12 col-md-4 col-lg-3" key={`myStore_${dataItem.id}_${index}`}>
@@ -377,7 +362,7 @@
                         </div>
                         <div className="item-detail">
                             <h5>{dataItem.detail}</h5>
-                            <h5>Quantity: {element.count}</h5>
+                            <h5>Quantity: {element.qtyItem}</h5>
                         </div>
                         <div className="button-group row">
                             <button
