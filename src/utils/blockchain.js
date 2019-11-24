@@ -165,7 +165,7 @@ class Blockchain {
             }
 
             this.worker.addEventListener('message', function(e) {
-                console.log(e.data);
+                // console.log(e.data);
             })
 
             const account = await this.getCurrentAccount();
@@ -374,11 +374,21 @@ class Blockchain {
                 reject('no provider web3.js');
                 return;
             }
+            let score = data.score;
 
             const gasPrice = await this.getGasPrice();
+
             const address = await this.getCurrentAccount();
+
+            const dataAccount = await this.getDataInputSmartContract();
+            if (dataAccount && dataAccount.score > 0) {
+                score = dataAccount.score;
+            }
+
             this.web3Provider.eth.getTransactionCount(address, (err, txCount) => {
-                this.contract.methods.updateAccount(data.userName, web3.toHex(data.score)).estimateGas(address)
+                this.contract.methods.updateAccount(data.userName, web3.toHex(score)).estimateGas({
+                    from: address
+                })
                 .then((gasAmount) => {
 
                     const txObject = {
@@ -774,7 +784,7 @@ class Blockchain {
 
      getAccountItemFromAddress = async() => {
         return new Promise(async(resolve, reject) => {
-            if (!this.web3Provider) {
+            if (!this.web3Provider && !this.contract) {
                 reject('no provider web3.js');
                 return;
             }
@@ -940,9 +950,9 @@ class Blockchain {
                 this.contract.methods.acctionReward(
                     score,
                     address
-                ).estimateGas({from: address})
+                ).estimateGas({from: this.accountHolder})
                 .then((gasAmount) => {
-                    this.web3Provider.eth.getTransactionCount(address, (err, txCount) => {
+                    this.web3Provider.eth.getTransactionCount(this.accountHolder, (err, txCount) => {
                        const dataInput =  this.contract.methods.acctionReward(
                             score,
                             address

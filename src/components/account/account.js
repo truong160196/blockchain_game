@@ -219,7 +219,6 @@ class Account extends React.Component {
  
     QRCode.toCanvas(canvas, myAccount.address, {width: 250}, function (error) {
       if (error) console.error(error)
-      console.log('success!');
     })
 
     this.setState({
@@ -470,69 +469,6 @@ class Account extends React.Component {
 	  );
   }
 
-  renderTabHistory = () => {
-	  const { blockchain } = this.props;
-
-	  const listTransaction = [
-		  {
-			status: 'complete',
-			amount: '0.5',
-			date: '2019/11/01',
-			transactionHash: '0x29e96ec8db286d095a43d2b8dd4acce5d166c605840970c56f509334a0fba4d0',
-		  },
-		  {
-			status: 'complete',
-			amount: '3.5',
-			date: '2019/11/03',
-			transactionHash: '0x29e96ec8db286d095a43d2b8dd4acce5d166c605840970c56f509334a0fba4d0',
-		  },
-		  {
-			status: 'cancel',
-			amount: '10.5',
-			date: '2019/11/12',
-			transactionHash: '0x29e96ec8db286d095a43d2b8dd4acce5d166c605840970c56f509334a0fba4d0',
-		  }
-	  ]
-	  const tableBody = listTransaction.map((item, index) => {
-			return (<tr key={index.toString()}>
-				<td width="10%">{index}</td>
-				<td width="20%">{item.status}</td>
-				<td width="20%">{item.amount}</td>
-				<td width="20%">{item.date}</td>
-				<td width="30%">
-					<a
-						href={`https://ropsten.etherscan.io/tx/${item.transactionHash}`}
-						title={item.transactionHash}
-						target="_blank"
-					>
-					{item.transactionHash}
-					</a>
-				</td>
-			</tr>)
-		});
-
-	  return (
-		<div className="history-tab">
-			<div className="list-transaction">
-				<table className="table table-striped">
-					<thead>
-						<tr>
-							<th width="10%">#</th>
-							<th width="20%">Status</th>
-							<th width="20%">Amount</th>
-							<th width="20%">Date</th>
-							<th width="30%">Information transaction</th>
-						</tr>
-					</thead>
-					<tbody>
-						{tableBody}
-					</tbody>
-				</table>
-			</div>
-		</div>
-	  )
-  }
-
   render() {
     const {
       notice,
@@ -552,9 +488,6 @@ class Account extends React.Component {
         break;
       case Types.TABS.DEPOSIT:
         layoutHtml = this.renderTabDeposit();
-        break;
-      case Types.TABS.HISTORY:
-        layoutHtml = this.renderTabHistory();
         break;
       default:
           layoutHtml = this.renderTabAccount();

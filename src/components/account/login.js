@@ -101,8 +101,6 @@ class Login extends React.Component {
 			score: 120,
 		});
 
-		console.log(result);
-
 		if (result.status === true) {
 			this.setState({
 				notification: {

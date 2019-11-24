@@ -51,7 +51,6 @@ class Main {
         const loading = document.getElementById('loader');
 
         this.loader.onProgress.add(() => {
-            console.log(loading)
             if (loading) {
                 loading.style.display = 'block'
             }
@@ -311,43 +310,53 @@ class Main {
     }
 
     loadTotalBall = async() => {
-        const listItem = Types.STORE.item;
-        if (this.blockchain && typeof this.blockchain.getAccountItemFromAddress === 'function') {
-            const dataItem = await this.blockchain.getAccountItemFromAddress();
-
-            if (dataItem && dataItem.length > 0) {
-                dataItem.forEach((item) => {
-                    if (item.id > 0) {
-                        let objItem = listItem.find(obj => obj.id === Number(item.id));
-    
-                        if (objItem) {
-                            this.numberBall += (objItem.power * Number(item.qtyItem));
-                        }
+        try {
+            const listItem = Types.STORE.item;
+            if (this.blockchain) {
+                if (typeof this.blockchain.getAccountItemFromAddress === 'function') {
+                    const dataItem = await this.blockchain.getAccountItemFromAddress();
+        
+                    if (dataItem && dataItem.length > 0) {
+                        dataItem.forEach((item) => {
+                            if (item.id > 0) {
+                                let objItem = listItem.find(obj => obj.id === Number(item.id));
+            
+                                if (objItem) {
+                                    this.numberBall += (objItem.power * Number(item.qtyItem));
+                                }
+                            }
+                        })
+            
                     }
-                })
-    
+                }
             }
-        }
+        } catch (err) {
+            console.error(err);
+        }   
     }
 
     openScreenGame = async() => {
-        this.gameScene.visible = false;
+        try {
+            this.gameScene.visible = false;
 
-        this.game.destroy(true, true);
+            this.game.destroy(true, true);
+    
+            await this.loadTotalBall();
+            const define = {
+                config: {
+                  urlSource: './assets/template/game.json'
+                },
+                numberBall: this.numberBall,
+                blockchain: this.blockchain,
+            };
+    
+            this.gameMain = new GameMain(define, PIXI);
+    
+            this.gameMain.init();
+        } catch (err) {
+            console.error(err);
+        }
 
-        await this.loadTotalBall();
-
-        const define = {
-            config: {
-              urlSource: './assets/template/game.json'
-            },
-            numberBall: this.numberBall,
-            blockchain:  this.blockchain,
-        };
-
-        this.gameMain = new GameMain(define, PIXI);
-
-        this.gameMain.init();
     }
 
     update = () => {

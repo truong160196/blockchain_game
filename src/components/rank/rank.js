@@ -50,9 +50,7 @@ class Rank extends React.Component {
                     <th scope="col">Score</th>
                     </tr>
                 </thead>
-                <tbody>
-                   {tableBody}
-                </tbody>
+                    <tbody>{tableBody}</tbody>
                 </table>
             </div>
         );

@@ -24,7 +24,11 @@ return (
             <div class='loader--dot'></div>
             <div class='loader--dot'></div>
             <div class='loader--dot'></div>
-            <div class='loader--text'></div>
+            <div class='loader--text'>
+                <p>
+                    <a href="https://metamask.io/" target="_blank" >Login MetaMask</a>
+                </p>
+            </div>
         </div>
     </div>
     );

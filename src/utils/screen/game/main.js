@@ -140,7 +140,7 @@ class Main {
 		    padding: 1,
             speed: 120.0,
             resolution: 1,
-            timeAppend: 1,
+            timeAppend: 0.5,
             numberEntities: 7,
             game: this.gameScene,
         }
@@ -169,8 +169,8 @@ class Main {
 		    padding: 1,
             speed: 150.0,
             resolution: 1,
-            timeAppend: 2,
-            numberEntities: 2,
+            timeAppend: 0.5,
+            numberEntities: 7,
             game: this.gameScene,
         }
 
@@ -198,8 +198,8 @@ class Main {
 		    padding: 1,
             speed: 130.0,
             resolution: 1,
-            timeAppend: 1,
-            numberEntities: 6,
+            timeAppend: 3,
+            numberEntities: 2,
             game: this.gameScene,
         }
 
@@ -374,7 +374,6 @@ class Main {
         this.victory.height = this.background.height;
         this.victory.x = this.background.width / 2 - this.victory.width / 2;
         this.victory.y = this.background.height / 2 - this.victory.height / 2;
-        console.log(this.event);
 
         this.eventKill = new PIXI.Sprite(this.id[`entities_06.png`]);
         this.eventKill.width = this.eventKill.width / 4;
@@ -448,6 +447,12 @@ class Main {
 
     saveGame = async() => {
         try {
+            const loader = document.getElementById('loader');
+
+            if (loader) {
+                loader.style.display = 'block';
+            };
+
             this.gameScene.visible = false;
             this.game.destroy(true, true);
     
@@ -457,16 +462,24 @@ class Main {
                 }
               };
           
-            this.gameDev = new GameMain(define);
-    
-            this.gameDev.init();
-
             if (this.blockchain && typeof this.blockchain.rewardPromotion === 'function' ) {
                 const score = Number(this.bomb.getScore());
-                this.blockchain.rewardPromotion(score);
+                await this.blockchain.rewardPromotion(score);
 
-                this.blockchain.updateScore(score);
+                await this.blockchain.updateScore(score);
             }
+
+            setTimeout(() => {
+                this.gameDev = new GameMain(define);
+    
+                this.gameDev.init();
+
+                window.location.reload();
+
+                loader.style.display = 'none';
+
+            }, 1000);
+
         } catch(err) {
             console.error(err);
         }

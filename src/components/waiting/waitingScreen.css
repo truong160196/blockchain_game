@@ -10,7 +10,9 @@
     width: 100%;
     height: 100%;
   }
-  
+  a {
+    color: #fbef5a !important;
+  }
   .loader {
     height: 20px;
     width: 250px;

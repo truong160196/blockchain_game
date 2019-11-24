@@ -50,7 +50,7 @@ Go to browser for now
 http://localhost:3006
 ```
 # Public game
-game publish 
+game public
 [link publish game](http://game.laptrinhblockchain.net/)
 
 # Testnet
@@ -88,6 +88,8 @@ npm run build
 ```
 path ./build
 # Introduce game
+- home screen
+![Login MetaMask](./public/assets/screen/login_metamask.JPG)
 - home screen
 ![Home page](./public/assets/screen/home_screen.JPG)
 - Account management
