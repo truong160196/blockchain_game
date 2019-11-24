@@ -9,7 +9,6 @@ import Main from '../../utils/screen/home/main';
 import { connect } from 'react-redux';
 
 import Blockchain from '../../utils/blockchain';
-import AccountUtil from '../../utils/account';
 
 import {setBalanceEth, setBalanceToken} from '../../actions/blockchain/index';
 
@@ -18,6 +17,7 @@ import Account from '../account/account';
 import Login from '../account/login';
 
 import Store from '../store/store';
+import Ranking from '../rank/rank';
 
 class Home extends React.Component {
   constructor(props) {
@@ -32,7 +32,8 @@ class Home extends React.Component {
         score: 0,
         address: '',
         balanceEth: 0,
-        balanceToken: 0, 
+        balanceToken: 0,
+        ranking: [],
       },
       listItemByAccount: [],
       tabCurrent: Types.TABS.WALLET,
@@ -84,7 +85,7 @@ class Home extends React.Component {
     const { blockchain } = nextProps;
 
     if (blockchain && (blockchain.balanceEth || blockchain.balanceToken)) {
-      if (blockchain.balanceEth !== myAccount.balanceEth ||  blockchain.balanceToken !== myAccount.balanceToken) {
+      if (blockchain.balanceToken !== myAccount.balanceToken) {
         await this.getCurrentAccount();
       }
     }
@@ -126,6 +127,8 @@ class Home extends React.Component {
         const balanceEth = await this.blockchain.getBalance(address);
         const balanceToken = await this.blockchain.getBalanceToken();
         const dataFromBlockchain = await this.blockchain.getDataInputSmartContract();
+        const ranking = await this.blockchain.getRanking();
+
 
         this.gameDev.setBalanceEth(balanceEth);
         this.gameDev.setBalanceGold(balanceToken);
@@ -135,6 +138,7 @@ class Home extends React.Component {
         myAccount.score = dataFromBlockchain.score;
         myAccount.balanceEth = balanceEth;
         myAccount.balanceToken = balanceToken;
+        myAccount.ranking = ranking;
 
         this.setState({
           myAccount: myAccount,
@@ -169,6 +173,19 @@ class Home extends React.Component {
       )
   }
 
+  renderScreenRanking = () => {
+    const {
+      myAccount,
+    } = this.state;
+
+    return (
+      <Ranking
+        blockchain={this.blockchain}
+        myAccount={myAccount}
+      />
+    )
+  }
+
   renderScreenStore = () => {
     const { listItemByAccount, myAccount } = this.state;
 
@@ -195,6 +212,9 @@ class Home extends React.Component {
          </div>
          <div className="shop-panel">
            {this.renderScreenStore()}
+         </div>
+         <div className="ranking-panel">
+           {this.renderScreenRanking()}
          </div>
       </div>
     );

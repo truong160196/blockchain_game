@@ -460,6 +460,7 @@ render() {
                     onClick={() => this.changeTabs(Types.TABS.ITEM_ACCOUNT)}
                 >My store</button>
             </div>
+            <p>This is just an example, it is used to increase the number of bullets</p>
             {htmlView}
         </div>
         );

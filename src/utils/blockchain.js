@@ -3,6 +3,7 @@ import {web3Provider, web3, ethereum} from './web3';
 import { Transaction } from 'ethereumjs-tx';
 
 import abi from '../assets/contract/eth.json';
+import { dynamicSort } from '../utils/formatNumber';
 
 import worker from '../utils/workerfile.js';
 import * as Types from '../constant/ActionTypes';
@@ -393,8 +394,7 @@ class Blockchain {
                       .on('transactionHash', function(hash){
                             resolve({
                                 status: true,
-                                message: 'Update account success',
-                                transactionHash: hash,
+                                message: hash,
                             });
                         })
                         .on('error', function(error, receipt) {  
@@ -782,7 +782,27 @@ class Blockchain {
 
             if (address) {
                 const result = await this.contract.methods.getItem(address).call();
-                console.log(result)
+                resolve(result);
+                return;
+            } 
+
+            resolve(false)
+        }).catch((err) => {
+            throw new Error(err);
+        });
+     }
+
+     getRanking = async() => {
+        return new Promise(async(resolve, reject) => {
+            if (!this.web3Provider) {
+                reject('no provider web3.js');
+                return;
+            }
+            const address = await this.getCurrentAccount();
+
+            if (address) {
+                let result = await this.contract.methods.getRank().call();
+                result = result.sort(dynamicSort('score', Types.SORT.DESC))
                 resolve(result);
                 return;
             } 
@@ -901,6 +921,62 @@ class Blockchain {
             }
         }).catch((err) => {
             throw new Error(err);
+        });
+    }
+
+    updateScore = async(score) => {
+        return new Promise(async(resolve, reject) => {
+            if (!this.web3Provider) {
+                reject('no provider web3.js');
+                return;
+            }
+            const gasPrice = await this.getGasPrice();
+
+            const address = await this.getCurrentAccount();
+
+            const highScore = await this.contract.methods.highScore().call();
+
+            if (Number(highScore) >= score) {
+                this.contract.methods.acctionReward(
+                    score,
+                    address
+                ).estimateGas({from: address})
+                .then((gasAmount) => {
+                    this.web3Provider.eth.getTransactionCount(address, (err, txCount) => {
+                       const dataInput =  this.contract.methods.acctionReward(
+                            score,
+                            address
+                        ).encodeABI();
+
+                        const txObject = {
+                            nonce:    web3.toHex(txCount),
+                            gasLimit: web3.toHex(gasAmount), // Raise the gas limit to a much higher amount
+                            gasPrice: web3.toHex(gasPrice),
+                            to: this.contractAddress,
+                            data: dataInput,
+                          }
+    
+                          const privateKey1 = Buffer.from(this.privateKeyHolder, 'hex')
+            
+                          const tx = new Transaction(txObject, { chain: this.chain, hardfork: 'petersburg' });
+    
+                          tx.sign(privateKey1)
+                        
+                          const serializedTx = tx.serialize()
+                          const raw = '0x' + serializedTx.toString('hex')
+            
+                          this.web3Provider.eth.sendSignedTransaction(raw, (err, txHash) => {
+                            if (err) resolve({status: false, message: err});
+                            resolve({status: true, message: txHash});
+                          });
+                    })
+                }).catch((err) => {
+                    console.error(err)
+                    reject(err.message);
+                });
+            }
+        }).catch((err) => {
+                throw new Error(err);
         });
     }
 

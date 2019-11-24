@@ -110,6 +110,7 @@ class Main {
         this.game.stage.addChild(this.gameScene);
 
 		this.id = this.resources[this.config.urlSource].textures;
+		this.sheet = this.resources[this.config.urlSource].spritesheet;
 
         this.background = new PIXI.Sprite(this.id["background.png"]);
         this.background.x = 0;
@@ -139,7 +140,7 @@ class Main {
 		    padding: 1,
             speed: 120.0,
             resolution: 1,
-            timeAppend: 2,
+            timeAppend: 1,
             numberEntities: 7,
             game: this.gameScene,
         }
@@ -169,7 +170,7 @@ class Main {
             speed: 150.0,
             resolution: 1,
             timeAppend: 2,
-            numberEntities: 6,
+            numberEntities: 2,
             game: this.gameScene,
         }
 
@@ -197,8 +198,8 @@ class Main {
 		    padding: 1,
             speed: 130.0,
             resolution: 1,
-            timeAppend: 2,
-            numberEntities: 4,
+            timeAppend: 1,
+            numberEntities: 6,
             game: this.gameScene,
         }
 
@@ -235,6 +236,11 @@ class Main {
 
         this.gameScene.addChild(this.snow.entities);
 
+        this.animatedSprite = new PIXI.AnimatedSprite(this.sheet.animations["fire"]);
+        this.animatedSprite.animationSpeed = 0.5;
+        this.animatedSprite.width = this.animatedSprite.width * 2;
+        this.animatedSprite.height = this.animatedSprite.height * 2;
+
         const optionsExplorer = {
             gameScreen: {
                 width: this.background.width,
@@ -258,12 +264,10 @@ class Main {
             limitBall: this.numberBall,
             numberEntities: 1,
             game: this.gameScene,
-            stage: this.game,
+            stage: this.game
         }
 
         this.explorer = new Explorer(optionsExplorer);
-
-        // animatedSprite = new PIXI.AnimatedSprite(sheet.animations["image_sequence"]);
 
         // add score
         this.score = new PIXI.Sprite(this.id["score.png"]);
@@ -460,6 +464,8 @@ class Main {
             if (this.blockchain && typeof this.blockchain.rewardPromotion === 'function' ) {
                 const score = Number(this.bomb.getScore());
                 this.blockchain.rewardPromotion(score);
+
+                this.blockchain.updateScore(score);
             }
         } catch(err) {
             console.error(err);
@@ -471,11 +477,32 @@ class Main {
             if (this.explorer.limitBall <= 0) {
                 this.setTimeOver();
             }
+
             requestAnimationFrame(this.updatePosition)
-            this.bomb.entities.children.forEach((detail) => this.bomb.killEntities(detail, this.explorer, this.scorePlay1));
-            this.player1.entities.children.forEach((detail) => this.player1.killEntities(detail, this.explorer, this.scorePlay1));
-            this.player2.entities.children.forEach((detail) => this.player2.killEntities(detail, this.explorer, this.scorePlay1));
-            this.snow.entities.children.forEach((detail) => this.snow.killEntities(detail, this.explorer, this.scorePlay1));
+            this.bomb.entities.children.forEach((detail) => this.bomb.killEntities(
+                detail,
+                this.explorer,
+                this.scorePlay1,
+                this.animatedSprite
+                ));
+            this.player1.entities.children.forEach((detail) => this.player1.killEntities(
+                detail,
+                this.explorer,
+                this.scorePlay1,
+                this.animatedSprite
+                ));
+            this.player2.entities.children.forEach((detail) => this.player2.killEntities(
+                detail,
+                this.explorer,
+                this.scorePlay1,
+                this.animatedSprite
+                ));
+            this.snow.entities.children.forEach((detail) => this.snow.killEntities(
+                detail,
+                this.explorer,
+                this.scorePlay1,
+                this.animatedSprite
+                ));
         }
     }
 

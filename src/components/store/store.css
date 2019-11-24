@@ -34,6 +34,11 @@
     color: #ffff00;
 }
 
+p {
+    color: #ffffff;
+    padding: 0;
+    margin: 0;
+}
 .store-list {
     position: relative;
     padding: 15px;
@@ -86,6 +91,7 @@
 
 .store-list .store-grid .store-item .item-detail {
    min-height: 50px;
+   margin-top: 10px;
 }
 
 .store-list .store-grid .store-item .item-detail h5 {
@@ -96,8 +102,16 @@
 
 .store-list .store-grid .store-item .image-item {
     width: 100%;
-    height: 200px;
+    height: 150px;
     margin-top: 10px;
+    padding: 10px;
+    justify-content: center;
+    text-align: center;
+}
+
+.store-list .store-grid .store-item .image-item img {
+    height: 140px;
+    width: auto;
 }
 
 .store-list .store-grid .store-item .button-group {

@@ -230,22 +230,26 @@ class Entities {
 		return collision;
 	}
 
-	killEntities = (bunny, explorer, scoreElement) => {
+	killEntities = (bunny, explorer, scoreElement, animatedSprite) => {
 		const balls = explorer.balls;
 
 		if (balls && balls.length > 0) {
 			for(let index = balls.length - 1; index >= 0; index-- ){
 				let isKill = this.hitTestRectangle(bunny, balls[index]);
-
 				if (isKill === true) {
 					this.score ++;
-					this.entities.removeChild(bunny);
-					explorer.destroyBall(balls[index], index)
-		
+					bunny.addChild(animatedSprite)
+					animatedSprite.play();
 					if (scoreElement) {
-						scoreElement.score += 10;
+						scoreElement.score += 1;
 						scoreElement.text = formatCurrency(scoreElement.score);
 					}
+					
+					explorer.destroyBall(balls[index], index)
+
+					setTimeout(() => {
+						this.entities.removeChild(bunny);
+					}, 360);
 				}
 			  }
 		}

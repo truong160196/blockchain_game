@@ -61,7 +61,7 @@ export const STORE = {
             priceEth: 50,
             priceGold: 150,
             image: image1,
-            detail: '+20 Damage',
+            detail: '+20 Bullets',
         },
         {
             id: 2,
@@ -70,7 +70,7 @@ export const STORE = {
             priceEth: 150,
             priceGold: 300,
             image: image2,
-            detail: '+60 Damage',
+            detail: '+60 Bullets',
             numberBall: 60,
         },
         {
@@ -80,7 +80,7 @@ export const STORE = {
             priceEth: 250,
             priceGold: 500,
             image: image3,
-            detail: '+120 Damage',
+            detail: '+120 Bullets',
         },
         {
             id: 4,
@@ -88,7 +88,7 @@ export const STORE = {
             power: 320,
             priceEth: 350,
             image: image4,
-            detail: '+350 Damage'
+            detail: '+350 Bullets'
         },
     ],
     online: [],

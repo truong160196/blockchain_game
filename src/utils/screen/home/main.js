@@ -438,6 +438,7 @@ class Main {
         if (this.buttonAccount.isOpen === false) {
             this.buttonAccount.isOpen = true;
             this.buttonShop.isOpen = true;
+            this.buttonRanking.isOpen = true;
            
             this.boxScene = new PIXI.Container();
             this.boxScene.visible = true;
@@ -483,6 +484,7 @@ class Main {
         if (this.buttonShop.isOpen === false) {
             this.buttonShop.isOpen = true;
             this.buttonAccount.isOpen = true;
+            this.buttonRanking.isOpen = true;
            
             this.shopScene = new PIXI.Container();
             this.shopScene.visible = true;
@@ -565,9 +567,9 @@ class Main {
 
             if (rankPanel) {
                 rankPanel.style.display = 'block'
-                rankPanel.style.width = this.shopModal.width - 100 + 'px';
-                rankPanel.style.left = this.shopModal.x + 50 + 'px';
-                rankPanel.style.top = this.shopModal.y + 110 + 'px';
+                rankPanel.style.width = this.rankModal.width - 100 + 'px';
+                rankPanel.style.left = this.rankModal.x + 50 + 'px';
+                rankPanel.style.top = this.rankModal.y + 110 + 'px';
             }
 
             this.rankModal.addChild(this.closeButtonRank);
@@ -580,6 +582,8 @@ class Main {
         this.boxScene.visible = false;
         this.buttonAccount.isOpen = false;
         this.buttonShop.isOpen = false;
+        this.buttonRanking.isOpen = false;
+
         const addressInput = document.getElementById('form-input');
         addressInput.style.display = 'none'
         this.game.stage.removeChild(this.boxScene);
@@ -589,6 +593,9 @@ class Main {
         this.shopScene.visible = false;
         this.buttonShop.isOpen = false;
         this.buttonAccount.isOpen = false;
+        this.buttonRanking.isOpen = false;
+
+
         const shopPanel = document.getElementById('shop-panel');
         if (shopPanel) {
             shopPanel.style.display = 'none'

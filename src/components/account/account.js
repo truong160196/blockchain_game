@@ -292,9 +292,56 @@ class Account extends React.Component {
     }
   }
 
-  saveEditAccount = () => {
+  saveEditAccount = async() => {
+    const { blockchain } = this.props;
+
     this.setState({
-      isEdit: false,
+      waiting: true,
+    })
+
+    let message = '';
+
+    try {
+      const userName = $('#username').val();
+  
+      const result  = await blockchain.updateAccount({
+        userName: userName,
+        score: 0,
+      });
+  
+      if (result.status === true) {
+        message = (
+          <div>
+              <h5 style={{color: 'green'}}>Update account Successfully! Please check transaction detail</h5>
+              <a href={`https://ropsten.etherscan.io/tx/${result.message}`}  target="_blank" >{result.message}</a>
+          </div>
+        );
+      } else {
+        if (!result.message) {
+          message = (
+            <h5 style={{color: 'red'}}>Something is wrong with your request, possibly due to invalid argument.</h5>
+          );
+        } else {
+          message = (
+            <h5 style={{color: 'red'}}>{result.message}</h5>
+          );
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      message = (
+        <h5 style={{color: 'red'}}>An unexpected server error was encountered, we are working on fixing this</h5>
+      );
+    }
+
+    
+    this.setState({
+      notice: {
+          message: message,
+          visible: true,
+          title: 'Update Account'
+      },
+      waiting: false,
     });
   }
 
