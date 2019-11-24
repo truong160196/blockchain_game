@@ -89,20 +89,22 @@ npm run build
 path ./build
 # Introduce game
 - home screen
-![Home page](./public/assets/home_screen.jpg)
+![Home page](./public/assets/screen/home_screen.jpg)
 - Account management
-
+![Account management](./public/assets/screen/account_screen.jpg)
 - Withdraw management
-
+![Withdraw management](./public/assets/screen/withdraw_screen.jpg)
 - Deposit management
-
+![Deposit management](./public/assets/screen/deposit_screen.jpg)
 - Shop list management
-
+![Shop list management](./public/assets/screen/shop_screen.jpg)
 - Shop online management
-
+![Shop online management](./public/assets/screen/shoponline_screen.jpg)
 - Item management
-
+![Item management](./public/assets/screen/my_store_screen.jpg)
 - Game screen
-
+![Game screen](./public/assets/screen/game_screen.jpg)
+- Victory screen
+![Victory management](./public/assets/screen/victory_screen.jpg)
 ## License
 Hackathon 2019
