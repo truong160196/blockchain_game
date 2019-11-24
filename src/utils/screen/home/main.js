@@ -20,7 +20,8 @@ class Main {
         this.style = new PIXI.TextStyle({
             fontFamily: "Futura",
             fontSize: 25,
-            fill: "white"
+            fill: "yellow",
+            fontWeight: 600,
         });
 
     }
@@ -44,6 +45,22 @@ class Main {
 
         this.loaderResource();
 
+        const loading = document.getElementById('loader');
+
+        this.loader.onProgress.add(() => {
+            console.log(loading)
+            if (loading) {
+                loading.style.display = 'block'
+            }
+        }); 
+        this.loader.onComplete.add(() => {
+            setTimeout(() => {
+                if (loading) {
+                    loading.style.display = 'none'
+                }
+            }, 1800);
+        });
+
         // window.onresize = (event) => {
         //     this.resize();
         // };
@@ -65,9 +82,16 @@ class Main {
 
     setBalanceEth = (value) => {
         if (this.balanceEthText && value && value > 0) {
-            this.balanceEthText.text = `${formatCurrency(value, 4)}`
-            this.balanceEthText.x = 120;
+            this.balanceEthText.text = `${formatCurrency(value, 4)} E`
+            this.balanceEthText.x = 100;
         }
+    }
+
+    setBalanceGold = (value) => {
+        if (this.balanceGodText && value && value > 0) {
+            this.balanceGodText.text = `${formatCurrency(value, 4)} Q`
+            this.balanceGodText.x = 110;
+        } 
     }
       
     
@@ -80,102 +104,146 @@ class Main {
 
 		this.id = this.resources[this.config.urlSource].textures;
 
-        this.background = new PIXI.Sprite(this.id["background.png"]);
+        this.background = new PIXI.Sprite(this.id["background.jpg"]);
         this.background.width = this.width;
         this.background.height =  this.height;
 
         this.gameScene.addChild(this.background);
 
         // // logo
-        this.logoMain = new PIXI.Sprite(this.id["logo.png"]);
-        this.logoMain.width = this.logoMain.width;
-        this.logoMain.height = this.logoMain.height;
-        this.logoMain.x = this.width / 2 - this.logoMain.width / 2;
-        this.logoMain.y = this.height / 2 - this.logoMain.height;
+        var texturePromotion = PIXI.Texture.from('./assets/template/promotion.png');
 
-        this.gameScene.addChild(this.logoMain);
+        this.promotionPanel = new PIXI.TilingSprite(texturePromotion, 460, 325);
+        this.promotionPanel.width = this.promotionPanel.width;
+        this.promotionPanel.height = this.promotionPanel.height;
+        this.promotionPanel.x = 70;
+        this.promotionPanel.y = 120;
+
+        this.gameScene.addChild(this.promotionPanel);
 
         // button play
         this.buttonPlay = new PIXI.Sprite(this.id["button-play.png"]);
-
-        this.buttonPlay.width = this.buttonPlay.width / 2;
-        this.buttonPlay.height = this.buttonPlay.height / 2;
-        
+        this.buttonPlay.width = this.buttonPlay.width * 1.2;
+        this.buttonPlay.height = this.buttonPlay.height * 1.2;
         this.buttonPlay.x =  this.width / 2 - this.buttonPlay.width / 2;
-        this.buttonPlay.y = this.logoMain.y + this.logoMain.height + 30;
+        this.buttonPlay.y =  this.height / 2 - this.buttonPlay.height;
 
         this.buttonPlay.buttonMode = true;
         this.buttonPlay.interactive = true;
         this.buttonPlay.isClick = false;
 
         this.buttonPlay
-        .on('mousedown', (event) => {
-            //handle event
+        .on('tap', this.openScreenGame)
+        .on('click',(event) => {
             this.openScreenGame();
-            this.buttonPlay.anchor.set(0.1)
-            setTimeout(() => {
-                this.buttonPlay.anchor.set(0)
-            }, 360);
-         })
-        .on('tap', (event) => {
-            //handle event
-            this.buttonPlay.anchor.set(0.1, 0.1)
-            setTimeout(() => {
-                this.buttonPlay.anchor.set(0)
-            }, 360);
-         });
+        })
+        .on('mousedown', (event) => {
+            this.openScreenGame();
+        });
 
         this.gameScene.addChild(this.buttonPlay);
+
+        // buttonRanking
+        this.buttonRanking = new PIXI.Sprite(this.id["button-rank.png"]);
         
+        this.buttonRanking.width = this.buttonRanking.width / 1.5;
+        this.buttonRanking.height = this.buttonRanking.height / 1.5;
+        this.buttonRanking.x = this.width - this.buttonRanking.width -  this.padding.right;
+        this.buttonRanking.y = this.height - this.buttonRanking.height - this.padding.bottom;
 
         
-        // button play
+        this.buttonRanking.buttonMode = true;
+        this.buttonRanking.interactive = true;
+        this.buttonRanking.isOpen = false;
+
+        this.buttonRanking
+        .on('tap', this.openScreenRank)
+        .on('click',(event) => {
+            this.openScreenRank();
+
+            this.buttonRanking.anchor.set(0.1)
+            setTimeout(() => {
+                this.buttonRanking.anchor.set(0)
+            }, 360);
+        })
+        .on('mousedown', (event) => {
+            this.openScreenRank();
+
+            this.buttonRanking.anchor.set(0.1, 0.1)
+            setTimeout(() => {
+                this.buttonRanking.anchor.set(0)
+            }, 360);
+        });
+
+        this.gameScene.addChild(this.buttonRanking);
+
+        // buttonAccount
+        this.buttonShop = new PIXI.Sprite(this.id["button-shop.png"]);
+        this.buttonShop.width = this.buttonShop.width / 1.5;
+        this.buttonShop.height = this.buttonShop.height / 1.5;
+        this.buttonShop.x = this.buttonRanking.x - this.buttonRanking.width - this.buttonShop.width / 4;
+        this.buttonShop.y = this.height - this.buttonRanking.height - this.padding.bottom;
+
+        this.buttonShop.buttonMode = true;
+        this.buttonShop.interactive = true;
+        this.buttonShop.isOpen = false;
+
+        this.buttonShop
+        .on('tap', this.openScreenShop)
+        .on('click',(event) => {
+            this.openScreenShop();
+
+            this.buttonShop.anchor.set(0.1)
+            setTimeout(() => {
+                this.buttonShop.anchor.set(0)
+            }, 360);
+        })
+        .on('mousedown', (event) => {
+            //handle event
+            this.openScreenShop();
+
+            this.buttonShop.anchor.set(0.1, 0.1)
+            setTimeout(() => {
+                this.buttonShop.anchor.set(0)
+            }, 360);
+        });
+        this.gameScene.addChild(this.buttonShop); 
+
+        // button account
         this.buttonAccount = new PIXI.Sprite(this.id["button-account.png"]);
-        this.buttonAccount.width = this.buttonAccount.width / 2;
-        this.buttonAccount.height = this.buttonAccount.height / 2;
-        this.buttonAccount.x =  this.width / 2 - this.buttonAccount.width / 2;
-        this.buttonAccount.y = this.buttonPlay.y + this.buttonPlay.height + 20;
+        this.buttonAccount.width = this.buttonAccount.width / 1.5;
+        this.buttonAccount.height = this.buttonAccount.height / 1.5;
+        this.buttonAccount.x =  this.buttonShop.x - this.buttonShop.width - this.buttonAccount.width / 4;
+        this.buttonAccount.y = this.height - this.buttonRanking.height - this.padding.bottom;
 
         this.buttonAccount.buttonMode = true;
         this.buttonAccount.interactive = true;
-        this.buttonAccount.isClick = false;
+        this.buttonAccount.isOpen = false;
 
         this.buttonAccount
-        .on('mousedown', (event) => {
-            //handle event
+        .on('tap', this.openScreenAccount)
+        .on('click',(event) => {
+            this.openScreenAccount();
+
             this.buttonAccount.anchor.set(0.1)
             setTimeout(() => {
                 this.buttonAccount.anchor.set(0)
             }, 360);
-         })
-        .on('tap', (event) => {
+        })
+        .on('mousedown', (event) => {
             //handle event
+            this.openScreenAccount();
+
             this.buttonAccount.anchor.set(0.1, 0.1)
             setTimeout(() => {
                 this.buttonAccount.anchor.set(0)
             }, 360);
-         });
+        });
 
         this.gameScene.addChild(this.buttonAccount);
 
-        // setting
-        this.setting = new PIXI.Sprite(this.id["button.png"]);
-        
-        this.setting.width = this.setting.width / 2;
-        this.setting.height = this.setting.height / 2;
-        this.setting.x = this.padding.left;
-        this.setting.y = this.height - this.setting.height - this.padding.bottom;
-
-        var settingIcon = new PIXI.Sprite(this.id["setting.png"]);
-        settingIcon.x =  this.setting.width / 2;
-        settingIcon.y =  this.setting.height / 2;
-
-        this.setting.addChild(settingIcon);
-
-        this.gameScene.addChild(this.setting);
-
         // balanceDisplay
-        this.balanceEth = new PIXI.Sprite(this.id["balance-eth.png"]);
+        this.balanceEth = new PIXI.Sprite(this.id["eth-balance.png"]);
         this.balanceEth.width = this.balanceEth.width / 1.5;
         this.balanceEth.height = this.balanceEth.height / 1.5;
         this.balanceEth.x = this.width - this.balanceEth.width - this.padding.right;
@@ -183,23 +251,23 @@ class Main {
 
         // balance eth
         this.balanceEthText = new PIXI.Text(0, this.style);
-        this.balanceEthText.x = 120;
-        this.balanceEthText.y = this.balanceEth.y + 20;
+        this.balanceEthText.x = 100;
+        this.balanceEthText.y = this.balanceEth.y + 10;;
         
         this.balanceEth.addChild(this.balanceEthText);
 
         this.gameScene.addChild(this.balanceEth);
 
         // balance god
-        this.balanceGod = new PIXI.Sprite(this.id["balance-god.png"]);
+        this.balanceGod = new PIXI.Sprite(this.id["money-balance.png"]);
         this.balanceGod.width = this.balanceGod.width / 1.5;
         this.balanceGod.height = this.balanceGod.height / 1.5;
         this.balanceGod.x = this.balanceEth.x - this.balanceEth.width - 10;
-        this.balanceGod.y = this.padding.top;
+        this.balanceGod.y = 10;
 
         this.balanceGodText = new PIXI.Text(0, this.style);
         this.balanceGodText.x = 110;
-        this.balanceGodText.y = this.balanceGod.y + 20;
+        this.balanceGodText.y = this.balanceGod.y + 22;
         
         this.balanceGod.addChild(this.balanceGodText);
 
@@ -221,7 +289,7 @@ class Main {
         this.volume = new PIXI.Sprite(this.id["button.png"]);
         this.volume.width = this.volume.width / 2;
         this.volume.height = this.volume.height / 2;
-        this.volume.x = this.setting.x + this.setting.width + this.padding.left;
+        this.volume.x = this.buttonRanking.x + this.buttonRanking.width + this.padding.left;
         this.volume.y = this.height - this.volume.height - this.padding.bottom;
 
         var volumeIcon = new PIXI.Sprite(this.id["volume.png"]);
@@ -232,37 +300,13 @@ class Main {
 
         this.gameScene.addChild(this.volume);
 
-         // box
-         this.box = new PIXI.Sprite(this.id["button.png"]);
-         this.box.width = this.box.width / 2;
-         this.box.height = this.box.height / 2;
-         this.box.x = this.volume.x + this.volume.width + this.padding.left;
-         this.box.y = this.height - this.box.height - this.padding.bottom;
- 
-         
-         var boxIcon = new PIXI.Sprite(this.id["box.png"]);
-         boxIcon.x =  this.box.width / 2;
-         boxIcon.y =  this.box.height / 2;
- 
-         this.box.addChild(boxIcon);
- 
-         this.box.buttonMode = true;
-         this.box.interactive = true;
-         this.box.isOpen = false;
- 
-         this.box
-         .on('mousedown', this.openScreenbox)
-         .on('touchstart', this.openScreenbox)
-         .on('click', this.openScreenbox)
-         this.gameScene.addChild(this.box); 
-
         this.customMouseIcon();
     }
 
     openScreenGame = () => {
         this.gameScene.visible = false;
 
-        this.game.destroy(true);
+        this.game.destroy(true, true);
 
         const define = {
             config: {
@@ -279,17 +323,17 @@ class Main {
         this.background.width = this.width;
         this.background.height = this.height;
 
-        this.logoMain.x = this.width / 2 - this.logoMain.width / 2;
-        this.logoMain.y = this.height / 2 - this.logoMain.height;
-        this.logoMain.visible = true;
+        this.promotionPanel.x = this.width / 2 - this.promotionPanel.width / 2;
+        this.promotionPanel.y = this.height / 2 - this.promotionPanel.height;
+        this.promotionPanel.visible = true;
 
-        this.setting.x = this.padding.left;
-        this.setting.y = this.height - this.setting.height - this.padding.bottom;
+        this.buttonRanking.x = this.padding.left;
+        this.buttonRanking.y = this.height - this.buttonRanking.height - this.padding.bottom;
 
-        this.box.x = this.volume.x + this.volume.width + this.padding.left;
-        this.box.y = this.height - this.box.height - this.padding.bottom;
+        this.buttonAccount.x = this.volume.x + this.volume.width + this.padding.left;
+        this.buttonAccount.y = this.height - this.buttonAccount.height - this.padding.bottom;
 
-        this.volume.x = this.setting.width + this.setting.x + this.padding.left;
+        this.volume.x = this.buttonRanking.width + this.buttonRanking.x + this.padding.left;
         this.volume.y = this.height - this.volume.height - this.padding.bottom;
 
         this.balanceEth.x = this.width - this.balanceEth.width - this.padding.right;
@@ -305,13 +349,13 @@ class Main {
         this.balanceGodText.y = this.balanceGod.y + 20;
 
         this.buttonPlay.x =  this.width / 2 - this.buttonPlay.width / 2;
-        this.buttonPlay.y = this.logoMain.y + this.logoMain.height + 30;
+        this.buttonPlay.y = this.promotionPanel.y + this.promotionPanel.height + 30;
 
         this.buttonAccount.x =  this.width / 2 - this.buttonAccount.width / 2;
         this.buttonAccount.y = this.buttonPlay.y + this.buttonPlay.height + 20;
 
-        // modal shop
-        if (this.box.isOpen === true) {
+        // modal buttonAccount
+        if (this.buttonAccount.isOpen === true) {
             this.boxModal.width = window.innerWidth / 2;
             this.boxModal.height = window.innerHeight / 1.2;
             this.boxModal.x = this.width / 2 - this.boxModal.width / 2;
@@ -339,9 +383,9 @@ class Main {
 
             this.buttonPlay.y = this.balanceEth.y + this.balanceEth.height + 30;
             this.buttonAccount.y = this.buttonPlay.y + this.buttonPlay.height + 20;
-            this.logoMain.visible = false;
+            this.promotionPanel.visible = false;
 
-            if (this.box.isOpen === true) {
+            if (this.buttonAccount.isOpen === true) {
                 this.boxModal.width = window.innerWidth;
                 this.boxModal.height = window.innerHeight;
                 this.boxModal.x = this.width / 2 - this.boxModal.width / 2;
@@ -359,9 +403,10 @@ class Main {
         }
     }
 
-    openScreenbox = () => {
-        if (this.box.isOpen === false) {
-            this.box.isOpen = true;
+    openScreenAccount = () => {
+        if (this.buttonAccount.isOpen === false) {
+            this.buttonAccount.isOpen = true;
+            this.buttonShop.isOpen = true;
            
             this.boxScene = new PIXI.Container();
             this.boxScene.visible = true;
@@ -370,105 +415,168 @@ class Main {
     
             this.game.stage.addChild(this.boxScene);
             
-            this.boxModal = new PIXI.Sprite(this.id["shop-modal.png"]);
+            this.boxModal = new PIXI.Sprite(this.id["account.png"]);
             this.boxModal.width = window.innerWidth / 2;
             this.boxModal.height = window.innerHeight / 1.2;
             this.boxModal.x = this.width / 2 - this.boxModal.width / 2;
             this.boxModal.y = this.padding.top + 50;
     
             // level
-            this.closeButton = new PIXI.Sprite(this.id["button.png"]);
+            this.closeButton = new PIXI.Sprite(this.id["button-close.png"]);
             this.closeButton.width = this.closeButton.width / 2;
             this.closeButton.height = this.closeButton.height / 2;
-            this.closeButton.x = this.boxModal.x - this.boxModal.width / 2 + 25;
-            this.closeButton.y = this.padding.top + 100;
-
-            const closeButtonIcon = new PIXI.Sprite(this.id["back.png"]);
-            closeButtonIcon.x = this.closeButton.width / 2 - closeButtonIcon.width / 2
-            closeButtonIcon.y = this.closeButton.height / 2 - closeButtonIcon.height / 2
+            this.closeButton.x = this.boxModal.x + 70;
+            this.closeButton.y = this.boxModal.y;
     
             this.closeButton.buttonMode = true;
             this.closeButton.interactive = true;
     
             this.closeButton
-            .on('mousedown', this.closeScreenbox)
-            .on('touchstart', this.closeScreenbox)
-            .on('click', this.closeScreenbox)
+            .on('mousedown', this.closeScreenAccount)
+            .on('touchstart', this.closeScreenAccount)
+            .on('click', this.closeScreenAccount)
 
             const addressInput = document.getElementById('form-input');
             addressInput.style.display = 'block'
             addressInput.style.width = this.boxModal.width - 100 + 'px';
             addressInput.style.left = this.boxModal.x + 50 + 'px';
             addressInput.style.top = this.boxModal.y + this.boxModal.height / 4 + 'px';
-            // const itemboxs = [];
 
-            // const itembox = new PIXI.Sprite(this.id["event1.png"]);
-            // const itemLimit = Math.ceil(this.boxModal.width / (itembox.width / 4));
-            // let rows = 50;
-            // let itemOfRows = 0;
-
-            // for (let i = 0; i < 10; i++) {
-            //     const item = new PIXI.Sprite(this.id["event1.png"]);
-            //     item.width = item.width / 4;
-            //     item.height = item.height / 4;
-
-            //     item.x = item.width * itemOfRows + 40;
-            //     item.y = rows;
-            //     itemOfRows++;
-
-            //     if (itemOfRows === itemLimit) {
-            //         rows += (itemboxs[i - 1].y + item.height);
-            //         itemOfRows = 0;
-            //     }
-
-            //     itemboxs.push(item);
-
-            //     item.buttonMode = true;
-            //     item.interactive = true;
-        
-            //     item
-            //     .on('mousedown', (e) => this.selectItembox(e, i))
-            //     .on('touchstart', (e) => this.selectItembox(e, i))
-            //     .on('click', (e) => this.selectItembox(e, i))
-
-            //     this.boxModal.addChild(item);
-            // }
-    
-            if (window.screen.width < 578) {
-                if (this.box.isOpen === true) {
-                    this.boxModal.width = window.innerWidth;
-                    this.boxModal.height = window.innerHeight;
-                    this.boxModal.x = this.width / 2 - this.boxModal.width / 2;
-                    this.boxModal.y = 0;
-
-                    this.closeButton.x = this.boxModal.x + 25;
-                    this.closeButton.y = this.padding.top + 100;
-
-                        
-                    const addressInput = document.getElementById('form-input');
-                    addressInput.style.display = 'block'
-                    addressInput.style.width = this.boxModal.width - 100 + 'px';
-                    addressInput.style.left = this.boxModal.x + 50 + 'px';
-                    addressInput.style.top = this.boxModal.y + this.boxModal.height / 4 + 'px';
-                }
-            }
             this.boxModal.addChild(this.closeButton);
     
             this.boxScene.addChild(this.boxModal);
         }
     }
 
-    selectItembox = (event, index) => {
-        console.log(event);
-        console.log(index);
+    openScreenShop= () => {
+        if (this.buttonShop.isOpen === false) {
+            this.buttonShop.isOpen = true;
+            this.buttonAccount.isOpen = true;
+           
+            this.shopScene = new PIXI.Container();
+            this.shopScene.visible = true;
+            this.shopScene.interactive = true;
+            this.shopScene.cursor = "pointer";
+    
+            this.game.stage.addChild(this.shopScene);
+            
+            this.shopModal = new PIXI.Sprite(this.id["shop.png"]);
+            this.shopModal.width = window.innerWidth / 2;
+            this.shopModal.height = window.innerHeight / 1.2;
+            this.shopModal.x = this.width / 2 - this.shopModal.width / 2;
+            this.shopModal.y = this.padding.top + 50;
+    
+            // level
+            this.closeButtonShop = new PIXI.Sprite(this.id["button-close.png"]);
+            this.closeButtonShop.width = this.closeButtonShop.width / 2;
+            this.closeButtonShop.height = this.closeButtonShop.height / 2;
+            this.closeButtonShop.x = this.shopModal.x + 70;
+            this.closeButtonShop.y = this.shopModal.y;
+    
+            this.closeButtonShop.buttonMode = true;
+            this.closeButtonShop.interactive = true;
+    
+            this.closeButtonShop
+            .on('mousedown', this.closeScreenShop)
+            .on('touchstart', this.closeScreenShop)
+            .on('click', this.closeScreenShop)
+
+            const shopPanel = document.getElementById('shop-panel');
+
+            if (shopPanel) {
+                shopPanel.style.display = 'block'
+                shopPanel.style.width = this.shopModal.width - 100 + 'px';
+                shopPanel.style.left = this.shopModal.x + 50 + 'px';
+                shopPanel.style.top = this.shopModal.y + 110 + 'px';
+            }
+
+            this.shopModal.addChild(this.closeButtonShop);
+    
+            this.shopScene.addChild(this.shopModal);
+        }
     }
 
-    closeScreenbox = () => {
+    openScreenRank= () => {
+        if (this.buttonRanking.isOpen === false) {
+            this.buttonShop.isOpen = true;
+            this.buttonAccount.isOpen = true;
+            this.buttonRanking.isOpen = true;
+           
+            this.rankScene = new PIXI.Container();
+            this.rankScene.visible = true;
+            this.rankScene.interactive = true;
+            this.rankScene.cursor = "pointer";
+    
+            this.game.stage.addChild(this.rankScene);
+            
+            this.rankModal = new PIXI.Sprite(this.id["top1.png"]);
+            this.rankModal.width = window.innerWidth / 2;
+            this.rankModal.height = window.innerHeight / 1.2;
+            this.rankModal.x = this.width / 2 - this.rankModal.width / 2;
+            this.rankModal.y = this.padding.top + 50;
+    
+            // level
+            this.closeButtonRank = new PIXI.Sprite(this.id["button-close.png"]);
+            this.closeButtonRank.width = this.closeButtonRank.width / 2;
+            this.closeButtonRank.height = this.closeButtonRank.height / 2;
+            this.closeButtonRank.x = this.rankModal.x + 70;
+            this.closeButtonRank.y = this.rankModal.y;
+    
+            this.closeButtonRank.buttonMode = true;
+            this.closeButtonRank.interactive = true;
+    
+            this.closeButtonRank
+            .on('mousedown', this.closeScreenRank)
+            .on('touchstart', this.closeScreenRank)
+            .on('click', this.closeScreenRank)
+
+            const rankPanel = document.getElementById('rank-panel');
+
+            if (rankPanel) {
+                rankPanel.style.display = 'block'
+                rankPanel.style.width = this.shopModal.width - 100 + 'px';
+                rankPanel.style.left = this.shopModal.x + 50 + 'px';
+                rankPanel.style.top = this.shopModal.y + 110 + 'px';
+            }
+
+            this.rankModal.addChild(this.closeButtonRank);
+    
+            this.rankScene.addChild(this.rankModal);
+        }
+    }
+
+    closeScreenAccount = () => {
         this.boxScene.visible = false;
-        this.box.isOpen = false;
+        this.buttonAccount.isOpen = false;
+        this.buttonShop.isOpen = false;
         const addressInput = document.getElementById('form-input');
         addressInput.style.display = 'none'
         this.game.stage.removeChild(this.boxScene);
+    }
+
+    closeScreenShop = () => {
+        this.shopScene.visible = false;
+        this.buttonShop.isOpen = false;
+        this.buttonAccount.isOpen = false;
+        const shopPanel = document.getElementById('shop-panel');
+        if (shopPanel) {
+            shopPanel.style.display = 'none'
+        }
+
+        this.game.stage.removeChild(this.shopScene);
+    }
+
+    closeScreenRank = () => {
+        this.rankScene.visible = false;
+        this.buttonShop.isOpen = false;
+        this.buttonAccount.isOpen = false;
+        this.buttonRanking.isOpen = false;
+        const rankPanel = document.getElementById('rank-panel');
+        if (rankPanel) {
+            rankPanel.style.display = 'none'
+        }
+
+        this.game.stage.removeChild(this.rankScene);
     }
 
     customMouseIcon = () => {

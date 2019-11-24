@@ -27,7 +27,14 @@ class Home extends React.Component {
       account: '',
       balanceEth: 0,
       currentAccount: '',
-      myAccount: [],
+      myAccount: {
+        userName: '',
+        score: 0,
+        address: '',
+        balanceEth: 0,
+        balanceToken: 0, 
+      },
+      listItemByAccount: [],
       tabCurrent: Types.TABS.WALLET,
       transaction: {
         message: '',
@@ -40,13 +47,13 @@ class Home extends React.Component {
   componentWillMount = async() => {
     const define = {
       config: {
-        urlSource: './assets/template/main.json'
+        urlSource: './assets/template/home.json'
       }
     };
 
     this.gameDev = new Main(define);
 
-    // await this.gameDev.init();
+    await this.gameDev.init();
     const options = {
 
     };
@@ -57,11 +64,11 @@ class Home extends React.Component {
   }
 
   componentWillReceiveProps = async(nextProps) => {
-    const { balanceEth } = this.state;
+    const { myAccount } = this.state;
     const { blockchain } = nextProps;
 
-    if (blockchain && blockchain.balance && blockchain.balance !== balanceEth) {
-      await this.getCurrentAccount();
+    if (blockchain && blockchain.balance && blockchain.balance !== myAccount.balanceEth) {
+      // await this.getCurrentAccount();
     }
   }
 
@@ -77,7 +84,7 @@ class Home extends React.Component {
       this.blockchain = new Blockchain(null, config, postData);
 
       await this.blockchain.init();
-
+      
 		  await this.blockchain.enableMetaMask();
 
       await this.blockchain.connectMetaMask();
@@ -87,13 +94,13 @@ class Home extends React.Component {
       if (loginAccount && loginAccount.status === true) {
         this.setState({
           login:  true,
-          myAccount: [],
         });
 
-        const dataStorage = {};
-        dataStorage[loginAccount.data.name] = loginAccount.data;
+        // const dataStorage = {};
+        // dataStorage[loginAccount.data.name] = loginAccount.data;
 
-        localStorage.setItem(Types.KEY_LOCALSTORAGE, JSON.stringify(dataStorage))
+        // localStorage.setItem(Types.KEY_LOCALSTORAGE, JSON.stringify(dataStorage))
+        await this.getCurrentAccount();
       } else {
         this.setState({isRegister:  true})
       }
@@ -109,17 +116,27 @@ class Home extends React.Component {
 
   getCurrentAccount = async() => {
     try {
-      const result = await this.blockchain.getCurrentAccount();
+      const { myAccount } = this.state;
 
-      if (result) {
-        const myData = await this.blockchain.getAccountItemFromAddress();
-        const balance = await this.blockchain.getBalanceToken();
-        this.gameDev.setBalanceEth(balance);
+      const address = await this.blockchain.getCurrentAccount();
+
+      if (address) {
+        const balanceEth = await this.blockchain.getBalance(address);
+        const balanceToken = await this.blockchain.getBalanceToken();
+
+        const dataFromBlockchain = await this.blockchain.getDataInputSmartContract();
+
+        this.gameDev.setBalanceEth(balanceEth);
+        this.gameDev.setBalanceGold(balanceToken);
+
+        myAccount.address = address;
+        myAccount.userName = dataFromBlockchain.user_name;
+        myAccount.score = dataFromBlockchain.score;
+        myAccount.balanceEth = balanceEth;
+        myAccount.balanceToken = balanceToken;
 
         this.setState({
-          currentAccount: result,
-          balanceEth: balance,
-          myAccount: myData,
+          myAccount: myAccount,
         })
       }
     } catch(err) {
@@ -130,12 +147,12 @@ class Home extends React.Component {
   renderScreenAccount = () => {
     const { blockchain } = this.props;
     const {
-      currentAccount,
+      myAccount,
     } = this.state;
 
     return (
         <Account
-          currentAccount={currentAccount}
+          myAccount={myAccount}
           blockchain={this.blockchain}
           account={{...blockchain}}
         />
@@ -152,14 +169,14 @@ class Home extends React.Component {
   }
 
   renderScreenStore = () => {
-    const { myAccount, currentAccount } = this.state;
+    const { listItemByAccount, myAccount } = this.state;
 
     return (
       <Store
         blockchain={this.blockchain}
         account={this.account}
-        itemData={myAccount}
-        currentAccount={currentAccount}
+        itemData={listItemByAccount}
+        myAccount={myAccount}
       />
     )
 
@@ -176,12 +193,18 @@ class Home extends React.Component {
       htmlView = this.renderScreenLogin();
     } else {
       // htmlView = this.renderScreenAccount();
-      htmlView = this.renderScreenStore();
+      // htmlView = this.renderScreenStore();
     }
 
     return (
       <div className="home">
          {htmlView}
+         <div className="account-panel">
+           {this.renderScreenAccount()}
+         </div>
+         <div className="shop-panel">
+           {this.renderScreenStore()}
+         </div>
       </div>
     );
   }

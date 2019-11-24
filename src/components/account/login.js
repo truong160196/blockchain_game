@@ -80,12 +80,6 @@ class Login extends React.Component {
 	}
   }
 
-  changeTabs = (tab) => {
-	this.setState({
-		tabCurrent: tab,
-	})
-  }
-
   closeNotification = () => {
 	this.setState({
 		notification: {
@@ -137,69 +131,6 @@ class Login extends React.Component {
 	}
   }
 
-  LoginAccount = async() => {
-	  try {
-		const { account, blockchain } = this.props;
-
-		const userName = $('#username').val();
-
-		if (userName) {
-			const address = await blockchain.getCurrentAccount();
-
-			const dataAccount = await blockchain.checkExitsAccount(userName, address);
-
-			if (dataAccount && dataAccount.status === true && dataAccount.data) {
-				const result = await account.setDataUser(dataAccount.data);
-				if (result) {
-					this.setState({
-						notification: {
-						display: 'block',
-						type: 'success',
-						loginMetaMask: true,
-						message: 'Login success!',
-						}
-					})	
-				}
-			} else {
-				this.setState({
-					notification: {
-					display: 'block',
-					type: 'danger',
-					loginMetaMask: true,
-					message: 'Please check username or login MetaMask',
-					}
-				})	
-			}
-		}
-
-		setTimeout(() => {
-			this.closeNotification();
-		}, 3600);
-	  } catch (err) {
-		  console.error(err);
-	  }
-  }
-
-  renderLoginHtml = () => {
-	  const { currentAccount } = this.state;
-
-	  return (
-		  <div className="login">
-			  <div className="col-sm-12 form-group">
-				<label>Wallet Address</label>
-			  	<input type="text" className="form-control input-address" name="address" id="address" value={currentAccount} disabled/>
-			  </div>
-			  <div className="col-sm-12 form-group">
-				<label>Username</label>
-			  	<input type="text" className="form-control input-username" name="username" id="username" placeholder="Please enter username"/>
-			  </div>
-			  <div className="col-sm-12 form-group">
-				  <button type="button" className="btn btn-info btn-login" onClick={this.LoginAccount}>Login</button>
-				</div>
-		  </div>
-	  )
-  }
-
   renderRegisterHtml = () => {
 	const { currentAccount } = this.state;
 
@@ -218,24 +149,13 @@ class Login extends React.Component {
 				</div>
 			</div>
 		)
-	}
+}
 
   
   render() {
     const {
 		notification,
-      tabCurrent,
     } = this.state;
-
-	let tabHtml = ''
-
-	if (tabCurrent === Types.TABS.LOGIN) {
-		tabHtml = this.renderLoginHtml();
-	};
-
-	if (tabCurrent === Types.TABS.REGISTER) {
-		tabHtml = this.renderRegisterHtml();
-	};
 
     return (
 		<div className='login-panel'>
@@ -255,12 +175,8 @@ class Login extends React.Component {
 				<button type="button" className="btn btn-default" onClick={() => this.changeProviderNetwork()}>Demo Game</button>
 			</div>
 			<div className="login-body">
-				<div className="tab-button">
-					<button type="button" className="btn btn-info active" onClick={() => this.changeTabs(Types.TABS.LOGIN)}>Login</button>
-					<button type="button" className="btn btn-success" onClick={() => this.changeTabs(Types.TABS.REGISTER)}>Register</button>
-				</div>
 				<div className="tab-body">
-					{tabHtml}
+					{this.renderRegisterHtml()}
 				</div>
 			</div>
 		</div>

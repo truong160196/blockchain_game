@@ -1,23 +1,71 @@
-.tab-button {
+.store {
     position: absolute;
     z-index: 999;
-    left: 50%;
 }
+
+.tab-button {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    justify-items: center;
+    border-bottom: 3px solid #0086b3;
+}
+
+.tab-button .btn-tab {
+    margin-left: 5px;
+    margin-right: 5px;
+    background: #0086b3;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 10px 10px 0 0;
+}
+
+.tab-button .btn-tab:hover,
+.tab-button .btn-tab:focus
+{
+    background: #007399;
+    color: #ffff00;
+}
+
+.tab-button .btn-tab.active
+{
+    background: #007399;
+    color: #ffff00;
+}
+
 .store-list {
-    position: absolute;
-    z-index: 999;
-    top : 150px;
-    left: 50%;
-    transform: translate(-50%);
-    min-width: 300px;
-    max-height: 550px;
+    position: relative;
     padding: 15px;
-    overflow-y: scroll;
-    overflow-x: hidden;
+    min-height: 250px;
+    overflow-y: hidden;
+    overflow-x: scroll;
+}
+
+::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    background-color: #b3d9ff;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar
+{
+	width: 10px;
+    background-color: #b3d9ff;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb
+{
+	background-color: #0066cc;
+    border: 1px solid #0059b3;
+    border-radius: 10px;
 }
 
 .store-list .store-grid {
     position: relative;
+    display: inline-flex;
 }
 
 .store-list .store-grid .store-item {
@@ -31,21 +79,48 @@
 }
 
 .store-list .store-grid .store-item h4 {
-    font-weight: 600;
+    font-weight: 900;
+    font-size: 25px;
+    color: #ffcc00;
+}
+
+.store-list .store-grid .store-item .item-detail {
+   min-height: 50px;
+}
+
+.store-list .store-grid .store-item .item-detail h5 {
+    font-weight: 400;
+    font-size: 18px;
+    color: #ffffff;
 }
 
 .store-list .store-grid .store-item .image-item {
     width: 100%;
     height: 200px;
+    margin-top: 10px;
 }
 
 .store-list .store-grid .store-item .button-group {
     position: relative;
     margin-top: 15px;
+    width: 100%;
+    text-align: center;
 }
 
 .btn-buy-eth {
     width: 100%;
     margin-bottom: 5px;
     border-radius: 10px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 20px;
+    border: 2px solid #cc7a00;
+    background-image: linear-gradient(#cc6600, #ff8000, #cc6600);
+}
+
+.btn-buy-eth:hover,
+.btn-buy-eth:focus
+{
+    border: 2px solid #cc7a00;
+    background-image: linear-gradient(#ff8c1a, #ffa64d, #ff8c1a);
 }

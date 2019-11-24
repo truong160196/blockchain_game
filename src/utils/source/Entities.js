@@ -50,6 +50,9 @@ class Entities {
 		this.numberEntities = arg.numberEntities;
 
 		this.score = 0;
+
+		this.pause = false;
+
 		this.init();
 	}
 
@@ -61,53 +64,63 @@ class Entities {
 		}
 
 		setInterval(() => {
-			this.entities.addChild(this.createEntities());
+			if (this.pause === false) {
+				this.entities.addChild(this.createEntities());
+			} 
 		}, this.timeAppend * 3600);
 
 		setInterval(() => {
-			const lastEntities = this.entities.children.length - 1;
-			if (lastEntities > 3) {
-				this.entities.removeChildAt(lastEntities)
+			if (this.pause === false) {
+				const lastEntities = this.entities.children.length - 1;
+				if (lastEntities > 3) {
+					this.entities.removeChildAt(lastEntities)
+				}
 			}
 		}, this.timeAppend * 3600 * 2);
 	}
 	
     updateEntities = (bunny) => {
-		//Move the blob
-		bunny.x += bunny.vx + this.speedUp / 60.0;
-		bunny.y += bunny.vy + this.speedUp / 60.0;
+		if (this.pause === false) {
+			//Move the blob
+			bunny.x += bunny.vx + this.speedUp / 60.0;
+			bunny.y += bunny.vy + this.speedUp / 60.0;
 
-		//Check the blob's screen boundaries
-		let blobHitsWall = this.contain(bunny, {
-			x: this.gameScreen.x,
-			y: this.gameScreen.y,
-			width: this.gameScreen.width,
-			height: this.gameScreen.height
-		});
-		//If the blob hits the top or bottom of the stage, reverse
-		//its direction
-		const positionX = this.gameScreen.width;
-		const positionY = this.gameScreen.height;
+			//Check the blob's screen boundaries
+			let blobHitsWall = this.contain(bunny, {
+				x: this.gameScreen.x,
+				y: this.gameScreen.y,
+				width: this.gameScreen.width,
+				height: this.gameScreen.height
+			});
+			//If the blob hits the top or bottom of the stage, reverse
+			//its direction
+			const positionX = this.gameScreen.width;
+			const positionY = this.gameScreen.height;
 
-		if (blobHitsWall === "right") {
-			bunny.vx -= positionX + 2 * this.padding;
+			if (blobHitsWall === "right") {
+				bunny.vx -= positionX + 2 * this.padding;
+			}
+
+			if (blobHitsWall === "left") {
+				bunny.vx += positionX + 2 * this.padding;
+			}
+
+			if (blobHitsWall === "bottom") {
+				bunny.vy -= positionY + 2 * this.padding;
+			}
+
+			if (blobHitsWall === "top") {
+				bunny.vy += positionY + 2 * this.padding;
+			}
+			
+			bunny.rotation += this.rotation;
 		}
-
-		if (blobHitsWall === "left") {
-			bunny.vx += positionX + 2 * this.padding;
-		}
-
-		if (blobHitsWall === "bottom") {
-			bunny.vy -= positionY + 2 * this.padding;
-		}
-
-		if (blobHitsWall === "top") {
-			bunny.vy += positionY + 2 * this.padding;
-		}
-		
-		bunny.rotation += this.rotation;
 	}
 	
+	setPause = () => {
+		this.pause = true;
+	}
+
 	createEntities = () => {
 		const bunny = new PIXI.Sprite(this.player.texture);
 		
@@ -230,7 +243,7 @@ class Entities {
 					explorer.destroyBall(balls[index], index)
 		
 					if (scoreElement) {
-						scoreElement.score += 1;
+						scoreElement.score += 10;
 						scoreElement.text = formatCurrency(scoreElement.score);
 					}
 				}

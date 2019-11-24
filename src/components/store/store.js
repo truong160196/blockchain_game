@@ -1,24 +1,30 @@
-    import React from 'react';
+import React from 'react';
 
-    import './store.css';
+import './store.css';
 
-    import * as Types from '../../constant/ActionTypes';
-    import {dynamicSort} from '../../utils/formatNumber';
+import * as Types from '../../constant/ActionTypes';
+import {dynamicSort, formatCurrency} from '../../utils/formatNumber';
 
-    // import component
+// import component
 
-    class Store extends React.Component {
+import Notification from '../notification/notification';
+import Waiting from '../waiting/waiting';
+
+class Store extends React.Component {
     constructor(props) {
-    super(props)
-    this.state = {
-        store: {
-            message: '',
-            type: 'info',
-            display: 'none'
-        },
-        storeDataOnline: [],
-        currentTabs: Types.TABS.STORE_LIST
-    }
+        super(props)
+        this.state = {
+            notice: {
+                message: '',
+                isConfirm: false,
+                title: 'Notification!',
+                visible: false,
+            },
+            waiting: false,
+            storeDataOnline: [],
+            itemData: [],
+            currentTabs: Types.TABS.STORE_LIST
+        }
     }
 
     componentWillMount = async() => {
@@ -29,22 +35,46 @@
         const {storeDataOnline} = this.state;
         const {blockchain} = this.props;
 
-        const listDataStore = await blockchain.getDataInputStoreContract();
+        if (blockchain && typeof blockchain.getDataInputStoreContract === 'function') {
+            const listDataStore = await blockchain.getDataInputStoreContract();
 
-        if (listDataStore && listDataStore.length !== storeDataOnline.length) {
-            this.setState({storeDataOnline: listDataStore})
+            if (listDataStore && listDataStore.length !== storeDataOnline.length) {
+                this.setState({storeDataOnline: listDataStore})
+            }
         }
+    }
 
+    cancelModal = () => {
+        const { notice } = this.state;
+        notice.visible =  false;
+
+        this.setState({
+            notice: notice,
+        })
+    }
+
+    confirmModal = () => {
+        const { notice } = this.state;
+        notice.visible =  false;
+
+        this.setState({
+            notice: notice,
+        })
     }
 
     buyItemEth = async(item) => {
+        let message = '';
+
         try {
+            this.setState({
+                waiting: true,
+            });
             const {blockchain} = this.props;
 
             const address = await blockchain.getCurrentAccount();
     
             const myBalance = await blockchain.getBalanceToken(address);
-    
+
             if (item.priceEth < myBalance) {
                 const dataRequest = {
                     id: item.id,
@@ -53,201 +83,156 @@
                 }
                 
                 const result = await blockchain.buyItem(dataRequest);
-    
-                if (result && result.txHash) {
-                    this.setState({
-                        store: {
-                            message: 'Please check transaction: ' + result.txHash,
-                            type: 'success',
-                            display: 'block'
-                        }
-                    })
+                if (result.status === true) {
+                    message = (
+                        <div>
+                            <h5 style={{color: 'green'}}>Buy Item Successfully! Please check transaction detail</h5>
+                            <a href={`https://ropsten.etherscan.io/tx/${result.message}`}  target="_blank" >{result.message}</a>
+                        </div>
+                    );
                 } else {
-                    this.setState({
-                        store: {
-                            message: 'Buy item fail',
-                            type: 'danger',
-                            display: 'block'
-                        }
-                    }) 
+                    if (!result.message) {
+                        message = (
+                          <h5 style={{color: 'red'}}>Something is wrong with your request, possibly due to invalid argument.</h5>
+                        );
+                      } else {
+                        message = (
+                          <h5 style={{color: 'red'}}>{result.message}</h5>
+                        );
+                      }
                 }
             } else {
-                this.setState({
-                    store: {
-                        message: 'The account has not enough balance',
-                        type: 'danger',
-                        display: 'block'
-                    }
-                }) 
+                message = (
+                    <h5 style={{color: 'red'}}>The account has not enough balance</h5>
+                );
             }
-
-            setTimeout(() => {
-                this.closeNotification();
-            }, 3600);
-
         } catch (err) {
             console.error(err);
+            message = (
+                <h5 style={{color: 'red'}}>An unexpected server error was encountered, we are working on fixing this</h5>
+            );
         }
+
+        this.setState({
+            notice: {
+                message: message,
+                visible: true,
+                title: `Buy Item ${item.name}`
+            },
+            waiting: false,
+        });
     }
 
     sellItemEth = async(item, element) => {
-        try {
-            const {blockchain} = this.props;
+        let message = '';
 
-            const address = await blockchain.getCurrentAccount();
-    
-            const myBalance = await blockchain.getBalance(address);
-    
-            const myAccountBlockChain = await blockchain.getAccountFromAddress(address);
+        try {
+            this.setState({
+                waiting: true,
+            });
+            
+            const {blockchain} = this.props;
 
             const qtyItem = 1;
     
-            if (item.priceEth < myBalance) {
-                const objItem = myAccountBlockChain.equipment.findIndex(obj => obj.id === item.id);
-                
-                if (objItem > -1) {
-                    myAccountBlockChain.equipment[objItem].count += qtyItem;
-                } else {
-                    const itemInfo = {
-                        id: item.id,
-                        count: 1,
-                    };
-    
-                    myAccountBlockChain.equipment.push(itemInfo); 
-                }
-    
-                const dataRequest = {
-                    type: Types.DATA_TYPE.STORE_SELL,
-                    data: myAccountBlockChain,
-                    item: {
-                        id: element.id,
-                        address: element.address,
-                        product: element.product,
-                        qtyItem: qtyItem,
-                        price: element.price,
-                        timeOrder: new Date().getTime(),
-                    }
-                }
-                
-                const result = await blockchain.sellItem(dataRequest);
-    
-                if (result && result.txHash) {
-                    this.setState({
-                        store: {
-                            message: 'Please check transaction: ' + result.txHash,
-                            type: 'success',
-                            display: 'block'
-                        }
-                    })
-                } else {
-                    this.setState({
-                        store: {
-                            message: 'Buy item fail',
-                            type: 'danger',
-                            display: 'block'
-                        }
-                    }) 
-                }
-            } else {
-                this.setState({
-                    store: {
-                        message: 'The account has not enough balance',
-                        type: 'danger',
-                        display: 'block'
-                    }
-                }) 
+            const dataRequest = {
+                address: element.address_to,
+                id: item.id,
+                qtyItem: qtyItem,
+                price: element.price,
+                id_order: element.id,
             }
-
-            setTimeout(() => {
-                this.closeNotification();
-            }, 3600);
-
+            
+            const result = await blockchain.sellItem(dataRequest);
+            if (result.status === true) {
+                message = (
+                    <div>
+                        <h5 style={{color: 'green'}}>Order Item Successfully! Please check transaction detail</h5>
+                        <a href={`https://ropsten.etherscan.io/tx/${result.message}`}  target="_blank" >{result.message}</a>
+                    </div>
+                );
+            } else {
+                if (!result.message) {
+                    message = (
+                      <h5 style={{color: 'red'}}>Something is wrong with your request, possibly due to invalid argument.</h5>
+                    );
+                  } else {
+                    message = (
+                      <h5 style={{color: 'red'}}>{result.message}</h5>
+                    );
+                  }
+            }
         } catch (err) {
             console.error(err);
+            message = (
+                <h5 style={{color: 'red'}}>An unexpected server error was encountered, we are working on fixing this</h5>
+            );
         }
+
+        this.setState({
+            notice: {
+                message: message,
+                visible: true,
+                title: `Buy Item ${item.name}`
+            },
+            waiting: false,
+        });
     }
 
 
     orderItem = async(item) => {
+        let message = '';
+
         try {
+            this.setState({
+                waiting: true,
+            });
+            
             const {blockchain} = this.props;
 
-            const valuePice = item.priceEth + item.priceEth * 15 / 100;
+            const valuePice = item.priceEth;
             const qtyItem = 1;
-
-            const address = await blockchain.getCurrentAccount();
     
-            const myDataAccount = await blockchain.getAccountFromAddress(address);
-
-            const objIndex= myDataAccount.equipment.findIndex(obj => obj.id === item.id);
-    
-            if (objIndex > -1) {
-                if (myDataAccount.equipment[objIndex].count >= qtyItem) {
-
-                    myDataAccount.equipment[objIndex].count -= qtyItem;
-
-                    if (myDataAccount.equipment[objIndex].count === 0) {
-                        myDataAccount.equipment.splice(objIndex, 1)
-                    }
-
-                    myDataAccount.equipment = [];
-
-                    const dataRequest = {
-                        type: Types.DATA_TYPE.STORE_ORDER,
-                        data: myDataAccount,
-                        item: {
-                            id: new Date().getTime(),
-                            address: address,
-                            product: item.id,
-                            qtyItem: qtyItem,
-                            price: valuePice,
-                            timeOrder: new Date().getTime()
-                        }
-                    }
-                    
-                    const result = await blockchain.orderItem(dataRequest);
-        
-                    if (result && result.txHash) {
-                        this.setState({
-                            store: {
-                                message: 'Please check transaction: ' + result.txHash,
-                                type: 'success',
-                                display: 'block'
-                            }
-                        })
-                    } else {
-                        this.setState({
-                            store: {
-                                message: 'Buy item fail',
-                                type: 'danger',
-                                display: 'block'
-                            }
-                        }) 
-                    }
-                } else {
-                    this.setState({
-                        store: {
-                            message: 'Invalid request',
-                            type: 'danger',
-                            display: 'block'
-                        }
-                    }) 
-                }
-            } else {
-                this.setState({
-                    store: {
-                        message: 'Can not find item',
-                        type: 'danger',
-                        display: 'block'
-                    }
-                }) 
+            const dataRequest = {
+                id: item.id,
+                qtyItem: qtyItem,
+                price: valuePice,
             }
-            setTimeout(() => {
-                this.closeNotification();
-            }, 3600);
+            
+            const result = await blockchain.orderItem(dataRequest);
+            if (result.status === true) {
+                message = (
+                    <div>
+                        <h5 style={{color: 'green'}}>Order Item Successfully! Please check transaction detail</h5>
+                        <a href={`https://ropsten.etherscan.io/tx/${result.message}`}  target="_blank" >{result.message}</a>
+                    </div>
+                );
+            } else {
+                if (!result.message) {
+                    message = (
+                      <h5 style={{color: 'red'}}>Something is wrong with your request, possibly due to invalid argument.</h5>
+                    );
+                  } else {
+                    message = (
+                      <h5 style={{color: 'red'}}>{result.message}</h5>
+                    );
+                  }
+            }
         } catch (err) {
             console.error(err);
+            message = (
+                <h5 style={{color: 'red'}}>An unexpected server error was encountered, we are working on fixing this</h5>
+            );
         }
+
+        this.setState({
+            notice: {
+                message: message,
+                visible: true,
+                title: `Buy Item ${item.name}`
+            },
+            waiting: false,
+        });
     }
 
     closeNotification = () => {
@@ -266,7 +251,7 @@
 
         const listItem = Types.STORE.item.map((element, index) => {
             return (
-                <div className="store-item col-sm-12 col-md-4 col-lg-3" key={`store_list_${element.id}_${index}`}>
+                <div className="store-item" key={`store_list_${element.id}_${index}`}>
                     <h4>{element.name}</h4>
                     <div className="image-item" >
                         <img src={element.image} title="product" alt={`product_${element.id}`}/>
@@ -274,12 +259,12 @@
                     <div className="item-detail">
                         <h5>{element.detail}</h5>
                     </div>
-                    <div className="button-group row">
+                    <div className="button-group">
                         <button
                             className="btn btn-info btn-buy-eth col-sm-12"
                             onClick={() => this.buyItemEth(element)}
                         >
-                        {element.priceEth}
+                        {`${formatCurrency(element.priceEth, 0)} ${Types.TOKEN}`}
                         </button>
                     </div>
                 </div>
@@ -288,7 +273,7 @@
 
         return (
         <div className="store-list">
-            <div className="store-grid row">
+            <div className="store-grid">
                 {listItem}
             </div>
         </div>
@@ -297,17 +282,15 @@
 
     renderTabsStoreOnline = () => {
         let {storeDataOnline} = this.state;
-        const { currentAccount } = this.props;
-
+        const { myAccount } = this.props;
         storeDataOnline = storeDataOnline.sort(dynamicSort('time_update', Types.SORT.DESC))
 
         const listItem = storeDataOnline.map((element, index) => {
 
             const dataItem = Types.STORE.item.find(obj => obj.id === Number(element.product))
-
-            if (dataItem) {
+            if (dataItem && dataItem.id) {
                 return (
-                    <div className="store-item col-sm-12 col-md-4 col-lg-3" key={`store_online_${dataItem.id}_${index}`}>
+                    <div className="store-item" key={`store_online_${dataItem.id}_${index}`}>
                         <h4>{dataItem.name}</h4>
                         <div className="image-item" >
                             <img src={dataItem.image} title="product" alt={`product_${dataItem.id}`} />
@@ -317,17 +300,17 @@
                             <h5>Quantity: {element.qtyItem}</h5>
                             <h5 style={{maxHeight: 200, overflow: 'hidden'}}>From Address: {element.address} ...</h5>
                         </div>
-                        <div className="button-group row">
+                        <div className="button-group">
                             <button
-                                className="btn btn-success btn-buy-eth col-sm-12"
-                                style={{display: element.address !== currentAccount ? 'block': 'none'}}
+                                className="btn btn-success btn-buy-eth"
+                                style={{display: element.address_to.toUpperCase() != myAccount.address.toUpperCase() ? 'block': 'none'}}
                                 onClick={() => this.sellItemEth(dataItem, element)}
                             >
                                 {element.price}
                             </button>
                             <button
-                                className="btn btn-info btn-buy-eth col-sm-12"
-                                style={{display: element.address === currentAccount ? 'block': 'none'}}
+                                className="btn btn-info btn-buy-eth"
+                                style={{display: element.address_to.toUpperCase() == myAccount.address.toUpperCase() ? 'block': 'none'}}
                                 onClick={() => this.removeItem(dataItem)}
                             >
                                 Remove
@@ -341,7 +324,7 @@
 
         return (
         <div className="store-list">
-            <div className="store-grid row">
+            <div className="store-grid">
                 {listItem}
             </div>
         </div>
@@ -349,59 +332,86 @@
     }
 
     renderTabsItemStore = () => {
-        const {itemData} = this.props;
+        const { itemData } = this.state;
+
         const listItem = itemData.map((element, index) => {
-            console.log(itemData)
             const dataItem = Types.STORE.item.find(obj => obj.id === Number(element.id))
             if (dataItem) {
                 return (
-                    <div className="store-item col-sm-12 col-md-4 col-lg-3" key={`myStore_${dataItem.id}_${index}`}>
+                    <div className="store-item" key={`myStore_${dataItem.id}_${index}`}>
                         <h4>{dataItem.name}</h4>
                         <div className="image-item" >
                             <img src={dataItem.image} title="product" alt={`product_${dataItem.id}`}/>
                         </div>
                         <div className="item-detail">
-                            <h5>{dataItem.detail}</h5>
                             <h5>Quantity: {element.qtyItem}</h5>
+                            <h5>Price: {dataItem.priceEth}</h5>
                         </div>
                         <div className="button-group row">
                             <button
                                 className="btn btn-info btn-buy-eth col-sm-12"
                                 onClick={() => this.orderItem(dataItem)}
                             >
-                            {dataItem.priceEth}
+                                SELL
                             </button>
                         </div>
                     </div>
                 );
             }
             
-          return '';
+        return '';
         })
 
         return (
         <div className="store-list">
-            <div className="store-grid row">
+            <div className="store-grid">
                 {listItem}
             </div>
         </div>
         );
     }
 
-    changeTabs = (tab) => {
+    changeTabs = async(tab) => {
+        const {blockchain} = this.props;
+        const dataState = [];
+
         this.setState({
-            currentTabs: tab,
-        })
+            waiting: true,
+        });
+
+        dataState.currentTabs = tab;
+        if (blockchain) {
+            switch (tab) {
+                case Types.TABS.ITEM_ACCOUNT:
+                        const myItemData = await blockchain.getAccountItemFromAddress();
+                        if (myItemData && myItemData.length > 0) {
+                            dataState.itemData = myItemData;
+                        }
+                    break;
+                case Types.TABS.STORE_ONLINE:
+                        const storeDataOnline = await blockchain.getDataInputStoreContract();
+                        if (storeDataOnline && storeDataOnline.length > 0) {
+                            dataState.storeDataOnline = storeDataOnline;
+                        }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        dataState.waiting = false;
+
+        this.setState(dataState)
     }
 
 render() {
     const {
         currentTabs,
-        store,
+        notice,
+        waiting,
     } = this.state;
 
     let htmlView = '';
-
     switch (currentTabs) {
         case Types.TABS.STORE_LIST:
             htmlView = this.renderTabsStoreList();
@@ -418,25 +428,39 @@ render() {
     }
 
     return (
-        <div className="store">
-        <div
-            class={`alert alert-${store.type} alert-dismissible fade show notification-success`}
-            role="alert"
-            style={{display: store.display}}
-        >
-            {store.message}
-        <button type="button" class="close" onClick={this.closeNotification}>
-            <span aria-hidden="true">&times;</span>
-        </button>
-        </div>
+        <div id="shop-panel" className="store" style={{display: 'none'}}>
+            <Notification
+                title={notice.title}
+                message={notice.message}
+                visible={notice.visible}
+                isConfirm={notice.isConfirm}
+                cancelModal={this.cancelModal}
+                confirmModal={this.confirmModal}
+            />
+            <Waiting
+                waiting={waiting}
+            />
             <div className="tab-button">
-                <button className="btn btn-success" onClick={() => this.changeTabs(Types.TABS.STORE_LIST)} >Store list</button>
-                <button className="btn btn-info" onClick={() => this.changeTabs(Types.TABS.STORE_ONLINE)} >Store online</button>
-                <button className="btn btn-danger" onClick={() => this.changeTabs(Types.TABS.ITEM_ACCOUNT)} >My store</button>
+                <button
+                className={`btn btn-default btn-tab ${currentTabs === Types.TABS.STORE_LIST ? 'active' : ''}`}
+                onClick={() => this.changeTabs(Types.TABS.STORE_LIST)}
+                >
+                    Store list
+                </button>
+                <button
+                    className={`btn btn-default btn-tab ${currentTabs === Types.TABS.STORE_ONLINE ? 'active' : ''}`}
+                    onClick={() => this.changeTabs(Types.TABS.STORE_ONLINE)}
+                >
+                    Store online
+                </button>
+                <button
+                    className={`btn btn-default btn-tab ${currentTabs === Types.TABS.ITEM_ACCOUNT ? 'active' : ''}`}
+                    onClick={() => this.changeTabs(Types.TABS.ITEM_ACCOUNT)}
+                >My store</button>
             </div>
             {htmlView}
         </div>
-    );
+        );
     }
 }
 

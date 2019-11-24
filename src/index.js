@@ -12,6 +12,7 @@ import * as serviceWorker from './serviceWorker';
 
 import App from './components/app/App';
 import ErrorBoundary from './components/errorHandling/ErrorBoundary';
+import Loading from './components/waiting/waitingScreen';
 
 const store = createStore(
 	appReducers,
@@ -21,6 +22,7 @@ const store = createStore(
   ReactDOM.render(
 	<Provider store={store}>
 		<ErrorBoundary>
+        	<Loading />
 			<App />
 		</ErrorBoundary>
 	</Provider>,

@@ -6,23 +6,46 @@ contract Token {
     /// @return total amount of tokens
     function totalSupply() constant returns (uint256 supply) {}
 
+    function highScore() constant returns (uint highScore) {}
+    
     /// @param _owner The address from which the balance will be retrieved
     /// @return The balance
     function balanceOf(address _owner) constant returns (uint256 balance) {}
 
-    /// @notice send `_value` token to `_to` from `msg.sender`
-    /// @param _to The address of the recipient
-    /// @param _value The amount of token to be transferred
-    /// @return Whether the transfer was successful or not
-    function transfer(address _to, uint256 _value) returns (bool success) {}
+    function updateAccount(string _user_name, uint256 _score) returns (bool success){}
+    
+    function updateItem(uint256 _product, uint256 _qtyItem, uint256 _price) returns (bool success)  {}
 
+    function acctionReward (uint256 score) returns (bool status) {}
+    
+    function transferItem(
+        address _to,
+        uint256 _value,
+        uint256 _qtyItem,
+        uint256 _product,
+        uint _id_order
+    ) returns (bool success) {}
+    
+     function transferGiftItem(
+        address _to,
+        uint256 _qtyItem,
+        uint256 _product,
+        uint256 _price
+        ) returns (bool success) {}
+        
+    function updateStore(
+        uint256 _product,
+        uint256 _qtyItem,
+        uint256 _price
+        ) returns (bool success) {}
+        
     /// @notice send `_value` token to `_to` from `_from` on the condition it is approved by `_from`
     /// @param _from The address of the sender
     /// @param _to The address of the recipient
     /// @param _value The amount of token to be transferred
     /// @return Whether the transfer was successful or not
     function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {}
-
+        
     /// @notice `msg.sender` approves `_addr` to spend `_value` tokens
     /// @param _spender The address of the account able to transfer the tokens
     /// @param _value The amount of wei to be approved for transfer
@@ -34,25 +57,32 @@ contract Token {
     /// @return Amount of remaining tokens allowed to spent
     function allowance(address _owner, address _spender) constant returns (uint256 remaining) {}
 
+    /// @notice send `_value` token to `_to` from `msg.sender`
+    /// @param _to The address of the recipient
+    /// @param _value The amount of token to be transferred
+    /// @return Whether the transfer was successful or not
+    function transfer(address _to, uint256 _value) returns (bool success) {}
+    
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-    event UpdateAccount(address indexed _address, string user_name, uint256 score);
-    event UpdateItem(address indexed _address, uint indexed _product, uint256 _qtyItem, uint256 _price);
+    event UpdateAccount(address indexed _address, string user_name, uint score);
+    event UpdateItem(address indexed _address, uint256 indexed _product, uint256 _qtyItem, uint256 _price);
     event TransferItem(
-        address indexed _to,
         address indexed _from,
+        address indexed _to,
         uint256 indexed _product,
         uint256 _value,
         uint256 _qtyItem
         );
     event UpdateStore(address indexed _address_to, uint indexed id,  uint256 _product, uint256 _qtyItem, uint256 _price);
+    event Reward(address indexed _address, uint256 value);
 }
 
 
 contract StandardToken is Token {
      struct Account {
           string user_name;
-          uint256 score;
+          uint score;
      }
      
     struct Item {
@@ -70,7 +100,15 @@ contract StandardToken is Token {
           uint256 time_update;
      }
      
+    struct Rank {
+          address address_player;
+          uint score;
+     }
+     
+    uint public highScore = 0;
+     
     Store[] stores;
+    Rank[] ranks;
     
     function transfer(address _to, uint256 _value) returns (bool success) {
         //Default assumes totalSupply can't be over max (2^256 - 1).
@@ -112,11 +150,11 @@ contract StandardToken is Token {
       return allowed[_owner][_spender];
     }
     
-    function updateAccount(address _address, string _user_name, uint256 _score) returns (bool success) {
+    function updateAccount(string _user_name, uint _score) returns (bool success) {
         Account memory account = Account(_user_name, _score);
-        accounts[_address] = account;
+        accounts[msg.sender] = account;
       
-        UpdateAccount(_address, _user_name, _score);
+        UpdateAccount(msg.sender, _user_name, _score);
         return true;
     }
     
@@ -124,86 +162,153 @@ contract StandardToken is Token {
         return accounts[_address];
     }
     
-    function getIdItem (address _address, uint256 _product) view returns (uint idex, bool status){
+    function checkRank(address _address) returns (bool isCheck, uint index) {
+      for (uint i; i < ranks.length; i++){
+          if (ranks[i].address_player == _address)
+          return (true, i);
+      }
+      return (false, 0);
+    }
+    
+    function acctionReward (uint score, address _address) returns (bool status) {
+     if (score > 0 && score > highScore) {
+         highScore = score;
+         accounts[_address].score = score;
+
+         ( bool checkTop, uint indexRank) = checkRank(_address);
+         
+         if (checkTop == false) {
+             Rank memory rank = Rank(_address, score);
+             ranks.push(rank);
+         } else {
+            ranks[indexRank].score = score; 
+         }
+         
+         transferFrom(owner, _address, 15);
+         Reward(_address, 15);
+         return true;
+     } else {
+        accounts[_address].score = score;
+        return false;  
+     }
+
+    }
+    
+    function getIdItem (address _address, uint256 _product) returns (uint idex, bool status){
       for (uint i; i < items[_address].length; i++){
           if (items[_address][i].id == _product)
           return (i, true);
       }
       return (0, false);
     }
+    
+    function getIndexStore(uint256 order_id) returns (uint index, bool status) {
+        for(uint i = 0; i< stores.length; i++) {
+          if(order_id == stores[i].id) return (i, true);
+        }
+        return (0, false);
+     }
   
-    function updateItem(address _address, uint256 _product, uint256 _qtyItem, uint256 _price) returns (bool success) {
-         Item memory item = Item(_product, _qtyItem, _price);
-         if (items[_address].length == 0) {
-            items[_address].push(item);
-         } else {
-            (uint idCheck, bool status) = getIdItem(_address, _product);
+    function updateItem(uint256 _product, uint256 _qtyItem, uint256 _price) returns (bool success) {
+        uint256 valueTranfer = (_qtyItem * _price);
+        require(balances[msg.sender] >= valueTranfer, "Not enough money sent.");
+        if (balances[msg.sender] >= valueTranfer && valueTranfer > 0) {
+             Item memory item = Item(_product, _qtyItem, _price);
+             (uint idCheck, bool status) = getIdItem(msg.sender, _product);
             if (status == true && idCheck >= 0) {
-                 items[_address][idCheck].qtyItem += _qtyItem; 
+                 items[msg.sender][idCheck].qtyItem += _qtyItem; 
             } else {
-                items[_address].push(item); 
+                items[msg.sender].push(item); 
             }
-         }
-        
-        UpdateItem(_address, _product, _qtyItem, _price);
-        
-        return true;
+             
+            transfer(owner, valueTranfer);
+            UpdateItem(owner, _product, _qtyItem, _price);
+
+            return true;
+        } else {
+            return false;
+        }
     }
     
     function getItem(address _address) public view returns (Item[]){
         return items[_address];
     }
 
-    function removeItem( address _address, uint256 _product) returns (bool success) {
-        delete items[_address][_product];
-        return true;
-    }
-    
     function transferItem(
         address _to,
-        address _from,
         uint256 _value,
         uint256 _qtyItem,
         uint256 _product,
         uint _id_order
         ) returns (bool success) {
+        uint256 valueTranfer = (_qtyItem * _value);
+        require(balances[msg.sender] >= valueTranfer, "Not enough money sent.");
         
-        if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0 && items[_to][_product].qtyItem >= _qtyItem ) {
-            items[_to][_product].qtyItem -= _qtyItem;
-            items[_from][_product].qtyItem += _qtyItem;
-            items[_from][_product].price += _value;
+        (uint indexOrder, bool statusOrder) = getIndexStore(_id_order);
+         require(statusOrder == true, "Order not exits");
+         
+        if (statusOrder == true) {
+                require(stores[indexOrder].qtyItem >= _qtyItem, "Not enough quantity provider");
+                if (balances[msg.sender] >= valueTranfer && valueTranfer > 0 && stores[indexOrder].qtyItem >= _qtyItem ) {
+                Item memory item = Item(_product, _qtyItem, _value);
+               (uint idCheck, bool status) = getIdItem(msg.sender, _product);
+                if (status == true && idCheck >= 0) {
+                     items[msg.sender][idCheck].qtyItem += _qtyItem; 
+                } else {
+                    items[msg.sender].push(item); 
+                }
+                
+                stores[indexOrder].qtyItem -= _qtyItem;
+                
+                if (stores[indexOrder].qtyItem == 0) {
+                    delete stores[indexOrder];
+                }
+                
+                transfer(_to, valueTranfer);
+                TransferItem(msg.sender, _to, _product, _value, _qtyItem);
+                return true;
+            } else { return false; }
+        } else { return false; }
+       
+    }
+    
+    function transferGiftItem(
+        address _to,
+        uint256 _qtyItem,
+        uint256 _product,
+        uint256 _price
+        ) returns (bool success) {
+        (uint idCheck, bool status) = getIdItem(msg.sender, _product);
+        
+        if (idCheck >= 0 && status == true ) {
+            items[msg.sender][idCheck].qtyItem -= _qtyItem;
             
-            stores[_id_order].qtyItem -= _qtyItem;
-            
-            if (stores[_id_order].qtyItem == 0) {
-                delete stores[_id_order];
+            Item memory item = Item(_product, _qtyItem, _price);
+            (uint idCheckTo, bool statusTo) = getIdItem(_to, _product);
+            if (statusTo == true && idCheckTo >= 0) {
+                 items[_to][idCheckTo].qtyItem += _qtyItem; 
+            } else {
+                items[_to].push(item); 
             }
-            
-            balances[_to] += _value;
-            balances[_from] -= _value;
-            allowed[_from][msg.sender] -= _value;
-            
-            TransferItem(_from, _to, _product, _value, _qtyItem);
+
+            TransferItem(msg.sender, _to, _product, _price, _qtyItem);
             return true;
         } else { return false; }
-
     }
     
     function updateStore(
         uint256 _product,
         uint256 _qtyItem,
-        uint256 _price,
-        address _address_to
+        uint256 _price
         ) returns (bool success) {
-        (uint idItem, bool status) = getIdItem(_address_to, _product);
-        
-        uint256 subQtyItem = items[_address_to][idItem].qtyItem - _qtyItem;
+        (uint idItem, bool status) = getIdItem(msg.sender, _product);
+        require(items[msg.sender][idItem].qtyItem >= _qtyItem, "Not enough quantity.");
         
         if (status == true && idItem >= 0) {
-            if (subQtyItem == 0) {
-                delete items[_address_to][idItem];
-            } else if (subQtyItem > 0) {
-                items[_address_to][idItem].qtyItem -= _qtyItem;
+            if (items[msg.sender][idItem].qtyItem == _qtyItem) {
+                delete items[msg.sender][idItem];
+            } else if (items[msg.sender][idItem].qtyItem > _qtyItem) {
+                items[msg.sender][idItem].qtyItem -= _qtyItem;
             } else {
                 return false;
             }
@@ -213,13 +318,13 @@ contract StandardToken is Token {
             _product,
             _qtyItem,
             _price,
-            _address_to,
+            msg.sender,
             now
             );
 
         uint id = stores.push(store) - 1;
         
-        UpdateStore(_address_to, id, _product, _qtyItem, _price);
+        UpdateStore(msg.sender, id, _product, _qtyItem, _price);
         
         return true;
         } else {
@@ -231,11 +336,16 @@ contract StandardToken is Token {
         return stores;
     }
     
+    function getRank() public view returns (Rank[]){
+        return ranks;
+    }
+    
     mapping (address => uint256) balances;
     mapping (address => mapping (address => uint256)) allowed;
     mapping (address => Account) accounts;
     mapping (address => Item[]) items;
     uint256 public totalSupply;
+    address public owner;
 }
 
 
@@ -259,6 +369,7 @@ contract ERC20Token is StandardToken {
     uint8 public decimals;                //How many decimals to show. ie. There could 1000 base units with 3 decimals. Meaning 0.980 SBX = 980 base units. It's like comparing 1 wei to 1 ether.
     string public symbol;                 //An identifier: eg SBX
     string public version = 'H1.0';       //human 0.1 standard. Just an arbitrary versioning scheme.
+    address public owner;
 
 //
 // CHANGE THESE VALUES FOR YOUR TOKEN
@@ -268,11 +379,12 @@ contract ERC20Token is StandardToken {
 
     function ERC20Token(
         ) {
-        balances[msg.sender] = 1000000;               // Give the creator all initial tokens (100000 for example)
-        totalSupply = 1000000;                        // Update total supply (100000 for example)
+        balances[msg.sender] = 10000000;               // Give the creator all initial tokens (100000 for example)
+        totalSupply = 10000000;                        // Update total supply (100000 for example)
         name = "QuocTruong";                                   // Set the name for display purposes
         decimals = 0;                            // Amount of decimals for display purposes
-        symbol = "TPI";                               // Set the symbol for display purposes
+        symbol = "QTN";                            // Set the symbol for display purposes
+        owner = msg.sender;
     }
 
     /* Approves and then calls the receiving contract */

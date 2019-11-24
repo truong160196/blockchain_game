@@ -1,10 +1,10 @@
 
 import * as PIXI from "pixi.js"
 
-import { formatCurrency } from '../../../utils/formatNumber';
-
 import Entities from '../../source/Entities';
 import Explorer from '../../source/Explorer';
+
+import GameMain from '../home/main';
 
 class Main {
     constructor(arg) {
@@ -25,6 +25,9 @@ class Main {
             fill: "white"
         });
         this.scoreNumber = 0;
+        this.timeNumber= 60;
+        this.pause = false;
+        this.event = 'entities_01'
     }
 
     init = () => {
@@ -46,8 +49,24 @@ class Main {
 
         this.loaderResource();
 
+        const loading = document.getElementById('loader');
+
+        this.loader.onProgress.add(() => {
+            if (loading) {
+                loading.style.display = 'block'
+            }
+        }); 
+        this.loader.onComplete.add(() => {
+            setTimeout(() => {
+                if (loading) {
+                    loading.style.display = 'none'
+                }
+            }, 1800);
+        });
+
         this.customMouseIcon();
 
+        this.setTimeOver();
         // window.onresize = (event) => {
         //     this.resize();
         // };
@@ -58,7 +77,7 @@ class Main {
     }
 
     loaderResource = () => {
-        this.loader.add(this.config.urlSource).load(this.setup)
+        this.loader.add(this.config.urlSource).load(this.setup);
     }
 
     setup = (resources) => {
@@ -233,7 +252,7 @@ class Main {
             },
             rotation: 1,
             speed: 300.0,
-            limitBall: 50,
+            limitBall: 500,
             numberEntities: 1,
             game: this.gameScene,
             stage: this.game,
@@ -241,12 +260,7 @@ class Main {
 
         this.explorer = new Explorer(optionsExplorer);
 
-        this.gameScene.on("mousedown", (event) => {
-            if (this.explorer.isActive === false) {
-                this.explorer.setRotation(event.data.global);
-                this.updatePosition();
-            }
-        });
+        // animatedSprite = new PIXI.AnimatedSprite(sheet.animations["image_sequence"]);
 
         // add score
         this.score = new PIXI.Sprite(this.id["score.png"]);
@@ -292,23 +306,167 @@ class Main {
 
         this.gameScene.addChild(this.buttonGroup);
 
+        // add score
+        this.time = new PIXI.Sprite(this.id["tine.png"]);
+        this.time.width = this.time.width / 1.5;
+        this.time.height = this.time.height / 1.5;
+        this.time.x = 150
+        this.time.y =0;
 
-        this.game.ticker.add(() => {
-            this.player1.entities.children.forEach(this.player1.updateEntities);
-            this.player2.entities.children.forEach(this.player2.updateEntities);
-            this.bomb.entities.children.forEach(this.bomb.updateEntities);
-            this.snow.entities.children.forEach(this.snow.updateEntities);
+        const timeTextStyle = new PIXI.TextStyle({
+            fontSize: 35,
+            lineHeight: 2,
+            fontWeight: 600,
+            fill: "white"
         });
 
-        this.updatePosition();
+        this.timeText = new PIXI.Text(this.timeNumber, timeTextStyle);
+        this.timeText.x = this.time.x;
+        this.timeText.y=  this.time.y + this.time.height / 2 + 15;
+        this.timeText.score = this.timeNumber;
+
+        this.time.addChild(this.timeText);
+
+        this.gameScene.addChild(this.time);
+
+        if (this.pause === false) {
+            this.game.ticker.add(() => {
+                this.player1.entities.children.forEach(this.player1.updateEntities);
+                this.player2.entities.children.forEach(this.player2.updateEntities);
+                this.bomb.entities.children.forEach(this.bomb.updateEntities);
+                this.snow.entities.children.forEach(this.snow.updateEntities);
+            });
+            this.updatePosition();
+         }
+
+    }
+
+    setTimeOver = () => {
+        setInterval(() => {
+            if (this.pause === false) {
+                this.timeNumber--;
+                this.timeText.text = this.timeNumber;
+    
+                if (this.timeNumber === 0) {
+                    this.pauseView()
+                    this.openPanelVictory()
+                }
+            }
+        }, 1000);
+    }
+
+    pauseView = () => {
+        this.pause = true;
+        // this.game.ticker.stop();
+        this.explorer.actionPause();
+        this.player1.setPause();
+        this.player2.setPause();
+        this.bomb.setPause();
+        this.snow.setPause();
+    }
+
+    openPanelVictory = () => {
+        this.victory = new PIXI.Sprite(this.id["victory.png"]);
+        this.victory.width = this.background.width / 2;
+        this.victory.height = this.background.height;
+        this.victory.x = this.background.width / 2 - this.victory.width / 2;
+        this.victory.y = this.background.height / 2 - this.victory.height / 2;
+        console.log(this.event);
+
+        this.eventKill = new PIXI.Sprite(this.id[`entities_06.png`]);
+        this.eventKill.width = this.eventKill.width / 4;
+        this.eventKill.height = this.eventKill.height / 4;
+        this.eventKill.x = 145;
+        this.eventKill.y = 90;
+
+        
+        const styleScore = new PIXI.TextStyle({
+            fontSize: 50,
+            lineHeight: 2,
+            fontWeight: 600,
+            fill: "yellow"
+        });
+
+        this.scoreEvent = new PIXI.Text(0, styleScore);
+        this.scoreEvent.x = this.eventKill.x - 35;
+        this.scoreEvent.y=  this.scoreEvent.height + 130;
+        this.scoreEvent.text = this.bomb.getScore();
+
+        this.eventKill.addChild(this.scoreEvent)
+
+        this.victory.addChild(this.eventKill);
+
+        this.scoreGame = new PIXI.Sprite(this.id[`score.png`]);
+        this.scoreGame.width = this.scoreGame.width / 2;
+        this.scoreGame.height = this.scoreGame.height / 2;
+        this.scoreGame.x = 100;
+        this.scoreGame.y = 155;
+
+        
+        const styleScore2 = new PIXI.TextStyle({
+            fontSize: 50,
+            lineHeight: 2,
+            fontWeight: 900,
+            fill: "yellow"
+        });
+
+        this.scoreEndGGame = new PIXI.Text(this.scorePlay1.score, styleScore2);
+        this.scoreEndGGame.x = this.scoreGame.width - this.scoreEndGGame.width / 2;
+        this.scoreEndGGame.y=  this.scoreGame.height;
+
+        this.scoreGame.addChild(this.scoreEndGGame)
+        
+        this.victory.addChild(this.scoreGame);
+
+        
+        this.buttonSave = new PIXI.Sprite(this.id[`button-save.png`]);
+        this.buttonSave.width = this.buttonSave.width / 2;
+        this.buttonSave.height = this.buttonSave.height / 2;
+        this.buttonSave.x = 140;
+        this.buttonSave.y = 260;
+        
+        this.buttonSave.buttonMode = true;
+        this.buttonSave.interactive = true;
+        this.buttonSave.isClick = false;
+
+        this.buttonSave
+        .on('tap', this.saveGame)
+        .on('click',(event) => {
+            this.saveGame();
+        })
+        .on('mousedown', (event) => {
+            this.saveGame();
+        });
+
+        this.victory.addChild(this.buttonSave)
+        
+        this.gameScene.addChild(this.victory);
+    }
+
+    saveGame = () => {
+        this.gameScene.visible = false;
+        this.game.destroy(true, true);
+
+        const define = {
+            config: {
+              urlSource: './assets/template/home.json'
+            }
+          };
+      
+        this.gameDev = new GameMain(define);
+
+        this.gameDev.init();
+        // this.gameDev.game.start();
     }
 
     updatePosition = () => {
-        requestAnimationFrame(this.updatePosition)
-        this.bomb.entities.children.forEach((detail) => this.bomb.killEntities(detail, this.explorer, this.scorePlay1));
-        this.player1.entities.children.forEach((detail) => this.player1.killEntities(detail, this.explorer, this.scorePlay1));
-        this.player2.entities.children.forEach((detail) => this.player2.killEntities(detail, this.explorer, this.scorePlay1));
-        this.snow.entities.children.forEach((detail) => this.snow.killEntities(detail, this.explorer, this.scorePlay1));
+        if (this.pause === false) {
+            requestAnimationFrame(this.updatePosition)
+            this.bomb.entities.children.forEach((detail) => this.bomb.killEntities(detail, this.explorer, this.scorePlay1));
+            this.player1.entities.children.forEach((detail) => this.player1.killEntities(detail, this.explorer, this.scorePlay1));
+            this.player2.entities.children.forEach((detail) => this.player2.killEntities(detail, this.explorer, this.scorePlay1));
+            this.snow.entities.children.forEach((detail) => this.snow.killEntities(detail, this.explorer, this.scorePlay1));
+        }
     }
 
 

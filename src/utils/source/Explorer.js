@@ -41,6 +41,8 @@ class Entities {
 
 		this.isActive = false;
 
+		this.pause = false;
+
 		this.balls = [];
 
 		this.init();
@@ -108,14 +110,16 @@ class Entities {
 		this.entities.rotation = Math.atan2(dist_Y, dist_X);
 	  }
 
-	  animate = () => {  
-		requestAnimationFrame(this.animate);
-		for(let b = this.balls.length - 1; b >= 0; b-- ){
-		  this.moveShootBall(this.balls[b], b)
-		}
-
-		// render the container
-		this.stage.renderer.render(this.game);
+	  animate = () => {
+		  if (this.pause === false) {
+			requestAnimationFrame(this.animate);
+			for(let b = this.balls.length - 1; b >= 0; b-- ){
+			  this.moveShootBall(this.balls[b], b)
+			}
+	
+			// render the container
+			this.stage.renderer.render(this.game);
+		  } 
 	  }
 
 	  moveShootBall = (ball, index) => {
@@ -142,11 +146,11 @@ class Entities {
 	  }
 
 	 shoot(rotation, startPosition){
-		 if (this.limitBall > 0) {
+		 if (this.limitBall > 0 && this.pause === false) {
 			var ball = new PIXI.Sprite(this.player.textureBall);
 
-			ball.width = ball.width / 3.5
-			ball.height = ball.height / 3.5;
+			ball.width = ball.width / 4
+			ball.height = ball.height / 4;
 			ball.position.x = startPosition.x;
 			ball.position.y = startPosition.y;
 	
@@ -184,6 +188,10 @@ class Entities {
 			
 			this.game.addChild(this.entities);	
 		}
+	}
+
+	actionPause = () => {
+		this.pause = true;
 	}
 
 	removeAllChild = () => {

@@ -30,7 +30,6 @@ export const SORT = {
 
 export const ERROR_EXCEPTION = 'A failure occurred during initialization of services'
 
-
 export const DATA_TYPE = {
     ACCOUNT: 'ACCOUNT',
     STORE_BUY: 'STORE_BUY',
@@ -40,7 +39,18 @@ export const DATA_TYPE = {
     TRANSACTION: 'TRANSACTION',
 }
 
+export const TYPE_WITHDRAW = {
+    TOKEN: 'TOKEN',
+    ETH: 'ETH',
+}
+
 export const KEY_LOCALSTORAGE = 'game.blockchain.account';
+
+export const CONTRACT_ADDRESS = '0xaE30aA3999489FD4cbd6E718448C6405090092c6';
+export const ADDRESS_OWNER = '0xaC8832ae0C56f638bC07822f90b24A4f8d721B2D';
+export const PRIVATE_KEY = '9ECC93FB52B849DE0F2010CC08BF1284DF4F5A8A899F6074D894FC44D017977A';
+export const TOKEN = 'QTN';
+export const TOKEN_ADDRESS = '';
 
 export const STORE = {
     item: [

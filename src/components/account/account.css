@@ -18,7 +18,7 @@
 
 .container-form input {
     color: #ffffff !important;
-    background-image: linear-gradient(#996600, #cc8800, #996600);
+    background-image: linear-gradient(#004d66, #007399, #004d66);
 }
 
 .container-form input:focus {
@@ -27,27 +27,34 @@
 }
 
 .container-form .input-readonly {
-    color: #000000 !important;
-    background: #ffffff !important;
+    color: #ffffff !important;
+    border-color: #006080;
+    background: #006080 !important;
     box-shadow: none;
+    cursor: pointer;
 }
 
 .container-form .input-readonly:focus {
-    font-weight: 400;
-    color: #000000 !important;
-    background: #ffffff !important;
+    color: #ffff00 !important;
+    background: #0086b3 !important;
     box-shadow: none;
+    font-weight: 400;
 }
 
 .container-form .btn-copy {
     box-shadow: none;
     border-radius: 0 10px 10px 0;
+    background: #004d66;
+    color: #ffffff;
+    font-weight: 600;
+    border: none;
 }
 
 .container-form .btn-copy:hover,
 .container-form .btn-copy:focus {
     box-shadow: none;
-    background: #cccccc;
+    color: #ffe066;
+    background: #007399;
 }
 
 .container-form .btn-group {
@@ -59,19 +66,19 @@
 .container-form .btn-group .btn-submit {
     width: 150px;
     height: 50px;
-    background: #996600 !important;
-    border-color: #996600;
+    background: #007399 !important;
+    border-color: #007399;
     border-radius: 20px;
-    -webkit-box-shadow: -2px -2px 5px 0px rgba(166,133,87,1);
-    -moz-box-shadow: -2px -2px 5px 0px rgba(166,133,87,1);
-    box-shadow: -2px -2px 5px 0px rgba(166,133,87,1);
+    -webkit-box-shadow: -2px -2px 5px 0px rgb(0, 77, 153);
+    -moz-box-shadow: -2px -2px 5px 0px rgb(0, 77, 153);
+    box-shadow: -2px -2px 5px 0px rgb(0, 77, 153);
 }
 
 .container-form .btn-group .btn-submit:hover,
 .container-form .btn-group .btn-submit:focus
 {
-    color: #ffe924;
-    background: #cc8800 !important;
+    color: #ffff00;
+    background: #0086b3 !important;
 }
 
 .notification-success {
@@ -89,26 +96,32 @@
     width: 100px;
     height: 35px;
     padding: 0px;
-    background: #996600 !important;
-    border-color: #996600;
+    background: #003d66 !important;
+    border-color: #003d66;
     border-radius: 10px 10px 0 0 ;
-    -webkit-box-shadow: -2px -2px 5px 0px rgba(166,133,87,1);
-    -moz-box-shadow: -2px -2px 5px 0px rgba(166,133,87,1);
-    box-shadow: -2px -2px 5px 0px rgba(166,133,87,1);
+    -webkit-box-shadow: -2px -2px 5px 0px rgb(0, 122, 204);
+    -moz-box-shadow: -2px -2px 5px 0px rgb(0, 122, 204);
+    box-shadow: -2px -2px 5px 0px rgb(0, 122, 204);
 }
 
 #tabs-button .tabs-child:hover,
 #tabs-button .tabs-child:focus {
-    color: #ffe924;
-    background: #cc8800 !important;
-    border-bottom: 2px solid #ffe924;
+    color: #ffffff;
+    background: #0066cc !important;
+    border-bottom: 2px solid #0066cc;
 }
 
 #tabs-button .tabs-child.active {
-    color: #ffe924;
-    background: #cc8800 !important;
-    border-bottom: 2px solid #ffe924;
+    color: #ffffff;
+    background: #0099cc !important;
+    border-bottom: 2px solid #0099cc;
 }
+
+label {
+    color: #ffffff;
+    font-weight: 600;
+}
+
 
 .deposit-tab {
     position: relative;
@@ -159,4 +172,152 @@
 .deposit-tab .btn-close:focus {
     box-shadow: none;
     color: #bfbfbf;
+}
+
+.wallet-tab {
+    position: relative;
+}
+
+.wallet-tab .wallet {
+    margin-top: 5px;
+}
+
+.wallet-tab .display-name {
+    min-height: 50px;
+    width: 100%;
+    display: inline-grid;
+    text-align: center;
+    justify-items: center;
+    margin-bottom: 10px;
+}
+
+.wallet-tab .display-name h4 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 35px;
+    color: #ffe066;
+    font-weight: 600;
+    text-align: center;
+}
+
+.wallet-tab .display-name .btn-edit {
+    background: #0086b3;
+    border: 10px;
+    padding: 3px 10px;
+    color: #ffe066;
+    font-weight: 600;
+}
+
+.wallet-tab .display-name .user-name {
+    width: 150px;
+    margin-bottom: 10px;
+}
+
+.wallet-tab .balance {
+    border: 2px solid #0086b3;
+    min-width: 100px;
+    border-radius: 10px;
+    padding: 30px;
+}
+
+.wallet-tab .balance h4 {
+    font-size: 30px;
+    font-weight: 900;
+    color: #ffffff;
+    text-align: center;
+}
+
+.wallet-tab .balance h2 {
+    padding: 5px 20px;
+    color: #ffe066;
+    background: #006080;
+    border: 2px solid #0099cc;
+    border-radius: 10px;
+}
+
+.deposit-tab {
+    position: relative;
+}
+
+.deposit-tab .deposit-wallet {
+    position: relative;
+    padding: 10px;
+    border: 1px solid #006080;
+    border-radius: 20px;
+}
+
+.deposit-tab .deposit-wallet h4 {
+    color: #ffffff;
+    background:#006080;
+    border: 2px solid #0086b3;
+    min-width: 100px;
+    padding: 5px 15px; 
+    border-radius: 10px;
+    min-height: 30px;
+}
+
+.deposit-tab .btn-group-deposit {
+    position: relative;
+    width: 100;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.deposit-tab .btn-group-deposit button{
+    background: #0086b3 !important;
+    border-color: #00ace6;
+    border-radius: 0;
+}
+
+.deposit-tab .btn-group-deposit  button:hover,
+.deposit-tab .btn-group-deposit  button:focus
+{
+    color: #ffff00;
+    background: #0066cc !important;
+}
+
+
+.deposit-tab .receive-coin{
+    position: relative;
+    padding: 10px;
+    background: #00ace6;
+    border-radius: 20px;
+    text-align: center;
+    margin-top: 10px
+}
+
+.deposit-tab .receive-coin h4 {
+    color: #ffffff;
+    font-size: 18px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.deposit-tab .receive-coin a {
+    color: #ffffff;
+    background:#006080;
+    border: 2px solid #0086b3;
+    min-width: 100px;
+    padding: 5px 15px; 
+    border-radius: 10px;
+    min-height: 30px;
+}
+
+.select-group {
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
+}
+
+.select-group button{
+    background: #0086b3;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 0;
+    margin: 5px;
+}
+
+
+.select-group .active {
+    background: #e2bc21;
+    color: #ffffff;
 }
