@@ -262,9 +262,17 @@ class Account extends React.Component {
     }, 3600);
   }
 
-  changeTabs = (tab) => {
+  changeTabs = async(tab) => {
+    const { blockchain } = this.props;
+
+    this.setState({
+      waiting: true,
+    })
+    
+    await blockchain.getBalanceToken();
     this.setState({
       tabCurrent: tab,
+      waiting: false,
     })
   }
 

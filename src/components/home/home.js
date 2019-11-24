@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import Blockchain from '../../utils/blockchain';
 import AccountUtil from '../../utils/account';
 
-import postData from '../../actions/blockchain/index';
+import {setBalanceEth, setBalanceToken} from '../../actions/blockchain/index';
 
 // import component
 import Account from '../account/account';
@@ -45,44 +45,53 @@ class Home extends React.Component {
   }
 
   componentWillMount = async() => {
-    const define = {
-      config: {
-        urlSource: './assets/template/home.json'
+    const { postBalanceEth, postBalanceToken } = this.props;
+
+    this.loader = document.getElementById('loader');
+
+    if (this.loader) {
+      this.loader.style.display = 'block';
+
+      const config = {
+        gasPrice: '1400000000',
+        gas: 210000,
       }
-    };
 
-    this.gameDev = new Main(define);
+      const redux = {
+        postBalanceEth,
+        postBalanceToken
+      }
+      
+      this.blockchain = new Blockchain(null, config, redux);
 
-    await this.gameDev.init();
-    const options = {
+      const define = {
+        config: {
+          urlSource: './assets/template/home.json',
+        },
+        blockchain: this.blockchain
+      };
 
-    };
+      this.gameDev = new Main(define);
+      
+      await this.gameDev.init();
 
-    this.account = new AccountUtil(options);
-
-    await this.loadBlockchainData();
+      await this.loadBlockchainData();
+    }
   }
 
   componentWillReceiveProps = async(nextProps) => {
     const { myAccount } = this.state;
     const { blockchain } = nextProps;
 
-    if (blockchain && blockchain.balance && blockchain.balance !== myAccount.balanceEth) {
-      // await this.getCurrentAccount();
+    if (blockchain && (blockchain.balanceEth || blockchain.balanceToken)) {
+      if (blockchain.balanceEth !== myAccount.balanceEth ||  blockchain.balanceToken !== myAccount.balanceToken) {
+        await this.getCurrentAccount();
+      }
     }
   }
 
   async loadBlockchainData() {
-    const { postData } = this.props;
-
     try {
-      const config = {
-        gasPrice: '1400000000',
-        gas: 210000,
-      }
-      
-      this.blockchain = new Blockchain(null, config, postData);
-
       await this.blockchain.init();
       
 		  await this.blockchain.enableMetaMask();
@@ -91,27 +100,20 @@ class Home extends React.Component {
 
       const loginAccount = await this.blockchain.loginWithMetaMask();
 
-      if (loginAccount && loginAccount.status === true) {
+      if (loginAccount && loginAccount.status === true && this.gameDev) {
         this.setState({
           login:  true,
         });
 
-        // const dataStorage = {};
-        // dataStorage[loginAccount.data.name] = loginAccount.data;
-
-        // localStorage.setItem(Types.KEY_LOCALSTORAGE, JSON.stringify(dataStorage))
         await this.getCurrentAccount();
-      } else {
-        this.setState({isRegister:  true})
+
+        await this.blockchain.subscribe();
       }
-
-      // await this.blockchain.subscribe();
-
-      await this.getCurrentAccount();
+      
     } catch (err) {
       console.error(err);
     }
-
+    this.loader.style = 'none';
   }
 
   getCurrentAccount = async() => {
@@ -123,7 +125,6 @@ class Home extends React.Component {
       if (address) {
         const balanceEth = await this.blockchain.getBalance(address);
         const balanceToken = await this.blockchain.getBalanceToken();
-
         const dataFromBlockchain = await this.blockchain.getDataInputSmartContract();
 
         this.gameDev.setBalanceEth(balanceEth);
@@ -187,18 +188,8 @@ class Home extends React.Component {
       isRegister,
     } = this.state;
 
-    let htmlView = '';
-
-    if (isRegister === true) {
-      htmlView = this.renderScreenLogin();
-    } else {
-      // htmlView = this.renderScreenAccount();
-      // htmlView = this.renderScreenStore();
-    }
-
     return (
       <div className="home">
-         {htmlView}
          <div className="account-panel">
            {this.renderScreenAccount()}
          </div>
@@ -214,8 +205,11 @@ class Home extends React.Component {
 const mapStateToProps = state => ({ blockchain: state.blockchain });
 
 const mapDispatchToProps = dispatch => ({
-  postData: (data) => {
-    dispatch(postData(data));
+  postBalanceEth: (data) => {
+    dispatch(setBalanceEth(data));
+  },
+  postBalanceToken: (data) => {
+    dispatch(setBalanceToken(data));
   },
 })
 

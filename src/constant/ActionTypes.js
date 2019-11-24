@@ -46,7 +46,7 @@ export const TYPE_WITHDRAW = {
 
 export const KEY_LOCALSTORAGE = 'game.blockchain.account';
 
-export const CONTRACT_ADDRESS = '0xaE30aA3999489FD4cbd6E718448C6405090092c6';
+export const CONTRACT_ADDRESS = '0xb527FdE93d1dcC4F192E3eE42B219C0D81789F67';
 export const ADDRESS_OWNER = '0xaC8832ae0C56f638bC07822f90b24A4f8d721B2D';
 export const PRIVATE_KEY = '9ECC93FB52B849DE0F2010CC08BF1284DF4F5A8A899F6074D894FC44D017977A';
 export const TOKEN = 'QTN';
@@ -57,37 +57,38 @@ export const STORE = {
         {
             id: 1,
             name: 'Rare',
-            power: 2,
-            priceEth: 10,
+            power: 20,
+            priceEth: 50,
             priceGold: 150,
             image: image1,
-            detail: '+20 Damage'
+            detail: '+20 Damage',
         },
         {
             id: 2,
             name: 'Epic',
-            power: 3,
-            priceEth: 15,
+            power: 60,
+            priceEth: 150,
             priceGold: 300,
             image: image2,
-            detail: '+60 Damage'
+            detail: '+60 Damage',
+            numberBall: 60,
         },
         {
             id: 3,
             name: 'Club',
-            power: 6,
-            priceEth: 20,
+            power: 120,
+            priceEth: 250,
             priceGold: 500,
             image: image3,
-            detail: '+120 Damage'
+            detail: '+120 Damage',
         },
         {
             id: 4,
             name: 'Wand',
-            power: 12,
-            priceEth: 25,
+            power: 320,
+            priceEth: 350,
             image: image4,
-            detail: '+320 Damage'
+            detail: '+350 Damage'
         },
     ],
     online: [],

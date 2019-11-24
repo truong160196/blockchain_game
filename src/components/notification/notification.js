@@ -2,8 +2,6 @@ import React from 'react';
 
 import './notification.css';
 
-import * as Types from '../../constant/ActionTypes';
-
 // import component
 
 class Notification extends React.Component {

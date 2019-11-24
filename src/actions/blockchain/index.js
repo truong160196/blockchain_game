@@ -1,8 +1,13 @@
-export function postData(data) {
+export function setBalanceEth(data) {
     return {
-      type: 'FET_BLOCKCHAIN',
+      type: 'FET_ETH',
       payload: data,
     };
   }
-  
-  export default postData;
+
+export function setBalanceToken(data) {
+  return {
+    type: 'FET_TOKEN',
+    payload: data,
+  };
+}

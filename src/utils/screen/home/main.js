@@ -4,6 +4,8 @@ import {formatCurrency} from '../../formatNumber';
 
 import GameMain from '../game/main';
 
+import * as Types from '../../../constant/ActionTypes';
+
 class Main {
     constructor(arg) {
         this.config = arg.config;
@@ -14,7 +16,7 @@ class Main {
             right: 15,
             bottom: 15
         }
-
+        this.numberBall = 50;
         this.width = window.innerWidth;
         this.height = window.innerHeight;
         this.style = new PIXI.TextStyle({
@@ -24,6 +26,7 @@ class Main {
             fontWeight: 600,
         });
 
+        this.blockchain = arg.blockchain;
     }
 
     init = () => {
@@ -81,17 +84,21 @@ class Main {
     }
 
     setBalanceEth = (value) => {
-        if (this.balanceEthText && value && value > 0) {
-            this.balanceEthText.text = `${formatCurrency(value, 4)} E`
-            this.balanceEthText.x = 100;
+        if (this.balanceEthText && this.balanceEthText.x) {
+            if (value && value > 0 && this.balanceEthText.text != value) {
+                this.balanceEthText.text = `${formatCurrency(value, 4)} E`
+                this.balanceEthText.x = 100;
+            }
         }
     }
 
     setBalanceGold = (value) => {
-        if (this.balanceGodText && value && value > 0) {
-            this.balanceGodText.text = `${formatCurrency(value, 4)} Q`
-            this.balanceGodText.x = 110;
-        } 
+        if (this.balanceGodText && this.balanceGodText.x) {
+            if (value && value > 0 && this.balanceGodText.text != value) {
+                this.balanceGodText.text = `${formatCurrency(value, 0)} Q`
+                this.balanceGodText.x = 110;
+            }
+        }
     }
       
     
@@ -303,15 +310,39 @@ class Main {
         this.customMouseIcon();
     }
 
-    openScreenGame = () => {
+    loadTotalBall = async() => {
+        const listItem = Types.STORE.item;
+        if (this.blockchain && typeof this.blockchain.getAccountItemFromAddress === 'function') {
+            const dataItem = await this.blockchain.getAccountItemFromAddress();
+
+            if (dataItem && dataItem.length > 0) {
+                dataItem.forEach((item) => {
+                    if (item.id > 0) {
+                        let objItem = listItem.find(obj => obj.id === Number(item.id));
+    
+                        if (objItem) {
+                            this.numberBall += (objItem.power * Number(item.qtyItem));
+                        }
+                    }
+                })
+    
+            }
+        }
+    }
+
+    openScreenGame = async() => {
         this.gameScene.visible = false;
 
         this.game.destroy(true, true);
 
+        await this.loadTotalBall();
+
         const define = {
             config: {
               urlSource: './assets/template/game.json'
-            }
+            },
+            numberBall: this.numberBall,
+            blockchain:  this.blockchain,
         };
 
         this.gameMain = new GameMain(define, PIXI);

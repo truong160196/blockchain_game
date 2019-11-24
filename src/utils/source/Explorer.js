@@ -104,10 +104,12 @@ class Entities {
 	  }
 
 	  handleRotation = (event) => {
-		const dist_Y =  event.data.global.y - this.entities.position.y;
+		const dist_Y =  - event.data.global.y + this.entities.position.y;
 		const dist_X = event.data.global.x - this.entities.position.x;
-		this.rotation = Math.atan2(dist_Y, dist_X);
-		this.entities.rotation = Math.atan2(dist_Y, dist_X);
+
+		const dist_Y_Ball =  event.data.global.y - this.entities.position.y;
+		this.rotation = Math.atan2(dist_Y_Ball, dist_X);
+		this.entities.rotation =  Math.atan2(dist_X, dist_Y);
 	  }
 
 	  animate = () => {
@@ -126,10 +128,10 @@ class Entities {
 		ball.position.x += 2 * Math.cos(ball.rotation) * 5;
 		ball.position.y += 2 * Math.sin(ball.rotation) * 5;
 
-		const limitRight = this.gameScreen.x + this.gameScreen.width;
-		const limitLeft = this.gameScreen.x;
-		const limitTop = this.gameScreen.y + 10;
-		const limitBottom = this.gameScreen.y + this.gameScreen.height;
+		const limitRight = this.gameScreen.x + this.gameScreen.width + 50;
+		const limitLeft = this.gameScreen.x - 50;
+		const limitTop = this.gameScreen.y - 50;
+		const limitBottom = this.gameScreen.y + this.gameScreen.height + 50;
 
 		if (ball.position.y < limitTop || ball.position.y > limitBottom) {
 			this.destroyBall()
@@ -151,7 +153,7 @@ class Entities {
 
 			ball.width = ball.width / 4
 			ball.height = ball.height / 4;
-			ball.position.x = startPosition.x;
+			ball.position.x = startPosition.x - 15;
 			ball.position.y = startPosition.y;
 	
 			ball.rotation = rotation;
@@ -170,10 +172,10 @@ class Entities {
 		// const x = event.data.global.x;
 		// const y = event.data.global.y;
 		this.shoot(this.rotation, {
-			x: this.circleGun.position.x + Math.cos(this.entities.rotation) * 20,
-			y: this.circleGun.position.y + Math.sin(this.entities.rotation) * 20
+			x: this.entities.position.x + Math.cos(this.entities.rotation) * 20,
+			y: this.entities.position.y + Math.sin(this.entities.rotation) * 20
 		  });
-		// this.entities.rotation.x = this.entities.x + Math.cos(this.entities.rotation) * 20
+		// this.entities.rotation.x = this.entities.x + Math.cos(this.entities.rotation) * 20;
 	}
 
 	reset = () => {

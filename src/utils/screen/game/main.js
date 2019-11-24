@@ -6,10 +6,11 @@ import Explorer from '../../source/Explorer';
 
 import GameMain from '../home/main';
 
+
 class Main {
     constructor(arg) {
         this.config = arg.config;
-
+        this.blockchain = arg.blockchain;
         this.padding = {
             left: 15,
             top: 15,
@@ -25,7 +26,8 @@ class Main {
             fill: "white"
         });
         this.scoreNumber = 0;
-        this.timeNumber= 60;
+        this.timeNumber= 30;
+        this.numberBall = arg.numberBall;
         this.pause = false;
         this.event = 'entities_01'
     }
@@ -56,6 +58,7 @@ class Main {
                 loading.style.display = 'block'
             }
         }); 
+
         this.loader.onComplete.add(() => {
             setTimeout(() => {
                 if (loading) {
@@ -137,7 +140,7 @@ class Main {
             speed: 120.0,
             resolution: 1,
             timeAppend: 2,
-            numberEntities: 1,
+            numberEntities: 7,
             game: this.gameScene,
         }
 
@@ -166,7 +169,7 @@ class Main {
             speed: 150.0,
             resolution: 1,
             timeAppend: 2,
-            numberEntities: 3,
+            numberEntities: 6,
             game: this.gameScene,
         }
 
@@ -194,8 +197,8 @@ class Main {
 		    padding: 1,
             speed: 130.0,
             resolution: 1,
-            timeAppend: 3,
-            numberEntities: 2,
+            timeAppend: 2,
+            numberEntities: 4,
             game: this.gameScene,
         }
 
@@ -220,11 +223,11 @@ class Main {
                 vy: 0,
             },
             rotation: 0,
-            timeAppend: 6,
+            timeAppend: 4,
 		    padding: 1,
             speed: 160.0,
             resolution: 1,
-            numberEntities: 0,
+            numberEntities: 3,
             game: this.gameScene,
         }
 
@@ -252,7 +255,7 @@ class Main {
             },
             rotation: 1,
             speed: 300.0,
-            limitBall: 500,
+            limitBall: this.numberBall,
             numberEntities: 1,
             game: this.gameScene,
             stage: this.game,
@@ -284,11 +287,7 @@ class Main {
 
         this.score.addChild(this.scorePlay1)
 
-        const listItem = [
-            {id: 1},
-            {id: 2},
-            {id: 3},
-        ];
+        const listItem = [];
 
         this.buttonGroup = new PIXI.Container();
         this.buttonGroup.x = this.explorer.entities.x + this.explorer.entities.width + 30
@@ -443,24 +442,35 @@ class Main {
         this.gameScene.addChild(this.victory);
     }
 
-    saveGame = () => {
-        this.gameScene.visible = false;
-        this.game.destroy(true, true);
+    saveGame = async() => {
+        try {
+            this.gameScene.visible = false;
+            this.game.destroy(true, true);
+    
+            const define = {
+                config: {
+                  urlSource: './assets/template/home.json'
+                }
+              };
+          
+            this.gameDev = new GameMain(define);
+    
+            this.gameDev.init();
 
-        const define = {
-            config: {
-              urlSource: './assets/template/home.json'
+            if (this.blockchain && typeof this.blockchain.rewardPromotion === 'function' ) {
+                const score = Number(this.bomb.getScore());
+                this.blockchain.rewardPromotion(score);
             }
-          };
-      
-        this.gameDev = new GameMain(define);
-
-        this.gameDev.init();
-        // this.gameDev.game.start();
+        } catch(err) {
+            console.error(err);
+        }
     }
 
     updatePosition = () => {
         if (this.pause === false) {
+            if (this.explorer.limitBall <= 0) {
+                this.setTimeOver();
+            }
             requestAnimationFrame(this.updatePosition)
             this.bomb.entities.children.forEach((detail) => this.bomb.killEntities(detail, this.explorer, this.scorePlay1));
             this.player1.entities.children.forEach((detail) => this.player1.killEntities(detail, this.explorer, this.scorePlay1));

@@ -58,48 +58,59 @@ class Blockchain {
     }
 
     connectMetaMask = async() => {
-        if (this.web3Provider) {
-            const netId = await this.web3Provider.eth.net.getId();
-            this.chanId = netId;
-            switch (netId) {
-              case 1:
-                this.chain = 'mainnet';
-                break
-              case 42:
-                this.chain = 'kovan';
-                break
-              case 3:
-                this.chain = 'ropsten';
-                break
-             case 4:
-                this.chain = 'rinkeby';
-                break
-            case 5:
-                this.chain = 'goerli';
-                break
-              default:
-                console.log('This is an unknown network.')
+        return new Promise(async(resolve, reject) => {
+            if (!web3) {
+              // show error: Install Metamask
+                reject('No web3? Please use google chrome and metamask plugin to enter this Dapp!', null, null)
+                return;
             }
-        }
-        
-        ethereum.on('accountsChanged', async(accounts) => {
-            if (accounts.length === 0) {
-                console.error('Please connect to MetaMask.')
-            } else {
-                this.addToListAccount(accounts[0])
-
-                if (this.currentAccount !== accounts[0]) {
-                    this.currentAccount = accounts[0]; 
-
-                    await this.getBalance(accounts[0]);
+            if (this.web3Provider) {
+                    const netId = await this.web3Provider.eth.net.getId();
+                    this.chanId = netId;
+                    switch (netId) {
+                    case 1:
+                        this.chain = 'mainnet';
+                        break
+                    case 42:
+                        this.chain = 'kovan';
+                        break
+                    case 3:
+                        this.chain = 'ropsten';
+                        break
+                    case 4:
+                        this.chain = 'rinkeby';
+                        break
+                    case 5:
+                        this.chain = 'goerli';
+                        break
+                    default:
+                        console.log('This is an unknown network.')
+                    }
                 }
-            }
-        })
-        
-        ethereum.on('networkChanged',  async(netId) => {
-            if (this.chanId !== netId) {
-                this.chanId = netId;
-            }
+                
+            ethereum.on('accountsChanged', async(accounts) => {
+                    if (accounts.length === 0) {
+                        console.error('Please connect to MetaMask.')
+                    } else {
+                        this.addToListAccount(accounts[0])
+
+                        if (this.currentAccount !== accounts[0]) {
+                            this.currentAccount = accounts[0]; 
+
+                            await this.getBalance(accounts[0]);
+                        }
+                    }
+            })
+                
+            ethereum.on('networkChanged',  async(netId) => {
+                    if (this.chanId !== netId) {
+                        this.chanId = netId;
+                    }
+            })
+
+            resolve();
+          }).catch((err) => {
+            throw new Error(err);
         })
     }
 
@@ -165,33 +176,11 @@ class Blockchain {
                 if (error) {
                     console.error(error);
                 }
-                // console.log(result);
-            })
-            .on("connected", (subscriptionId) => {
-                // console.log('subscriptionId', subscriptionId);
-            })
-            .on("data", (log) => {
-                if (log.address === account) {
-                    console.log('data: ', log);
-                }
-            })
-            .on("changed", (log) => {
-                console.log('changed: ', log)
+                this.getBalance(account);
             });
     
-            this.subscriptions = this.web3Provider.eth.subscribe('newBlockHeaders', (error, sync) => {
-                // if (!error)
-                    // console.log('sync', sync);
-            })
+            this.subscriptions = this.web3Provider.eth.subscribe('newBlockHeaders', (error, sync) => {})
             .on("data", this.syncData)
-            .on("changed", function(isSyncing){
-                console.log('isSyncing',isSyncing)
-                if(isSyncing) {
-                    // stop app operation
-                } else {
-                    // regain app operation
-                }
-            });
 
             resolve();
         }).catch((err) => {
@@ -718,7 +707,7 @@ class Blockchain {
 
             const result = await web3.fromWei(balance, 'ether');
 
-            this.dispatch({balance: result});
+            this.dispatch.postBalanceEth(result);
 
             resolve(result);
         }).catch((err) => {
@@ -739,7 +728,7 @@ class Blockchain {
 
             const result = await web3.fromWei(balance, 'wei');
 
-            this.dispatch({balance: result});
+            this.dispatch.postBalanceToken(result);
 
             resolve(result);
         }).catch((err) => {
@@ -863,6 +852,58 @@ class Blockchain {
         });
     }
 
+    rewardPromotion = async(score) => {
+        return new Promise(async(resolve, reject) => {
+            if (!this.web3Provider) {
+                reject('no provider web3.js');
+                return;
+            }
+
+            const gasPrice = await this.getGasPrice();
+
+            const address = await this.getCurrentAccount();
+
+            if (score >= 10) {
+                this.web3Provider.eth.getTransactionCount(this.accountHolder, (err, txCount) => {
+                    this.contract.methods.transfer(address, 200).estimateGas({
+                        from: this.accountHolder
+                    })
+                    .then((gasAmount) => {
+                        const dataInput =  this.contract.methods.transfer(address, 200).encodeABI();
+                        const txObject = {
+                            nonce:    web3.toHex(txCount),
+                            gasLimit: web3.toHex(gasAmount), // Raise the gas limit to a much higher amount
+                            gasPrice: web3.toHex(gasPrice),
+                            to: this.contractAddress,
+                            data: dataInput,
+                            }
+    
+                            const privateKey1 = Buffer.from(this.privateKeyHolder, 'hex')
+            
+                            const tx = new Transaction(txObject, { chain: this.chain, hardfork: 'petersburg' });
+    
+                            tx.sign(privateKey1)
+                        
+                            const serializedTx = tx.serialize()
+                            const raw = '0x' + serializedTx.toString('hex')
+            
+                            this.web3Provider.eth.sendSignedTransaction(raw, (err, txHash) => {
+                            if (err) resolve({status: false, message: err});
+                            resolve({status: true, message: txHash});
+                            });
+                    })
+                    .catch(function(error){
+                        reject(error)
+                    });
+                });
+            } else {
+                resolve({status: false, message: 'Unconditional'});
+            }
+        }).catch((err) => {
+            throw new Error(err);
+        });
+    }
+
     sendToken =  async(toAddress, value) => {
         return new Promise(async(resolve, reject) => {
             if (!this.web3Provider) {
@@ -981,11 +1022,11 @@ class Blockchain {
                 },
                 (err, events) => {
                     if (!err) {
-                        console.log(events);
-                        this.getInputDataFromTransaction();
+                        this.getBalanceToken();
+                        resolve();
                     }
                 }
-            )
+            );
 
             resolve();
         }).catch((err) => {

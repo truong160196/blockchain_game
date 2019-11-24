@@ -310,10 +310,12 @@ class Store extends React.Component {
                             </button>
                             <button
                                 className="btn btn-info btn-buy-eth"
-                                style={{display: element.address_to.toUpperCase() == myAccount.address.toUpperCase() ? 'block': 'none'}}
-                                onClick={() => this.removeItem(dataItem)}
+                                style={{
+                                    display: element.address_to.toUpperCase() == myAccount.address.toUpperCase() ? 'block': 'none',
+                                    pointerEvents: 'none'
+                                }}
                             >
-                                Remove
+                                Owner
                             </button>
                         </div>
                     </div>
