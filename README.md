@@ -87,9 +87,9 @@ QTN, ETH
 npm run build
 ```
 path ./build
-# Introduce consent game
-## home screen
-
+# Introduce game
+- home screen
+![Home page](./public/assets/home_screen.jpg)
 - Account management
 
 - Withdraw management
