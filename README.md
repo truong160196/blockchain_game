@@ -51,8 +51,9 @@ http://localhost:3006
 ```
 # Public game
 game public
-[link publish game](http://game.laptrinhblockchain.net/)
+[link public game](http://game.laptrinhblockchain.net/)
 
+get Token QTN free at screen deposit
 # Testnet
 
 Using testnet [Ropsten](https://ropsten.etherscan.io/)
